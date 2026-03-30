@@ -1,4 +1,12 @@
-import { test as base, expect, type Page } from "@playwright/test";
+import { test as base, expect, type Page, type APIRequestContext } from "@playwright/test";
+
+/** CSRF token storage per context */
+let csrfToken = "";
+
+/** Get current CSRF token */
+export function getCsrfToken(): string {
+  return csrfToken;
+}
 
 /** Credentials for different roles used in tests */
 export const USERS = {
@@ -32,12 +40,32 @@ export const USERS = {
 
 /** Log in to Frappe desk via API */
 export async function login(page: Page, email: string, password: string) {
-  await page.goto("/api/method/login", { waitUntil: "domcontentloaded" });
+  // Navigate to login page first to get cookies/CSRF
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
   const resp = await page.request.post("/api/method/login", {
     form: { usr: email, pwd: password },
   });
-  expect(resp.ok()).toBeTruthy();
-  await page.goto("/app", { waitUntil: "networkidle" });
+  if (!resp.ok()) {
+    const body = await resp.text();
+    throw new Error(`Login failed for ${email}: ${resp.status()} ${body}`);
+  }
+  // Navigate to desk — Frappe may use /app or /desk depending on version
+  await page.goto("/app", { waitUntil: "domcontentloaded" });
+  // Wait for Frappe to fully initialize and provide CSRF token
+  try {
+    await page.waitForFunction(() => (window as any).frappe?.csrf_token, null, {
+      timeout: 15_000,
+    });
+  } catch {
+    // If /app redirected to /desk, the CSRF token should still be available
+  }
+  csrfToken = await page.evaluate(() => {
+    return (window as any).frappe?.csrf_token || "";
+  });
+  if (!csrfToken) {
+    // Fallback: extract from cookie or retry
+    throw new Error(`Failed to extract CSRF token for ${email}`);
+  }
 }
 
 /** Log out of current session */
@@ -48,13 +76,15 @@ export async function logout(page: Page) {
 /** Navigate to a list view for a doctype */
 export async function gotoList(page: Page, doctype: string) {
   const slug = doctype.toLowerCase().replace(/ /g, "-");
-  await page.goto(`/app/${slug}`, { waitUntil: "networkidle" });
+  await page.goto(`/app/${slug}`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector(".frappe-list", { timeout: 15_000 });
 }
 
 /** Navigate to a new form for a doctype */
 export async function gotoNew(page: Page, doctype: string) {
   const slug = doctype.toLowerCase().replace(/ /g, "-");
-  await page.goto(`/app/${slug}/new`, { waitUntil: "networkidle" });
+  await page.goto(`/app/${slug}/new`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector(".form-layout", { timeout: 15_000 });
 }
 
 /** Fill a Frappe form field using data-fieldname */
@@ -113,6 +143,7 @@ export async function createUser(
   roles: string[] = []
 ) {
   const resp = await page.request.post("/api/resource/User", {
+    headers: { "X-Frappe-CSRF-Token": csrfToken },
     data: {
       email,
       first_name: firstName,
@@ -131,9 +162,13 @@ export async function createDoc(
   data: Record<string, unknown>
 ) {
   const resp = await page.request.post(`/api/resource/${doctype}`, {
+    headers: { "X-Frappe-CSRF-Token": csrfToken },
     data,
   });
-  expect(resp.ok()).toBeTruthy();
+  if (!resp.ok()) {
+    const body = await resp.text();
+    throw new Error(`createDoc(${doctype}) failed: ${resp.status()} ${body}`);
+  }
   return resp.json();
 }
 
@@ -161,7 +196,9 @@ export async function deleteDoc(
   doctype: string,
   name: string
 ) {
-  await page.request.delete(`/api/resource/${doctype}/${name}`);
+  await page.request.delete(`/api/resource/${doctype}/${name}`, {
+    headers: { "X-Frappe-CSRF-Token": csrfToken },
+  });
 }
 
 /** Extended test fixture with login helpers */

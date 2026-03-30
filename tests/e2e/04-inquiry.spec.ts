@@ -12,6 +12,7 @@ import {
   saveForm,
   createDoc,
   deleteDoc,
+  getCsrfToken,
 } from "./fixtures";
 
 test.describe("Inquiry Workflow", () => {
@@ -47,13 +48,15 @@ test.describe("Inquiry Workflow", () => {
     // Create inquiry via API
     const resp = await createDoc(page, "Travel Inquiry", {
       customer: customerName,
+      customer_name: "Inquiry Test Customer",
+      customer_email: "inquiry-test@test.example",
       agency: USERS.agencyAdmin1.agency,
       travel_type: "Honeymoon",
       destination: "Paris",
       departure_date: "2025-06-01",
       return_date: "2025-06-15",
-      number_of_travelers: 2,
-      budget: 5000,
+      num_travelers: 2,
+      budget_min: 5000,
       status: "New",
       source: "Website",
     });
@@ -79,22 +82,22 @@ test.describe("Inquiry Workflow", () => {
     expect(body.data.status).toBe("New");
   });
 
-  test("Inquiry status can be changed to In Progress", async ({ page }) => {
+  test("Inquiry status can be changed to Contacted", async ({ page }) => {
     await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
     const resp = await page.request.put(
       `/api/resource/Travel Inquiry/${inquiryName}`,
-      { data: { status: "In Progress" } }
+      { data: { status: "Contacted" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
-    expect(body.data.status).toBe("In Progress");
+    expect(body.data.status).toBe("Contacted");
   });
 
   test("Inquiry can be moved to Quoted", async ({ page }) => {
     await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
     const resp = await page.request.put(
       `/api/resource/Travel Inquiry/${inquiryName}`,
-      { data: { status: "Quoted" } }
+      { data: { status: "Quoted" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     expect(resp.ok()).toBeTruthy();
   });
@@ -103,7 +106,7 @@ test.describe("Inquiry Workflow", () => {
     await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
     const resp = await page.request.put(
       `/api/resource/Travel Inquiry/${inquiryName}`,
-      { data: { status: "Won" } }
+      { data: { status: "Won" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     expect(resp.ok()).toBeTruthy();
   });
@@ -114,7 +117,7 @@ test.describe("Inquiry Workflow", () => {
     await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
     const resp = await page.request.post(
       "/api/method/horizon_crm.api.inquiry.create_booking_from_inquiry",
-      { data: { source_name: inquiryName } }
+      { data: { source_name: inquiryName }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     // May succeed (200) or fail if booking already exists (4xx with msg)
     if (resp.ok()) {
@@ -135,16 +138,16 @@ test.describe("Inquiry Workflow", () => {
   test("Inquiry form renders key fields", async ({ page }) => {
     await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
     await page.goto(`/app/travel-inquiry/${inquiryName}`, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
     });
     await expect(
-      page.locator('[data-fieldname="customer"]')
+      page.locator('[data-fieldname="customer_name"]').first()
     ).toBeVisible();
     await expect(
-      page.locator('[data-fieldname="travel_type"]')
+      page.locator('[data-fieldname="status"]').first()
     ).toBeVisible();
     await expect(
-      page.locator('[data-fieldname="status"]')
+      page.locator('[data-fieldname="agency"]').first()
     ).toBeVisible();
   });
 });

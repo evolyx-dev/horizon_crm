@@ -42,6 +42,7 @@ def create_booking_from_inquiry(source_name: str) -> dict:
     booking.total_amount = inquiry.budget_max or 0
     booking.booking_date = frappe.utils.today()
     booking.notes = inquiry.notes
+    booking.insert()
 
     return booking.as_dict()
 

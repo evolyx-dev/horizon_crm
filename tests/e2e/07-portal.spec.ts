@@ -3,7 +3,7 @@
  * Covers: portal dashboard, booking list, inquiry submission, feedback
  */
 import { test, expect } from "@playwright/test";
-import { USERS, login, createDoc } from "./fixtures";
+import { USERS, login, createDoc, getCsrfToken } from "./fixtures";
 
 test.describe("Customer Portal", () => {
   test.beforeEach(async ({ page }) => {
@@ -11,7 +11,7 @@ test.describe("Customer Portal", () => {
   });
 
   test("Portal dashboard loads", async ({ page }) => {
-    await page.goto("/portal", { waitUntil: "networkidle" });
+    await page.goto("/portal", { waitUntil: "domcontentloaded" });
     await expect(page.locator("body")).toBeVisible();
     // Should contain some portal content
     const content = await page.textContent("body");
@@ -19,12 +19,12 @@ test.describe("Customer Portal", () => {
   });
 
   test("Portal bookings page loads", async ({ page }) => {
-    await page.goto("/portal/bookings", { waitUntil: "networkidle" });
+    await page.goto("/portal/bookings", { waitUntil: "domcontentloaded" });
     await expect(page.locator("body")).toBeVisible();
   });
 
   test("Portal inquiry page loads", async ({ page }) => {
-    await page.goto("/portal/inquiry", { waitUntil: "networkidle" });
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
     await expect(page.locator("body")).toBeVisible();
   });
 
@@ -46,10 +46,12 @@ test.describe("Customer Portal", () => {
           destination: "Maldives",
           departure_date: "2025-09-01",
           return_date: "2025-09-10",
-          number_of_travelers: 2,
-          budget: 8000,
+          num_travelers: 2,
+          budget_min: 5000,
+          budget_max: 8000,
           notes: "E2E portal test inquiry",
         },
+        headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
       }
     );
     // May succeed or fail if customer not properly linked
@@ -84,11 +86,10 @@ test.describe("Customer Portal", () => {
       const bookResp = await createDoc(adminPage, "Travel Booking", {
         customer: customerName,
         agency: USERS.customer1.agency,
-        travel_type: "Adventure",
-        destination: "Dubai",
         departure_date: "2025-04-01",
         return_date: "2025-04-07",
-        number_of_travelers: 1,
+        num_travelers: 1,
+        booking_date: "2025-03-15",
         total_amount: 3000,
         status: "Completed",
       });
@@ -104,6 +105,7 @@ test.describe("Customer Portal", () => {
             rating: 5,
             comments: "Excellent trip! E2E test feedback.",
           },
+          headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
         }
       );
       // Feedback may succeed or fail depending on customer linkage

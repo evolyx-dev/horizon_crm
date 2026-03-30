@@ -13,6 +13,7 @@ import {
   createDoc,
   deleteDoc,
   getListCount,
+  getCsrfToken,
 } from "./fixtures";
 
 test.describe("Staff Management", () => {
@@ -82,7 +83,7 @@ test.describe("Staff Management", () => {
     // Set max_staff to a low number temporarily
     await page.request.put(
       `/api/resource/Travel Agency/${encodeURIComponent(USERS.agencyAdmin1.agency)}`,
-      { data: { max_staff: 1 } }
+      { data: { max_staff: 1 }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
 
     // Try to add beyond limit
@@ -92,16 +93,17 @@ test.describe("Staff Management", () => {
         data: {
           staff_user: "overflow@test.example",
           agency: USERS.agencyAdmin1.agency,
-          role: "Agency Staff",
+          role_in_agency: "Staff",
           is_active: 1,
         },
+        headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
       }
     );
 
     // Restore limit
     await page.request.put(
       `/api/resource/Travel Agency/${encodeURIComponent(USERS.agencyAdmin1.agency)}`,
-      { data: { max_staff: 10 } }
+      { data: { max_staff: 10 }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
 
     // The create should have failed with a validation error

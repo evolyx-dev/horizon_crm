@@ -3,7 +3,7 @@
  * Covers: create booking, status updates, payment tracking, balance calculation
  */
 import { test, expect } from "@playwright/test";
-import { USERS, login, createDoc, gotoList } from "./fixtures";
+import { USERS, login, createDoc, gotoList, getCsrfToken } from "./fixtures";
 
 test.describe("Booking Workflow", () => {
   let customerName: string;
@@ -39,13 +39,12 @@ test.describe("Booking Workflow", () => {
     const bResp = await createDoc(page, "Travel Booking", {
       customer: customerName,
       agency: USERS.agencyAdmin1.agency,
-      travel_type: "Honeymoon",
-      destination: "Bali",
       departure_date: "2025-07-01",
       return_date: "2025-07-14",
-      number_of_travelers: 2,
+      num_travelers: 2,
+      booking_date: "2025-05-01",
       total_amount: 10000,
-      status: "Draft",
+      status: "Confirmed",
     });
     bookingName = bResp.data.name;
     await ctx.close();
@@ -64,18 +63,18 @@ test.describe("Booking Workflow", () => {
     );
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
-    expect(body.data.status).toBe("Draft");
+    expect(body.data.status).toBe("Confirmed");
   });
 
-  test("Booking status can be updated to Confirmed", async ({ page }) => {
+  test("Booking status can be updated to In Progress", async ({ page }) => {
     await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
     const resp = await page.request.put(
       `/api/resource/Travel Booking/${bookingName}`,
-      { data: { status: "Confirmed" } }
+      { data: { status: "In Progress" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
-    expect(body.data.status).toBe("Confirmed");
+    expect(body.data.status).toBe("In Progress");
   });
 
   test("Payment child table updates balance", async ({ page }) => {
@@ -91,10 +90,12 @@ test.describe("Booking Workflow", () => {
               payment_date: "2025-05-15",
               amount: 3000,
               payment_method: "Bank Transfer",
+              status: "Received",
               reference: "PAY-001",
             },
           ],
         },
+        headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
       }
     );
     expect(resp.ok()).toBeTruthy();
@@ -125,16 +126,16 @@ test.describe("Booking Workflow", () => {
   test("Booking form renders key fields", async ({ page }) => {
     await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
     await page.goto(`/app/travel-booking/${bookingName}`, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
     });
     await expect(
-      page.locator('[data-fieldname="customer"]')
+      page.locator('[data-fieldname="customer"]').first()
     ).toBeVisible();
     await expect(
-      page.locator('[data-fieldname="total_amount"]')
+      page.locator('[data-fieldname="total_amount"]').first()
     ).toBeVisible();
     await expect(
-      page.locator('[data-fieldname="status"]')
+      page.locator('[data-fieldname="status"]').first()
     ).toBeVisible();
   });
 
@@ -147,7 +148,7 @@ test.describe("Booking Workflow", () => {
     for (const status of statuses) {
       const resp = await page.request.put(
         `/api/resource/Travel Booking/${bookingName}`,
-        { data: { status } }
+        { data: { status }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
       );
       expect(resp.ok()).toBeTruthy();
       const body = await resp.json();

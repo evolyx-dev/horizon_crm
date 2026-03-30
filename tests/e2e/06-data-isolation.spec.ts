@@ -3,7 +3,7 @@
  * Covers: cross-agency data leakage, permission boundaries, CSRF, XSS prevention
  */
 import { test, expect } from "@playwright/test";
-import { USERS, login, createDoc, logout } from "./fixtures";
+import { USERS, login, createDoc, logout, getCsrfToken } from "./fixtures";
 
 test.describe("Data Isolation", () => {
   let agency1Customer: string;
@@ -38,13 +38,14 @@ test.describe("Data Isolation", () => {
     // Create Agency1-specific inquiry
     const iqResp = await createDoc(page, "Travel Inquiry", {
       customer: agency1Customer,
+      customer_name: "Isolation Test Customer",
+      customer_email: "isolation-cust@test.example",
       agency: USERS.agencyAdmin1.agency,
-      travel_type: "Adventure",
       destination: "Tokyo",
       departure_date: "2025-08-01",
       return_date: "2025-08-10",
-      number_of_travelers: 1,
-      budget: 3000,
+      num_travelers: 1,
+      budget_min: 3000,
       status: "New",
       source: "Phone",
     });
@@ -86,7 +87,7 @@ test.describe("Data Isolation", () => {
     await login(page, USERS.agencyAdmin2.email, USERS.agencyAdmin2.password);
     const resp = await page.request.put(
       `/api/resource/Travel Customer/${agency1Customer}`,
-      { data: { customer_name: "Hacked Name" } }
+      { data: { customer_name: "Hacked Name" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     expect([403, 404]).toContain(resp.status());
   });
@@ -94,7 +95,8 @@ test.describe("Data Isolation", () => {
   test("Agency2 Admin cannot delete Agency1 data", async ({ page }) => {
     await login(page, USERS.agencyAdmin2.email, USERS.agencyAdmin2.password);
     const resp = await page.request.delete(
-      `/api/resource/Travel Customer/${agency1Customer}`
+      `/api/resource/Travel Customer/${agency1Customer}`,
+      { headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     expect([403, 404]).toContain(resp.status());
   });
@@ -158,6 +160,7 @@ test.describe("Data Isolation", () => {
         phone: "+0000000000",
         agency: USERS.agencyAdmin1.agency,
       },
+      headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
     });
 
     if (resp.ok()) {
@@ -167,7 +170,8 @@ test.describe("Data Isolation", () => {
 
       // Cleanup
       await page.request.delete(
-        `/api/resource/Travel Customer/${body.data.name}`
+        `/api/resource/Travel Customer/${body.data.name}`,
+        { headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
       );
     }
   });

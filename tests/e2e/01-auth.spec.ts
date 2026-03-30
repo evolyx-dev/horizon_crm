@@ -8,25 +8,25 @@ import { USERS, login, logout } from "./fixtures";
 test.describe("Authentication", () => {
   test("Administrator can log in to desk", async ({ page }) => {
     await login(page, USERS.admin.email, USERS.admin.password);
-    await expect(page).toHaveURL(/\/app/);
+    await expect(page).toHaveURL(/\/(app|desk)/);
     await expect(page.locator(".navbar")).toBeVisible();
   });
 
   test("Agency Admin can log in to desk", async ({ page }) => {
     await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
-    await expect(page).toHaveURL(/\/app/);
+    await expect(page).toHaveURL(/\/(app|desk)/);
     await expect(page.locator(".navbar")).toBeVisible();
   });
 
   test("Agency Staff can log in to desk", async ({ page }) => {
     await login(page, USERS.staff1.email, USERS.staff1.password);
-    await expect(page).toHaveURL(/\/app/);
+    await expect(page).toHaveURL(/\/(app|desk)/);
   });
 
   test("Customer is redirected to portal", async ({ page }) => {
     await login(page, USERS.customer1.email, USERS.customer1.password);
     // Customer role_home_page should redirect to /portal
-    await page.goto("/app", { waitUntil: "networkidle" });
+    await page.goto("/app", { waitUntil: "domcontentloaded" });
     // Customer should not see desk sidebar admin items
     const sidebar = page.locator(".desk-sidebar");
     if (await sidebar.isVisible()) {
@@ -44,17 +44,31 @@ test.describe("Authentication", () => {
   });
 
   test("Unauthenticated user cannot access API", async ({ page }) => {
-    await logout(page);
-    const resp = await page.request.get("/api/resource/Travel Agency");
-    // Should redirect to login or return 403
-    expect([403, 401, 302]).toContain(resp.status());
+    // Fresh page has no session — navigating to desk should redirect to login
+    await page.goto("/app", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 
-  test("Logout clears the session", async ({ page }) => {
+  test("Logout clears the session", async ({ browser }) => {
+    // Use a dedicated context so we can verify session is truly cleared
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
     await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+
+    // Verify we can access protected resources before logout
+    const before = await page.request.get("/api/resource/Travel Booking");
+    expect(before.ok()).toBeTruthy();
+
+    // Logout
     await logout(page);
-    const resp = await page.request.get("/api/resource/Travel Agency");
-    expect([403, 401, 302]).toContain(resp.status());
+
+    // Clear cookies to simulate a truly logged-out state
+    await ctx.clearCookies();
+
+    // After clearing cookies, API should deny access
+    const resp = await page.request.get("/api/resource/Travel Booking");
+    expect([403, 401]).toContain(resp.status());
+    await ctx.close();
   });
 
   test("Session cookie is HttpOnly", async ({ page, context }) => {

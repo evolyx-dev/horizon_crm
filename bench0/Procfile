@@ -1,7 +1,5 @@
 
-redis_cache: redis-server config/redis_cache.conf
-redis_queue: redis-server config/redis_queue.conf
-
+# Redis provided by Docker (ports 13000, 11000)
 
 web: bench serve  --port 8000
 
