@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Virtual environment
+bench0/env/
+
+# Frappe runtime
+bench0/logs/
+bench0/config/pids/
+bench0/sites/*/private/
+bench0/sites/*/public/
+bench0/sites/assets/
+bench0/sites/apps.json
+bench0/sites/apps.txt
+bench0/sites/common_site_config.json
+
+# Frappe framework (managed by bench, not our code)
+bench0/apps/frappe/
+
+# Node
+node_modules/
+tests/node_modules/
+tests/test-results/
+tests/playwright-report/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Docker volumes
+mariadb-data/
+redis-data/
+bench-data/

@@ -1,0 +1,94 @@
+services:
+  mariadb:
+    image: mariadb:10.6
+    container_name: horizon_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "123"
+      MYSQL_CHARACTER_SET_SERVER: "utf8mb4"
+      MYSQL_COLLATION_SERVER: "utf8mb4_unicode_ci"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-cache:
+    image: redis:7-alpine
+    container_name: horizon_redis_cache
+    restart: unless-stopped
+    volumes:
+      - redis-cache-data:/data
+    ports:
+      - "13000:6379"
+
+  redis-queue:
+    image: redis:7-alpine
+    container_name: horizon_redis_queue
+    restart: unless-stopped
+    volumes:
+      - redis-queue-data:/data
+    ports:
+      - "11000:6379"
+
+  frappe:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: horizon_frappe
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+    environment:
+      - SHELL=/bin/bash
+      - FRAPPE_DEVELOPER_MODE=1
+    volumes:
+      - ./bench0/apps/horizon_crm:/workspace/frappe-bench/apps/horizon_crm
+      - ./images:/workspace/images
+      - frappe-bench-data:/workspace/frappe-bench/sites
+      - frappe-env-data:/workspace/frappe-bench/env
+      - frappe-node-modules:/workspace/frappe-bench/node_modules
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    working_dir: /workspace/frappe-bench
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+        echo 'Container started. Run docker/init.sh for first-time setup, or bench start for development.'
+        tail -f /dev/null
+      "
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.42.0-jammy
+    container_name: horizon_playwright
+    depends_on:
+      - frappe
+    environment:
+      - BASE_URL=http://frappe:8000
+    volumes:
+      - ./tests:/workspace/tests
+      - playwright-results:/workspace/test-results
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    command: tail -f /dev/null
+
+volumes:
+  mariadb-data:
+  redis-cache-data:
+  redis-queue-data:
+  frappe-bench-data:
+  frappe-env-data:
+  frappe-node-modules:
+  playwright-results:

@@ -1,0 +1,180 @@
+import { test as base, expect, type Page } from "@playwright/test";
+
+/** Credentials for different roles used in tests */
+export const USERS = {
+  admin: { email: "Administrator", password: "admin" },
+  agencyAdmin1: {
+    email: "admin@agency1.test",
+    password: "Test@1234",
+    agency: "Test Agency Alpha",
+  },
+  agencyAdmin2: {
+    email: "admin@agency2.test",
+    password: "Test@1234",
+    agency: "Test Agency Beta",
+  },
+  teamLead1: {
+    email: "lead@agency1.test",
+    password: "Test@1234",
+    agency: "Test Agency Alpha",
+  },
+  staff1: {
+    email: "staff@agency1.test",
+    password: "Test@1234",
+    agency: "Test Agency Alpha",
+  },
+  customer1: {
+    email: "customer@agency1.test",
+    password: "Test@1234",
+    agency: "Test Agency Alpha",
+  },
+};
+
+/** Log in to Frappe desk via API */
+export async function login(page: Page, email: string, password: string) {
+  await page.goto("/api/method/login", { waitUntil: "domcontentloaded" });
+  const resp = await page.request.post("/api/method/login", {
+    form: { usr: email, pwd: password },
+  });
+  expect(resp.ok()).toBeTruthy();
+  await page.goto("/app", { waitUntil: "networkidle" });
+}
+
+/** Log out of current session */
+export async function logout(page: Page) {
+  await page.request.get("/api/method/logout");
+}
+
+/** Navigate to a list view for a doctype */
+export async function gotoList(page: Page, doctype: string) {
+  const slug = doctype.toLowerCase().replace(/ /g, "-");
+  await page.goto(`/app/${slug}`, { waitUntil: "networkidle" });
+}
+
+/** Navigate to a new form for a doctype */
+export async function gotoNew(page: Page, doctype: string) {
+  const slug = doctype.toLowerCase().replace(/ /g, "-");
+  await page.goto(`/app/${slug}/new`, { waitUntil: "networkidle" });
+}
+
+/** Fill a Frappe form field using data-fieldname */
+export async function fillField(
+  page: Page,
+  fieldname: string,
+  value: string,
+  fieldtype: "input" | "select" | "link" | "text" = "input"
+) {
+  const control = page.locator(
+    `[data-fieldname="${fieldname}"] .control-input`
+  );
+  if (fieldtype === "link") {
+    const input = control.locator("input");
+    await input.fill("");
+    await input.fill(value);
+    await page.waitForTimeout(500);
+    const suggestion = page.locator(".awesomplete li").first();
+    if (await suggestion.isVisible()) {
+      await suggestion.click();
+    }
+  } else if (fieldtype === "select") {
+    await control.locator("select").selectOption(value);
+  } else if (fieldtype === "text") {
+    await control.locator("textarea").fill(value);
+  } else {
+    await control.locator("input").fill(value);
+  }
+}
+
+/** Click primary action button (Save / Submit) */
+export async function clickPrimaryAction(page: Page) {
+  await page.locator(".primary-action").click();
+  await page.waitForTimeout(1000);
+}
+
+/** Save the current form via Ctrl+S */
+export async function saveForm(page: Page) {
+  await page.keyboard.press("Control+s");
+  await page.waitForTimeout(1500);
+}
+
+/** Wait for success indicator (green alert) */
+export async function expectSuccess(page: Page) {
+  await expect(
+    page.locator(".indicator-pill.green, .msgprint.alert-success").first()
+  ).toBeVisible({ timeout: 10_000 });
+}
+
+/** Create a user via API */
+export async function createUser(
+  page: Page,
+  email: string,
+  firstName: string,
+  password: string,
+  roles: string[] = []
+) {
+  const resp = await page.request.post("/api/resource/User", {
+    data: {
+      email,
+      first_name: firstName,
+      new_password: password,
+      send_welcome_email: 0,
+      roles: roles.map((r) => ({ role: r })),
+    },
+  });
+  return resp;
+}
+
+/** Create a document via API */
+export async function createDoc(
+  page: Page,
+  doctype: string,
+  data: Record<string, unknown>
+) {
+  const resp = await page.request.post(`/api/resource/${doctype}`, {
+    data,
+  });
+  expect(resp.ok()).toBeTruthy();
+  return resp.json();
+}
+
+/** Get count of list results for a doctype, optionally filtered */
+export async function getListCount(
+  page: Page,
+  doctype: string,
+  filters?: Record<string, string>
+) {
+  const params = new URLSearchParams({ limit_page_length: "0" });
+  if (filters) {
+    params.set("filters", JSON.stringify(filters));
+  }
+  const resp = await page.request.get(
+    `/api/resource/${doctype}?${params.toString()}`
+  );
+  expect(resp.ok()).toBeTruthy();
+  const body = await resp.json();
+  return body.data.length as number;
+}
+
+/** Delete a document via API */
+export async function deleteDoc(
+  page: Page,
+  doctype: string,
+  name: string
+) {
+  await page.request.delete(`/api/resource/${doctype}/${name}`);
+}
+
+/** Extended test fixture with login helpers */
+export const test = base.extend<{
+  adminPage: Page;
+}>({
+  adminPage: async ({ browser }, use) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await login(page, USERS.admin.email, USERS.admin.password);
+    await use(page);
+    await ctx.close();
+  },
+});
+
+export { expect };

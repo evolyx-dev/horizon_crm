@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "creation": "2026-03-30 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "destination_name",
+  "country",
+  "region",
+  "description",
+  "image",
+  "is_popular"
+ ],
+ "fields": [
+  {
+   "fieldname": "destination_name",
+   "fieldtype": "Data",
+   "label": "Destination Name",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Data",
+   "label": "Region",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Image"
+  },
+  {
+   "fieldname": "is_popular",
+   "fieldtype": "Check",
+   "label": "Is Popular"
+  }
+ ],
+ "image_field": "image",
+ "links": [],
+ "modified": "2026-03-30 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Horizon CRM",
+ "name": "Travel Destination",
+ "naming_rule": "By fieldname",
+ "autoname": "field:destination_name",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "Agency Admin",
+   "read": 1
+  },
+  {
+   "role": "Agency Team Lead",
+   "read": 1
+  },
+  {
+   "role": "Agency Staff",
+   "read": 1
+  },
+  {
+   "role": "Agency Customer",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

@@ -1,0 +1,123 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Plan a Trip{% endblock %}
+
+{% block page_content %}
+<div class="portal-container">
+    <div class="portal-header">
+        <h2>Plan Your Next Adventure</h2>
+        <p>Tell us about your dream trip and we'll craft the perfect itinerary</p>
+    </div>
+
+    <div class="portal-form">
+        <form id="inquiry-form">
+            <input type="hidden" name="csrf_token" value="{{ frappe.session.csrf_token }}">
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="destination">Where do you want to go? *</label>
+                        <input type="text" id="destination" name="destination" required 
+                               placeholder="e.g., Bali, Paris, Maldives...">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="travel_type">Type of Travel</label>
+                        <select id="travel_type" name="travel_type">
+                            <option value="">Select type...</option>
+                            {% for tt in travel_types %}
+                            <option value="{{ tt.name }}">{{ tt.type_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="departure_date">Departure Date *</label>
+                        <input type="date" id="departure_date" name="departure_date" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="return_date">Return Date *</label>
+                        <input type="date" id="return_date" name="return_date" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="num_travelers">Number of Travelers</label>
+                        <input type="number" id="num_travelers" name="num_travelers" min="1" value="1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="budget_min">Minimum Budget</label>
+                        <input type="number" id="budget_min" name="budget_min" min="0" step="100" placeholder="0">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="budget_max">Maximum Budget</label>
+                        <input type="number" id="budget_max" name="budget_max" min="0" step="100" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Additional Details</label>
+                <textarea id="notes" name="notes" rows="4" 
+                          placeholder="Tell us about any special requirements, preferences, or activities you'd like..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Submit Inquiry</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('inquiry-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const btn = this.querySelector('.btn-submit');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    
+    frappe.call({
+        method: 'horizon_crm.api.portal.submit_inquiry',
+        args: {
+            destination: this.destination.value,
+            departure_date: this.departure_date.value,
+            return_date: this.return_date.value,
+            num_travelers: parseInt(this.num_travelers.value) || 1,
+            travel_type: this.travel_type.value || null,
+            budget_min: parseFloat(this.budget_min.value) || 0,
+            budget_max: parseFloat(this.budget_max.value) || 0,
+            notes: this.notes.value
+        },
+        callback: function(r) {
+            if (r.message) {
+                frappe.msgprint({
+                    title: 'Inquiry Submitted!',
+                    message: 'Your travel inquiry has been submitted successfully. Our team will contact you soon.',
+                    indicator: 'green'
+                });
+                setTimeout(function() {
+                    window.location.href = '/portal';
+                }, 2000);
+            }
+        },
+        error: function() {
+            btn.disabled = false;
+            btn.textContent = 'Submit Inquiry';
+        }
+    });
+});
+</script>
+{% endblock %}

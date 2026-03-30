@@ -1,0 +1,280 @@
+/* Horizon CRM - Portal Styles */
+
+:root {
+    --horizon-primary: #FF6B6B;
+    --horizon-primary-dark: #E85555;
+    --horizon-secondary: #FF8E53;
+    --horizon-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+    --horizon-text: #2D3436;
+    --horizon-text-light: #636E72;
+    --horizon-bg: #F8F9FA;
+    --horizon-card-bg: #FFFFFF;
+    --horizon-border: #E9ECEF;
+    --horizon-success: #00B894;
+    --horizon-warning: #FDCB6E;
+    --horizon-danger: #D63031;
+    --horizon-info: #0984E3;
+    --horizon-radius: 12px;
+    --horizon-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Portal Layout */
+.portal-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+.portal-header {
+    background: var(--horizon-gradient);
+    color: white;
+    padding: 32px 24px;
+    border-radius: var(--horizon-radius);
+    margin-bottom: 24px;
+}
+
+.portal-header h2 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 24px;
+}
+
+.portal-header p {
+    margin: 8px 0 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+/* Portal Cards */
+.portal-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.portal-card {
+    background: var(--horizon-card-bg);
+    border: 1px solid var(--horizon-border);
+    border-radius: var(--horizon-radius);
+    padding: 20px;
+    box-shadow: var(--horizon-shadow);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: var(--horizon-text);
+    display: block;
+}
+
+.portal-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    text-decoration: none;
+    color: var(--horizon-text);
+}
+
+.portal-card .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+.portal-card .card-icon.primary {
+    background: rgba(255, 107, 107, 0.1);
+    color: var(--horizon-primary);
+}
+.portal-card .card-icon.success {
+    background: rgba(0, 184, 148, 0.1);
+    color: var(--horizon-success);
+}
+.portal-card .card-icon.info {
+    background: rgba(9, 132, 227, 0.1);
+    color: var(--horizon-info);
+}
+.portal-card .card-icon.warning {
+    background: rgba(253, 203, 110, 0.15);
+    color: #E17055;
+}
+
+.portal-card h4 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.portal-card .card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--horizon-text);
+    margin-bottom: 4px;
+}
+
+.portal-card .card-desc {
+    font-size: 13px;
+    color: var(--horizon-text-light);
+    margin: 0;
+}
+
+/* Booking List */
+.portal-booking-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.portal-booking-item {
+    background: var(--horizon-card-bg);
+    border: 1px solid var(--horizon-border);
+    border-radius: var(--horizon-radius);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+}
+
+.portal-booking-item:hover {
+    border-color: var(--horizon-primary);
+    box-shadow: var(--horizon-shadow);
+}
+
+.portal-booking-item .booking-info h5 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.portal-booking-item .booking-info p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--horizon-text-light);
+}
+
+.portal-booking-item .booking-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.booking-status.confirmed {
+    background: rgba(0, 184, 148, 0.1);
+    color: var(--horizon-success);
+}
+.booking-status.in-progress {
+    background: rgba(255, 142, 83, 0.1);
+    color: var(--horizon-secondary);
+}
+.booking-status.completed {
+    background: rgba(9, 132, 227, 0.1);
+    color: var(--horizon-info);
+}
+.booking-status.cancelled {
+    background: rgba(214, 48, 49, 0.1);
+    color: var(--horizon-danger);
+}
+
+/* Portal Form */
+.portal-form {
+    background: var(--horizon-card-bg);
+    border: 1px solid var(--horizon-border);
+    border-radius: var(--horizon-radius);
+    padding: 24px;
+    box-shadow: var(--horizon-shadow);
+}
+
+.portal-form .form-group {
+    margin-bottom: 16px;
+}
+
+.portal-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--horizon-text);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.portal-form input,
+.portal-form select,
+.portal-form textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--horizon-border);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.portal-form input:focus,
+.portal-form select:focus,
+.portal-form textarea:focus {
+    outline: none;
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.portal-form .btn-submit {
+    background: var(--horizon-gradient);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.portal-form .btn-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* Rating stars */
+.rating-stars {
+    display: flex;
+    gap: 4px;
+}
+.rating-stars .star {
+    font-size: 24px;
+    cursor: pointer;
+    color: #DDD;
+    transition: color 0.15s;
+}
+.rating-stars .star.filled {
+    color: #FDCB6E;
+}
+
+/* Section title */
+.portal-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--horizon-text);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--horizon-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .portal-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .portal-booking-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .portal-header h2 {
+        font-size: 20px;
+    }
+}

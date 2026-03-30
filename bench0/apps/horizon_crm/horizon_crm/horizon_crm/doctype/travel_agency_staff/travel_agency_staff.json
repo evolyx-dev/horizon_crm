@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "creation": "2026-03-30 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "staff_user",
+  "agency",
+  "role_in_agency",
+  "team",
+  "designation",
+  "phone",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "staff_user",
+   "fieldtype": "Link",
+   "label": "Staff User",
+   "options": "User",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "agency",
+   "fieldtype": "Link",
+   "label": "Agency",
+   "options": "Travel Agency",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "role_in_agency",
+   "fieldtype": "Select",
+   "label": "Role in Agency",
+   "options": "Agency Admin\nTeam Lead\nStaff",
+   "reqd": 1,
+   "in_list_view": 1,
+   "default": "Staff"
+  },
+  {
+   "fieldname": "team",
+   "fieldtype": "Link",
+   "label": "Team",
+   "options": "Travel Team"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "default": "1",
+   "in_list_view": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-03-30 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Horizon CRM",
+ "name": "Travel Agency Staff",
+ "naming_rule": "By fieldname",
+ "autoname": "field:staff_user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "Agency Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "Agency Team Lead",
+   "read": 1
+  },
+  {
+   "role": "Agency Staff",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

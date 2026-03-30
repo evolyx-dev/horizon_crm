@@ -1,0 +1,212 @@
+{
+ "actions": [],
+ "creation": "2026-03-30 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "booking_number",
+  "agency",
+  "status",
+  "column_break_1",
+  "inquiry",
+  "customer",
+  "assigned_to",
+  "itinerary",
+  "section_dates",
+  "departure_date",
+  "return_date",
+  "num_travelers",
+  "booking_date",
+  "section_financial",
+  "total_amount",
+  "paid_amount",
+  "balance_amount",
+  "currency",
+  "section_notes",
+  "notes",
+  "section_payments",
+  "payments"
+ ],
+ "fields": [
+  {
+   "fieldname": "booking_number",
+   "fieldtype": "Data",
+   "label": "Booking Number",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "agency",
+   "fieldtype": "Link",
+   "label": "Agency",
+   "options": "Travel Agency",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Confirmed\nIn Progress\nCompleted\nCancelled",
+   "default": "Confirmed",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "inquiry",
+   "fieldtype": "Link",
+   "label": "Inquiry",
+   "options": "Travel Inquiry"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Travel Customer",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "Travel Agency Staff"
+  },
+  {
+   "fieldname": "itinerary",
+   "fieldtype": "Link",
+   "label": "Itinerary",
+   "options": "Travel Itinerary"
+  },
+  {
+   "fieldname": "section_dates",
+   "fieldtype": "Section Break",
+   "label": "Travel Dates"
+  },
+  {
+   "fieldname": "departure_date",
+   "fieldtype": "Date",
+   "label": "Departure Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Return Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "num_travelers",
+   "fieldtype": "Int",
+   "label": "Number of Travelers",
+   "reqd": 1,
+   "default": "1"
+  },
+  {
+   "fieldname": "booking_date",
+   "fieldtype": "Date",
+   "label": "Booking Date",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "section_financial",
+   "fieldtype": "Section Break",
+   "label": "Financial"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "default": "0"
+  },
+  {
+   "fieldname": "balance_amount",
+   "fieldtype": "Currency",
+   "label": "Balance Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "default": "USD"
+  },
+  {
+   "fieldname": "section_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text Editor",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "section_payments",
+   "fieldtype": "Section Break",
+   "label": "Payments"
+  },
+  {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "label": "Payments",
+   "options": "Booking Payment"
+  }
+ ],
+ "links": [],
+ "modified": "2026-03-30 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Horizon CRM",
+ "name": "Travel Booking",
+ "naming_rule": "Expression",
+ "autoname": "BK-.#####",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "Agency Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "Agency Team Lead",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "Agency Staff",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "booking_number",
+ "track_changes": 1
+}

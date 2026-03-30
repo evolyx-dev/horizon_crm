@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "autoname": "field:agency_name",
+ "creation": "2026-03-30 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "agency_name",
+  "agency_code",
+  "status",
+  "column_break_1",
+  "logo",
+  "admin_user",
+  "section_contact",
+  "contact_email",
+  "phone",
+  "column_break_2",
+  "website",
+  "address",
+  "section_subscription",
+  "subscription_plan",
+  "max_staff"
+ ],
+ "fields": [
+  {
+   "fieldname": "agency_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Agency Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "agency_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Agency Code",
+   "unique": 1
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Active\nInactive",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "logo",
+   "fieldtype": "Attach Image",
+   "label": "Logo"
+  },
+  {
+   "fieldname": "admin_user",
+   "fieldtype": "Link",
+   "label": "Admin User",
+   "options": "User"
+  },
+  {
+   "fieldname": "section_contact",
+   "fieldtype": "Section Break",
+   "label": "Contact Details"
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email",
+   "options": "Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "section_subscription",
+   "fieldtype": "Section Break",
+   "label": "Subscription"
+  },
+  {
+   "default": "Free",
+   "fieldname": "subscription_plan",
+   "fieldtype": "Select",
+   "label": "Subscription Plan",
+   "options": "Free\nBasic\nPremium"
+  },
+  {
+   "default": "10",
+   "fieldname": "max_staff",
+   "fieldtype": "Int",
+   "label": "Maximum Staff"
+  }
+ ],
+ "image_field": "logo",
+ "links": [],
+ "modified": "2026-03-30 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Horizon CRM",
+ "name": "Travel Agency",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Agency Admin"
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "agency_name",
+ "track_changes": 1
+}

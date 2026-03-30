@@ -1,0 +1,266 @@
+# Horizon CRM — Testing Guide
+
+## Overview
+
+Horizon CRM uses two testing layers:
+
+| Layer | Framework | Scope | Location |
+|-------|-----------|-------|----------|
+| Unit / Integration | Frappe Test Runner (pytest) | DocType controllers, API methods, permissions | `bench0/apps/horizon_crm/horizon_crm/tests/` |
+| E2E / Acceptance | Playwright | Full browser workflows, UI, security | `tests/e2e/` |
+
+---
+
+## Unit Tests (Frappe)
+
+### Running All App Tests
+
+```bash
+bench --site horizon.localhost run-tests --app horizon_crm
+```
+
+### Running a Specific Test File
+
+```bash
+bench --site horizon.localhost run-tests \
+  --module horizon_crm.horizon_crm.doctype.travel_agency.test_travel_agency
+```
+
+### Running a Single Test
+
+```bash
+bench --site horizon.localhost run-tests \
+  --module horizon_crm.horizon_crm.doctype.travel_agency.test_travel_agency \
+  --test test_agency_creation
+```
+
+### Writing Unit Tests
+
+Create `test_<doctype>.py` next to the DocType definition:
+
+```python
+import frappe
+from frappe.tests import IntegrationTestCase
+
+class TestTravelAgency(IntegrationTestCase):
+    def setUp(self):
+        # Runs before each test
+        pass
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def test_agency_creation(self):
+        agency = frappe.get_doc({
+            "doctype": "Travel Agency",
+            "agency_name": "Unit Test Agency",
+            "contact_email": "unit@test.example",
+            "max_staff": 5,
+            "status": "Active",
+        })
+        agency.insert()
+        self.assertEqual(agency.agency_name, "Unit Test Agency")
+        self.assertEqual(agency.status, "Active")
+        agency.delete()
+
+    def test_agency_isolation(self):
+        # Create two agencies
+        agency1 = frappe.get_doc({...}).insert()
+        agency2 = frappe.get_doc({...}).insert()
+
+        # Login as agency1 admin
+        frappe.set_user("admin@agency1.test")
+
+        # Should not see agency2 data
+        customers = frappe.get_all("Travel Customer",
+            filters={"agency": agency2.name})
+        self.assertEqual(len(customers), 0)
+```
+
+### Test Fixtures
+
+Place test data in `test_records.json` next to the DocType:
+
+```json
+[
+  {
+    "doctype": "Travel Agency",
+    "agency_name": "Fixture Agency",
+    "contact_email": "fixture@test.example",
+    "max_staff": 10,
+    "status": "Active"
+  }
+]
+```
+
+---
+
+## E2E Tests (Playwright)
+
+### Prerequisites
+
+```bash
+cd tests
+npm install
+npx playwright install   # Downloads browser binaries
+```
+
+### Running All E2E Tests
+
+```bash
+# Ensure the dev server is running on localhost:8000
+cd tests
+npx playwright test
+```
+
+### Running Specific Test Suites
+
+```bash
+# Auth tests only
+npx playwright test e2e/01-auth.spec.ts
+
+# Data isolation tests
+npx playwright test e2e/06-data-isolation.spec.ts
+
+# Run with visible browser
+npx playwright test --headed
+
+# Interactive UI mode
+npx playwright test --ui
+
+# Debug mode (step through)
+npx playwright test --debug
+```
+
+### Running in Docker
+
+```bash
+# From project root
+docker compose run --rm playwright npx playwright test
+
+# Or if playwright service is running
+docker compose exec playwright npx playwright test
+```
+
+### E2E Test Structure
+
+```
+tests/
+├── package.json              # Dependencies
+├── playwright.config.ts      # Playwright configuration
+└── e2e/
+    ├── fixtures.ts           # Shared utilities & test helpers
+    ├── global-setup.ts       # Creates test users & agencies (runs once)
+    ├── 01-auth.spec.ts       # Authentication & session tests
+    ├── 02-agency.spec.ts     # Agency CRUD tests
+    ├── 03-staff.spec.ts      # Staff management tests
+    ├── 04-inquiry.spec.ts    # Inquiry workflow tests
+    ├── 05-booking.spec.ts    # Booking workflow tests
+    ├── 06-data-isolation.spec.ts  # Security & isolation tests
+    ├── 07-portal.spec.ts     # Customer portal tests
+    ├── 08-ui-ux.spec.ts      # UI/UX & responsive tests
+    └── 09-other-doctypes.spec.ts  # Itinerary, Supplier, Feedback tests
+```
+
+### Test Suites Coverage
+
+| Suite | File | What it Tests |
+|-------|------|---------------|
+| Auth | `01-auth.spec.ts` | Login, logout, session, cookies, invalid credentials |
+| Agency | `02-agency.spec.ts` | CRUD, status toggle, permission checks |
+| Staff | `03-staff.spec.ts` | Staff CRUD, role assignment, User Permission, max limit |
+| Inquiry | `04-inquiry.spec.ts` | Status workflow, inquiry→booking conversion, isolation |
+| Booking | `05-booking.spec.ts` | Lifecycle, payment tracking, balance calc, summary API |
+| Security | `06-data-isolation.spec.ts` | Cross-agency access, SQL injection, XSS, CSRF |
+| Portal | `07-portal.spec.ts` | Dashboard, bookings, inquiry submission, feedback |
+| UI/UX | `08-ui-ux.spec.ts` | Desktop/mobile layout, CSS/JS loading, responsive |
+| Others | `09-other-doctypes.spec.ts` | Itinerary, Supplier, Feedback, Teams |
+
+### Writing New E2E Tests
+
+Import fixtures from `fixtures.ts`:
+
+```typescript
+import { test, expect } from "@playwright/test";
+import { USERS, login, createDoc, gotoList } from "./fixtures";
+
+test.describe("My Feature", () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+  });
+
+  test("should do something", async ({ page }) => {
+    await gotoList(page, "Travel Booking");
+    await expect(page.locator(".frappe-list")).toBeVisible();
+  });
+});
+```
+
+### Available Test Helpers
+
+| Helper | Purpose |
+|--------|---------|
+| `login(page, email, pw)` | Log in via API and navigate to /app |
+| `logout(page)` | Clear session |
+| `gotoList(page, doctype)` | Navigate to list view |
+| `gotoNew(page, doctype)` | Navigate to new form |
+| `fillField(page, name, value, type)` | Fill a Frappe form field |
+| `saveForm(page)` | Ctrl+S to save |
+| `createDoc(page, doctype, data)` | Create document via API |
+| `deleteDoc(page, doctype, name)` | Delete via API |
+| `getListCount(page, doctype, filters)` | Count list results |
+| `createUser(page, email, name, pw, roles)` | Create a User |
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FRAPPE_URL` | `http://localhost:8000` | Base URL of Frappe site |
+| `CI` | — | Set in CI to enable retries and forbid .only |
+
+### Viewing Reports
+
+```bash
+# After running tests, open HTML report
+npx playwright show-report
+```
+
+### Debugging Failures
+
+1. **Screenshots**: Saved automatically on failure in `test-results/`
+2. **Video**: Retained on failure (configured in `playwright.config.ts`)
+3. **Trace**: Generated on first retry — view with:
+   ```bash
+   npx playwright show-trace test-results/<test>/trace.zip
+   ```
+
+---
+
+## CI Integration
+
+Example GitHub Actions workflow:
+
+```yaml
+name: E2E Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start services
+        run: docker compose up -d
+      - name: Wait for Frappe
+        run: |
+          for i in $(seq 1 60); do
+            curl -s http://localhost:8000 && break
+            sleep 5
+          done
+      - name: Run E2E tests
+        run: docker compose run --rm playwright npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: tests/playwright-report/
+```

@@ -1,0 +1,59 @@
+{% extends "templates/web.html" %}
+
+{% block title %}My Travel Portal{% endblock %}
+
+{% block page_content %}
+<div class="portal-container">
+    <div class="portal-header">
+        <h2>Welcome, {{ customer_name or frappe.session.user }}</h2>
+        <p>Manage your travel bookings and explore new destinations</p>
+    </div>
+
+    <div class="portal-cards">
+        <a href="/portal/bookings" class="portal-card">
+            <div class="card-icon primary">✈️</div>
+            <div class="card-value">{{ total_bookings }}</div>
+            <h4>My Bookings</h4>
+            <p class="card-desc">View and track your travel bookings</p>
+        </a>
+
+        <a href="/portal/bookings?status=In Progress" class="portal-card">
+            <div class="card-icon warning">🗓️</div>
+            <div class="card-value">{{ active_bookings }}</div>
+            <h4>Active Trips</h4>
+            <p class="card-desc">Currently active or upcoming trips</p>
+        </a>
+
+        <a href="/portal/inquiry" class="portal-card">
+            <div class="card-icon success">📝</div>
+            <div class="card-value">New</div>
+            <h4>Plan a Trip</h4>
+            <p class="card-desc">Submit a new travel inquiry</p>
+        </a>
+
+        <a href="/portal/bookings?status=Completed" class="portal-card">
+            <div class="card-icon info">⭐</div>
+            <div class="card-value">{{ completed_bookings }}</div>
+            <h4>Past Trips</h4>
+            <p class="card-desc">View completed trips and leave feedback</p>
+        </a>
+    </div>
+
+    {% if recent_bookings %}
+    <h3 class="portal-section-title">Recent Bookings</h3>
+    <ul class="portal-booking-list">
+        {% for booking in recent_bookings %}
+        <li class="portal-booking-item">
+            <div class="booking-info">
+                <h5>{{ booking.booking_number }}</h5>
+                <p>{{ booking.departure_date }} — {{ booking.return_date }} · {{ booking.num_travelers }} traveler{{ 's' if booking.num_travelers > 1 else '' }}</p>
+            </div>
+            <span class="booking-status {{ booking.status | lower | replace(' ', '-') }}">
+                {{ booking.status }}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

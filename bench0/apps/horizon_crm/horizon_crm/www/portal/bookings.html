@@ -1,0 +1,48 @@
+{% extends "templates/web.html" %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block page_content %}
+<div class="portal-container">
+    <div class="portal-header">
+        <h2>My Bookings</h2>
+        <p>Track all your travel bookings in one place</p>
+    </div>
+
+    {% if bookings %}
+    <ul class="portal-booking-list">
+        {% for booking in bookings %}
+        <li class="portal-booking-item">
+            <div class="booking-info">
+                <h5>
+                    <a href="/portal/bookings/{{ booking.name }}">{{ booking.booking_number }}</a>
+                </h5>
+                <p>
+                    {{ frappe.utils.formatdate(booking.departure_date) }} — 
+                    {{ frappe.utils.formatdate(booking.return_date) }} · 
+                    {{ booking.num_travelers }} traveler{{ 's' if booking.num_travelers > 1 else '' }} · 
+                    {{ frappe.utils.fmt_money(booking.total_amount, currency=booking.currency) }}
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <span class="booking-status {{ booking.status | lower | replace(' ', '-') }}">
+                    {{ booking.status }}
+                </span>
+                {% if booking.balance_amount > 0 %}
+                <p style="margin: 4px 0 0; font-size: 12px; color: var(--horizon-secondary);">
+                    Balance: {{ frappe.utils.fmt_money(booking.balance_amount, currency=booking.currency) }}
+                </p>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px; color: var(--horizon-text-light);">
+        <p style="font-size: 48px; margin-bottom: 12px;">✈️</p>
+        <h3>No bookings yet</h3>
+        <p>Ready to explore? <a href="/portal/inquiry">Plan your next trip</a>!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

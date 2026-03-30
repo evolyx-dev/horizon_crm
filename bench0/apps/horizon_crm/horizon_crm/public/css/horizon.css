@@ -1,0 +1,200 @@
+/* Horizon CRM - Custom Desk Styles */
+
+:root {
+    --horizon-primary: #FF6B6B;
+    --horizon-primary-dark: #E85555;
+    --horizon-secondary: #FF8E53;
+    --horizon-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+    --horizon-text: #2D3436;
+    --horizon-text-light: #636E72;
+    --horizon-bg: #F8F9FA;
+    --horizon-card-bg: #FFFFFF;
+    --horizon-border: #E9ECEF;
+    --horizon-success: #00B894;
+    --horizon-warning: #FDCB6E;
+    --horizon-danger: #D63031;
+    --horizon-info: #0984E3;
+    --horizon-radius: 12px;
+    --horizon-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    --horizon-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Status indicator colors */
+.indicator-pill.green,
+.indicator-pill[data-status="Active"],
+.indicator-pill[data-status="Confirmed"],
+.indicator-pill[data-status="Completed"],
+.indicator-pill[data-status="Won"],
+.indicator-pill[data-status="Approved"],
+.indicator-pill[data-status="Received"] {
+    --indicator-color: var(--horizon-success);
+}
+
+.indicator-pill.red,
+.indicator-pill[data-status="Inactive"],
+.indicator-pill[data-status="Cancelled"],
+.indicator-pill[data-status="Lost"],
+.indicator-pill[data-status="Refunded"] {
+    --indicator-color: var(--horizon-danger);
+}
+
+.indicator-pill.orange,
+.indicator-pill[data-status="In Progress"],
+.indicator-pill[data-status="Contacted"],
+.indicator-pill[data-status="Quoted"],
+.indicator-pill[data-status="Shared"],
+.indicator-pill[data-status="Pending"] {
+    --indicator-color: var(--horizon-secondary);
+}
+
+.indicator-pill.blue,
+.indicator-pill[data-status="New"],
+.indicator-pill[data-status="Draft"] {
+    --indicator-color: var(--horizon-info);
+}
+
+/* List view enhancements */
+.list-row .level-left .list-row--col .indicator-pill {
+    font-weight: 500;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+}
+
+/* Form view enhancements */
+[data-doctype="Travel Agency"] .page-head .title-area .title-text,
+[data-doctype="Travel Inquiry"] .page-head .title-area .title-text,
+[data-doctype="Travel Booking"] .page-head .title-area .title-text,
+[data-doctype="Travel Itinerary"] .page-head .title-area .title-text {
+    font-weight: 700;
+}
+
+/* Card style for sections */
+.frappe-control[data-fieldname="section_customer"] .section-head,
+.frappe-control[data-fieldname="section_travel"] .section-head,
+.frappe-control[data-fieldname="section_financial"] .section-head,
+.frappe-control[data-fieldname="section_dates"] .section-head,
+.frappe-control[data-fieldname="section_items"] .section-head,
+.frappe-control[data-fieldname="section_payments"] .section-head {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--horizon-text-light);
+    border-bottom: 2px solid var(--horizon-primary);
+    padding-bottom: 8px;
+}
+
+/* Custom button styling */
+.btn-primary-dark {
+    background: var(--horizon-gradient);
+    border: none;
+    color: white;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary-dark:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--horizon-shadow-hover);
+}
+
+/* Dashboard cards */
+.horizon-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.horizon-stat-card {
+    background: var(--horizon-card-bg);
+    border-radius: var(--horizon-radius);
+    padding: 20px;
+    box-shadow: var(--horizon-shadow);
+    transition: all 0.2s ease;
+    border: 1px solid var(--horizon-border);
+}
+
+.horizon-stat-card:hover {
+    box-shadow: var(--horizon-shadow-hover);
+    transform: translateY(-2px);
+}
+
+.horizon-stat-card .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--horizon-text-light);
+    margin-bottom: 8px;
+}
+
+.horizon-stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--horizon-text);
+    line-height: 1.2;
+}
+
+.horizon-stat-card .stat-icon {
+    float: right;
+    font-size: 24px;
+    opacity: 0.3;
+}
+
+.horizon-stat-card.primary {
+    border-left: 4px solid var(--horizon-primary);
+}
+.horizon-stat-card.success {
+    border-left: 4px solid var(--horizon-success);
+}
+.horizon-stat-card.warning {
+    border-left: 4px solid var(--horizon-warning);
+}
+.horizon-stat-card.info {
+    border-left: 4px solid var(--horizon-info);
+}
+
+/* Booking status timeline */
+.booking-timeline {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 0;
+}
+
+.booking-timeline .step {
+    flex: 1;
+    height: 4px;
+    background: var(--horizon-border);
+    border-radius: 2px;
+    position: relative;
+}
+
+.booking-timeline .step.active {
+    background: var(--horizon-gradient);
+}
+
+.booking-timeline .step .step-label {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: var(--horizon-text-light);
+    white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .horizon-dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .horizon-stat-card .stat-value {
+        font-size: 22px;
+    }
+}
