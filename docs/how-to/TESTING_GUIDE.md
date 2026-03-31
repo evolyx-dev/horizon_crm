@@ -126,7 +126,8 @@ horizon_crm/tests/
 │   ├── 08-ui-ux.spec.ts      # UI/UX & responsive
 │   ├── 09-other-doctypes.spec.ts # Itinerary, suppliers, feedback, teams
 │   ├── 10-multi-tenant.spec.ts   # Multi-site isolation
-│   └── 11-lead-and-branding.spec.ts # Lead pipeline, branding
+│   ├── 11-lead-and-branding.spec.ts # Lead pipeline, branding
+│   └── 12-invoice-customer-masterdata.spec.ts # Invoice, customer CRUD, master data
 ├── test-results/             # Playwright artifacts (gitignored)
 ├── allure-results/           # Allure raw results (gitignored)
 └── node_modules/             # (gitignored)
@@ -147,6 +148,7 @@ horizon_crm/tests/
 | Others | `09-other-doctypes` | Itinerary, suppliers (6 types), feedback, teams |
 | Multi-Tenant | `10-multi-tenant` | Site isolation, tenant data boundary |
 | Leads & Branding | `11-lead-and-branding` | Lead pipeline, favicon, logo, CSS/JS assets |
+| Invoice, Customer & Master Data | `12-invoice-customer-masterdata` | Invoice lifecycle & calculations, customer CRUD, destinations, travel types, lost reasons |
 
 **Playwright projects:** Tests run across `chromium` (desktop), `mobile` (iPhone 13), and `multi-tenant` (API-only with two sites).
 

@@ -58,17 +58,23 @@ teardown("cleanup test data", async ({ page }) => {
   const testEmails = [
     "inquiry-test@test.example",
     "booking-test@test.example",
+    "invoice-test@test.example",
     "xss-",
     "overflow@test.example",
   ];
 
-  // Clean up feedback first (depends on booking)
+  // Clean up invoices first (depends on booking & customer)
+  await cleanupByPattern(page, "Travel Invoice", "customer", "Invoice Test Customer");
+  await cleanupByPattern(page, "Travel Invoice", "customer", "E2E");
+
+  // Clean up feedback (depends on booking)
   await cleanupByPattern(page, "Travel Feedback", "comments", "E2E");
 
   // Clean up bookings (depends on customer)
   await cleanupDocs(page, "Travel Booking", "customer_name", [
     "Booking Test Customer",
     "Inquiry Test Customer",
+    "Invoice Test Customer",
     "Test Customer One",
   ]);
 
@@ -80,8 +86,13 @@ teardown("cleanup test data", async ({ page }) => {
   // Clean up test teams
   await cleanupByPattern(page, "Travel Team", "team_name", "E2E Team");
 
-  // Clean up test suppliers
-  await cleanupByPattern(page, "Travel Supplier", "supplier_name", "E2E Supplier");
+  // Clean up category suppliers
+  await cleanupByPattern(page, "Airline Supplier", "airline_name", "E2E Airline");
+  await cleanupByPattern(page, "Hotel Supplier", "hotel_name", "E2E Hotel");
+  await cleanupByPattern(page, "Visa Agent", "agent_name", "E2E Visa Agent");
+  await cleanupByPattern(page, "Transport Supplier", "transport_name", "E2E Transport");
+  await cleanupByPattern(page, "Tour Operator", "operator_name", "E2E Tour Op");
+  await cleanupByPattern(page, "Insurance Provider", "provider_name", "E2E Insurance");
 
   // Clean up test itineraries
   await cleanupByPattern(page, "Travel Itinerary", "itinerary_name", "E2E Itinerary");
@@ -90,5 +101,7 @@ teardown("cleanup test data", async ({ page }) => {
   await cleanupDocs(page, "Travel Customer", "email", [
     "inquiry-test@test.example",
     "booking-test@test.example",
+    "invoice-test@test.example",
   ]);
+  await cleanupByPattern(page, "Travel Customer", "customer_name", "E2E Full Customer");
 });

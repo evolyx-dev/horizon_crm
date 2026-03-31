@@ -86,10 +86,15 @@ horizon_crm/                        # ← Repo root IS the Frappe app
 │   │       ├── insurance_provider/     # INS-##### | Coverage, claim turnaround
 │   │       ├── supplier_service/         (child: shared by all suppliers)
 │   │       │
+│   │       │── # ── Billing ──
+│   │       ├── travel_invoice/          # INV-##### | Invoice lifecycle
+│   │       ├── invoice_item/             (child: line items)
+│   │       │
 │   │       │── # ── Reference Data ──
 │   │       ├── travel_customer/
 │   │       ├── travel_destination/
 │   │       ├── travel_type/
+│   │       ├── travel_lost_reason/
 │   │       └── travel_feedback/
 │   │
 │   ├── api/                        # Whitelisted API methods
@@ -123,7 +128,7 @@ horizon_crm/                        # ← Repo root IS the Frappe app
 │   │   └── e2e/                    # Playwright E2E specs
 │   │       ├── fixtures.ts
 │   │       ├── global-setup.ts
-│   │       ├── 01-auth.spec.ts … 11-lead-and-branding.spec.ts
+│   │       ├── 01-auth.spec.ts … 12-invoice-customer-masterdata.spec.ts
 │   │       └── global-teardown.ts
 │   │
 │   └── www/                        # Portal pages

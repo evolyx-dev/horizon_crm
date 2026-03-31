@@ -503,15 +503,18 @@ Set the start and end dates — the system calculates the number of days for you
 
 ### Managing Suppliers
 
-Go to **Trip Planning → Travel Supplier**.
+Suppliers are organized into six category-specific DocTypes, each accessible from the workspace sidebar:
 
-**Types:** Hotel, Airline, Tour Operator, Transport, Insurance, Visa Agent, Other
+| DocType | Prefix | Key Fields |
+|---------|--------|------------|
+| Airline Supplier | AIR- | airline_name, iata_code, alliance, domestic/international |
+| Hotel Supplier | HTL- | hotel_name, star_rating, property_type, total_rooms |
+| Visa Agent | VISA- | agent_name, countries_served, avg_processing_days |
+| Transport Supplier | TRN- | transport_name, transport_type, fleet_size |
+| Tour Operator | TOUR- | operator_name, specialization, destinations_covered |
+| Insurance Provider | INS- | provider_name, insurance_types, max_coverage_amount |
 
-**Key fields:**
-- Supplier Name, Type, Active status
-- Contact Email, Phone, Website
-- Address, City, Country
-- Services table (name, description, price per service)
+All supplier types share contact info, address, notes, and a **Services** child table (service_name, description, price).
 
 ### Managing Destinations
 
@@ -782,12 +785,17 @@ Staff and Team Leads are blocked from accessing system configuration modules (Se
 | Travel Invoice | INV-.##### | Billing and payments |
 | Travel Customer | CUST-.##### | Customer records |
 | Travel Itinerary | ITN-.##### | Day-by-day trip plans |
-| Travel Supplier | SUP-.##### | Hotels, airlines, etc. |
+| Airline Supplier | AIR-.##### | Airlines and charter services |
+| Hotel Supplier | HTL-.##### | Hotels, resorts, hostels |
+| Visa Agent | VISA-.##### | Visa processing agents |
+| Transport Supplier | TRN-.##### | Ground transport providers |
+| Tour Operator | TOUR-.##### | Tour companies and guides |
+| Insurance Provider | INS-.##### | Travel insurance providers |
 | Travel Feedback | FB-.##### | Customer satisfaction |
 | Travel Destination | (by name) | Travel locations |
 | Travel Type | (by name) | Trip categories |
 | Travel Team | (by name) | Staff groups |
-| Travel Agency Staff | STAFF-.##### | Individual staff |
+| Travel Agency Staff | (by staff_user) | Individual staff |
 | Travel Agency | (singleton) | Agency master settings |
 | Travel Lost Reason | (by name) | Why inquiries are lost |
 | Invoice Item | (child) | Invoice line items |

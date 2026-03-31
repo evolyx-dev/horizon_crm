@@ -252,12 +252,19 @@ Navigate to **Trip Planning → Suppliers** to manage your travel partners.
 
 ### Adding a Supplier
 
-1. Click **+ Add Travel Supplier**
-2. Fill in the supplier details:
-   - **Supplier Name**: Business name
-   - **Supplier Type**: Select from the dropdown
-   - **Contact Email** and **Phone**
-   - **Website**: Supplier's website
+Suppliers are organized into six category-specific DocTypes:
+
+| DocType | Prefix | Use Case |
+|---------|--------|----------|
+| Airline Supplier | AIR- | Commercial airlines, charter services |
+| Hotel Supplier | HTL- | Resorts, boutique hotels, hostels |
+| Visa Agent | VISA- | Visa processing services |
+| Transport Supplier | TRN- | Car rentals, bus services, boat operators |
+| Tour Operator | TOUR- | Local guides, activity providers |
+| Insurance Provider | INS- | Travel insurance providers |
+
+1. Navigate to the relevant supplier DocType (e.g., **Airline Supplier**)
+2. Click **+ Add** and fill in the category-specific fields
 3. Add **Services** in the child table:
    - **Service Name**: e.g., "Deluxe Room - Peak Season"
    - **Description**: Detailed service description

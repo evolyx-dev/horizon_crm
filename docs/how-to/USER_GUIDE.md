@@ -366,17 +366,27 @@ A Travel Customer can be linked to a portal user (Agency Customer role) for self
 
 ## 10. Suppliers & Services
 
+Suppliers are organized into six category-specific DocTypes:
+
+| DocType | Prefix | Category-Specific Fields |
+|---------|--------|---------------------------|
+| Airline Supplier | AIR- | IATA code, alliance, domestic/international |
+| Hotel Supplier | HTL- | Star rating, property type, amenities |
+| Visa Agent | VISA- | Countries served, processing days, success rate |
+| Transport Supplier | TRN- | Transport type, fleet size, vehicle types |
+| Tour Operator | TOUR- | Specialization, destinations, group size |
+| Insurance Provider | INS- | Insurance types, coverage, claim turnaround |
+
 ### Add a Supplier
-1. Go to **Travel Supplier** (search bar)
-2. Click **+ Add Travel Supplier**
-3. Fill in supplier name, contact info, service types
-4. Add **Supplier Services** in the child table:
+1. Navigate to the relevant supplier DocType (e.g., search for **Airline Supplier**)
+2. Click **+ Add** and fill in the category-specific fields
+3. Add **Supplier Services** in the child table:
 
 | Field | Description |
 |-------|-------------|
-| Service Name | e.g., "Airport Transfer", "Hotel Booking" |
-| Service Type | Category of service |
-| Rate | Base rate/price |
+| Service Name | e.g., "Airport Transfer", "Deluxe Room" |
+| Description | Detailed service description |
+| Price | Standard rate |
 
 ### Link Suppliers to Bookings
 Suppliers can be referenced in itinerary items to track which vendor provides each service.
@@ -575,14 +585,21 @@ bench --site <site> console
 | DocType | Description | Key Fields |
 |---------|-------------|------------|
 | Travel Agency | Singleton — tenant settings | agency_name, admin_user, max_staff, status |
+| Travel Lead | Pre-qualification funnel | lead_name, status, email, source, expected_budget |
 | Travel Inquiry | Sales pipeline leads | customer, status, destination, travel_type, budget |
 | Travel Booking | Confirmed bookings | customer, inquiry, destination, total_amount, status |
-| Travel Customer | Customer database | customer_name, email, phone, country |
-| Travel Itinerary | Day-by-day travel plans | title, booking, start_date, end_date |
-| Travel Supplier | Vendor/partner management | supplier_name, services |
-| Travel Team | Staff team grouping | team_name, team_lead, members |
+| Travel Customer | Customer database | customer_name, email, phone, loyalty_tier |
+| Travel Itinerary | Day-by-day travel plans | itinerary_name, start_date, end_date, total_cost |
+| Travel Invoice | Billing & payments | customer, booking, grand_total, outstanding_amount |
+| Airline Supplier | Airlines | airline_name, iata_code, alliance |
+| Hotel Supplier | Hotels / resorts | hotel_name, star_rating, property_type |
+| Visa Agent | Visa processing | agent_name, countries_served, avg_processing_days |
+| Transport Supplier | Ground transport | transport_name, transport_type, fleet_size |
+| Tour Operator | Tour companies | operator_name, specialization, destinations_covered |
+| Insurance Provider | Travel insurance | provider_name, insurance_types, max_coverage_amount |
+| Travel Team | Staff team grouping | team_name, team_lead |
 | Travel Feedback | Post-trip feedback | booking, rating, comments |
-| Travel Agency Staff | Staff member records | user, is_active, team |
+| Travel Agency Staff | Staff member records | staff_user, role_in_agency, is_active |
 
 ### Child DocTypes
 
@@ -590,7 +607,8 @@ bench --site <site> console
 |---------|--------|-------------|
 | Booking Payment | Travel Booking | Individual payment records |
 | Itinerary Day Item | Travel Itinerary | Activities for each day |
-| Supplier Service | Travel Supplier | Services offered by supplier |
+| Invoice Item | Travel Invoice | Line items on an invoice |
+| Supplier Service | All supplier DocTypes | Services offered by supplier |
 | Travel Inquiry Traveler | Travel Inquiry | Travelers on an inquiry |
 
 ### Lookup DocTypes

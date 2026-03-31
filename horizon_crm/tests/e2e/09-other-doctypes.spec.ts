@@ -116,6 +116,12 @@ test.describe("Transport Supplier", () => {
     });
     expect(resp.data.name).toBeDefined();
   });
+
+  test("Transport Supplier list view loads", async ({ page }) => {
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+    await gotoList(page, "Transport Supplier");
+    await expect(page.locator(".frappe-list")).toBeVisible();
+  });
 });
 
 test.describe("Tour Operator", () => {
@@ -128,6 +134,12 @@ test.describe("Tour Operator", () => {
     });
     expect(resp.data.name).toBeDefined();
   });
+
+  test("Tour Operator list view loads", async ({ page }) => {
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+    await gotoList(page, "Tour Operator");
+    await expect(page.locator(".frappe-list")).toBeVisible();
+  });
 });
 
 test.describe("Insurance Provider", () => {
@@ -139,6 +151,12 @@ test.describe("Insurance Provider", () => {
       max_coverage_amount: 100000,
     });
     expect(resp.data.name).toBeDefined();
+  });
+
+  test("Insurance Provider list view loads", async ({ page }) => {
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+    await gotoList(page, "Insurance Provider");
+    await expect(page.locator(".frappe-list")).toBeVisible();
   });
 });
 

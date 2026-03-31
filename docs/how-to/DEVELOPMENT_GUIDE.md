@@ -39,7 +39,7 @@ horizon_crm/                     # ← Repo root = Frappe app
 │           ├── global-teardown.ts
 │           ├── 01-auth.spec.ts
 │           ├── ...
-│           └── 11-lead-and-branding.spec.ts
+│           └── 12-invoice-customer-masterdata.spec.ts
 │
 ├── docs/                        # Documentation
 └── bench0/                      # Local bench runtime (gitignored)
