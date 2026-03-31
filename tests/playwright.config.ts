@@ -40,17 +40,24 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      testIgnore: /10-multi-tenant/,
       dependencies: ["setup"],
     },
     {
       name: "mobile",
       use: { ...devices["iPhone 13"] },
+      testIgnore: /10-multi-tenant/,
+      dependencies: ["setup"],
+    },
+    {
+      name: "multi-tenant",
+      testMatch: /10-multi-tenant\.spec\.ts/,
       dependencies: ["setup"],
     },
     {
       name: "teardown",
       testMatch: /global-teardown\.ts/,
-      dependencies: ["chromium", "mobile"],
+      dependencies: ["chromium", "mobile", "multi-tenant"],
     },
   ],
 });

@@ -43,6 +43,11 @@ portal_menu_items = [
 
 after_install = "horizon_crm.install.after_install"
 
+# Bench CLI Commands
+# ------------------
+
+commands = "horizon_crm.commands.commands"
+
 # Permissions
 # -----------
 # Standard role-based permissions are defined in DocType JSON files.

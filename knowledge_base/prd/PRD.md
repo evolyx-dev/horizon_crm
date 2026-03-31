@@ -1,7 +1,7 @@
 # Horizon CRM — Product Requirements Document (PRD)
 
-**Version:** 1.0  
-**Date:** 2026-03-30  
+**Version:** 2.0  
+**Date:** 2026-03-31  
 **Author:** Auto-generated  
 **Status:** Draft  
 
@@ -15,7 +15,7 @@
 | Aspect | Frappe CRM | Horizon CRM |
 |--------|-----------|-------------|
 | Domain | Generic Sales | Travel Agency |
-| Multi-tenancy | Single-org | Agency-level isolation |
+| Multi-tenancy | Single-org | Site-per-tenant (separate DB per agency) |
 | Key entities | Lead, Deal, Organization | Inquiry, Booking, Itinerary, Customer, Supplier |
 | Portal | None | Agency portal + Customer portal |
 | Workflows | Sales pipeline | Inquiry → Quote → Booking → Travel → Feedback |
@@ -24,12 +24,12 @@
 
 ## 2. Goals & Objectives
 
-1. **Multi-Agency Support**: System admin can create multiple travel agencies, each fully isolated.
+1. **Multi-Agency Support**: System admin can create multiple agencies, each as a separate Frappe site with its own database.
 2. **Role-Based Access**: Agency Admin, Team Lead, Staff — each with scoped permissions.
 3. **Travel-Specific Workflows**: Inquiry management, itinerary building, booking lifecycle.
 4. **Customer Portal**: Customers can view their bookings, itineraries, and provide feedback.
 5. **Agency Portal**: Agency staff can manage their operations through a clean, modern UI.
-6. **Data Isolation**: Strict enforcement — agencies cannot see each other's data.
+6. **Data Isolation**: Complete database-level isolation via Frappe's site-per-tenant model.
 7. **Modern UI/UX**: Clean, responsive interface following Frappe UI patterns.
 8. **Docker-First Development**: All development and testing run in Docker.
 
@@ -127,28 +127,30 @@
 
 ## 5. Data Model Overview
 
+### Multi-Tenancy: Site-Per-Tenant
+
+Each travel agency runs as a separate Frappe site with its own database. The `Travel Agency` DocType is a singleton per site — no `agency` Link field is needed on operational DocTypes.
+
 ### Core DocTypes
 
 ```
-Travel Agency
+Travel Agency (Singleton — one per site)
 ├── name, agency_name, agency_code, logo, contact_email, phone, address
 ├── status (Active/Inactive)
 └── admin_user (Link: User)
 
 Travel Agency Staff
 ├── staff_user (Link: User)
-├── agency (Link: Travel Agency)
 ├── role (Select: Agency Admin / Team Lead / Staff)
 └── team (Link: Travel Team)
 
 Travel Team
-├── team_name, agency (Link: Travel Agency)
+├── team_name
 ├── team_lead (Link: Travel Agency Staff)
 └── description
 
 Travel Inquiry
 ├── inquiry_number (autoname)
-├── agency (Link: Travel Agency)  
 ├── customer (Link: Travel Customer)
 ├── assigned_to (Link: Travel Agency Staff)
 ├── destination, travel_type, budget_range
@@ -158,7 +160,7 @@ Travel Inquiry
 └── Child: Travel Inquiry Traveler (name, age, passport)
 
 Travel Itinerary
-├── itinerary_name, agency (Link: Travel Agency)
+├── itinerary_name
 ├── inquiry (Link: Travel Inquiry)
 ├── booking (Link: Travel Booking)
 ├── start_date, end_date
@@ -166,7 +168,6 @@ Travel Itinerary
 
 Travel Booking
 ├── booking_number (autoname)
-├── agency (Link: Travel Agency)
 ├── inquiry (Link: Travel Inquiry)
 ├── customer (Link: Travel Customer)
 ├── assigned_to (Link: Travel Agency Staff)
@@ -177,21 +178,19 @@ Travel Booking
 
 Travel Customer
 ├── customer_name, email, phone, address
-├── agency (Link: Travel Agency)
 ├── portal_user (Link: User)
 ├── nationality, passport_number
 └── preferences (Text)
 
 Travel Supplier
 ├── supplier_name, supplier_type (Hotel/Airline/Tour Operator/Transport/Other)
-├── agency (Link: Travel Agency)
 ├── contact_email, phone, website
 └── Child: Supplier Service (service_name, description, price)
 
 Travel Destination
 ├── destination_name, country, region
 ├── description, image
-└── is_global (checkbox - system admin managed)
+└── is_popular (checkbox)
 
 Travel Type
 ├── type_name (Adventure/Beach/Business/Cultural/Honeymoon/Family/Group/Solo)
@@ -200,7 +199,6 @@ Travel Type
 Travel Feedback
 ├── booking (Link: Travel Booking)
 ├── customer (Link: Travel Customer)
-├── agency (Link: Travel Agency)
 ├── rating (1-5), comments
 └── submitted_on (Date)
 ```
@@ -209,23 +207,29 @@ Travel Feedback
 
 ## 6. Security & Multi-Tenancy Design
 
-### 6.1 Roles
+### 6.1 Multi-Tenancy Strategy: Site-Per-Tenant
+- Each travel agency is provisioned as a **separate Frappe site** with its own MariaDB database
+- Complete data isolation — no cross-tenant data leakage possible at the database level
+- Shared infrastructure: MariaDB server, Redis, app code (via bench)
+- Tenant provisioning via `bench` CLI commands
+
+### 6.2 Roles (within each site)
 | Role | Scope | Description |
 |------|-------|-------------|
-| System Manager | Global | Built-in Frappe role. Full platform access |
-| Agency Admin | Per Agency | Manages agency settings, staff, all agency data |
-| Agency Team Lead | Per Agency | Manages team, views team data |
-| Agency Staff | Per Agency | Handles inquiries, bookings |
-| Agency Customer | Per Agency | Portal user, view own bookings |
+| System Manager | Site | Built-in Frappe role. Full site access |
+| Agency Admin | Site | Manages agency settings, staff, all data |
+| Agency Team Lead | Site | Manages team, views team data |
+| Agency Staff | Site | Handles inquiries, bookings |
+| Agency Customer | Site | Portal user, view own bookings |
 
-### 6.2 Data Isolation Strategy
-- Every tenant-specific DocType has an `agency` Link field
-- **User Permissions**: Auto-applied per user based on their `Travel Agency Staff` record
-- On user creation for an agency, a User Permission is created linking that user to their agency
-- Controller hooks (`validate`) ensure agency field is set and matches user's agency
-- No cross-agency data leaks possible via API, list views, or reports
+### 6.3 Data Isolation Strategy
+- **Database-level isolation**: Each site has its own database — no `agency` field needed
+- **Domain-based routing**: Frappe routes requests by Host header to the correct site
+- **Session isolation**: Each site has its own session store
+- **File isolation**: Each site has its own file uploads directory
+- **No cross-tenant API access**: Standard Frappe site scoping applies
 
-### 6.3 Permission Rules
+### 6.4 Permission Rules (within each site)
 ```
 Travel Agency:        System Manager (RWCD), Agency Admin (R)
 Travel Agency Staff:  System Manager (RWCD), Agency Admin (RWC), Team Lead (R)

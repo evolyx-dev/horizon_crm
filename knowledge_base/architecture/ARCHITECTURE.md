@@ -1,7 +1,7 @@
 # Horizon CRM — System Architecture Document
 
-**Version:** 1.0  
-**Date:** 2026-03-30  
+**Version:** 2.0  
+**Date:** 2026-03-31  
 
 ---
 
@@ -124,47 +124,92 @@ bench0/apps/horizon_crm/
 
 ## 3. Multi-Tenancy Implementation
 
-### 3.1 Approach: Shared Database with Row-Level Isolation
+### 3.1 Approach: Site-Per-Tenant (Separate Database per Tenant)
 
-Frappe supports multi-tenancy via separate sites (each with own database), but for our use case we use a **single-site, shared-database** approach with **row-level tenant isolation**:
-
-- Every tenant-sensitive DocType includes an `agency` Link field pointing to `Travel Agency`
-- **User Permissions** are created automatically when staff is added to an agency
-- Frappe's built-in User Permission system filters all list views, API calls, and reports
-
-### 3.2 Isolation Enforcement Layers
+Horizon CRM uses Frappe's native **site-per-tenant** architecture. Each tenant (travel agency) runs as an independent Frappe site with its own MariaDB database, Redis namespace, and file storage:
 
 ```
-Layer 1: User Permissions (Frappe Built-in)
-├── Auto-created when Travel Agency Staff record is saved
-├── Filters all standard API calls, list views, reports
-└── Prevents cross-agency data access in standard Frappe operations
-
-Layer 2: Controller Validation (Custom Code)
-├── validate() hooks on all tenant DocTypes
-├── Ensures agency field matches user's assigned agency
-└── Blocks direct database manipulation attempts
-
-Layer 3: API Whitelisting (Custom Code)
-├── All custom API methods verify user's agency
-├── Portal APIs scoped to customer's agency
-└── No unauthenticated access to tenant data
+┌─────────────────── Frappe Bench ───────────────────┐
+│                                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────┐ │
+│  │ agency1      │  │ agency2      │  │ agency3  │ │
+│  │ .localhost   │  │ .localhost   │  │ .local.. │ │
+│  ├──────────────┤  ├──────────────┤  ├──────────┤ │
+│  │ DB: _agency1 │  │ DB: _agency2 │  │ DB: _ag3 │ │
+│  │ Users: own   │  │ Users: own   │  │ Users:   │ │
+│  │ Data: own    │  │ Data: own    │  │ own      │ │
+│  └──────────────┘  └──────────────┘  └──────────┘ │
+│                                                     │
+│  Shared: Redis, MariaDB server, App code            │
+│  Isolated: Database, sessions, files, users         │
+└─────────────────────────────────────────────────────┘
 ```
 
-### 3.3 User Permission Auto-Creation
+**Why site-per-tenant (not shared-database row-level isolation)?**
 
-```python
-# In Travel Agency Staff controller (after_insert hook)
-def after_insert(self):
-    # Create user permission for the staff's agency
-    frappe.get_doc({
-        "doctype": "User Permission",
-        "user": self.staff_user,
-        "allow": "Travel Agency",
-        "for_value": self.agency,
-        "apply_to_all_doctypes": 1
-    }).insert(ignore_permissions=True)
+| Concern | Site-Per-Tenant | Shared DB + Row Isolation |
+|---------|----------------|--------------------------|
+| Data isolation | Complete (separate DB) | Requires agency field + User Permissions on every DocType |
+| Security | Zero risk of cross-tenant leaks | Must enforce at every query, API, report |
+| Complexity | Frappe handles it natively | Custom code needed everywhere |
+| Backup/restore | Per-tenant granularity | All tenants in one DB |
+| Performance | Independent scaling | Shared resources, query overhead |
+| DocType schema | Clean — no `agency` field needed | Every DocType needs an `agency` Link |
+| Frappe compatibility | Works with all standard Frappe features | Custom permission_query_conditions needed |
+
+### 3.2 Isolation Enforcement
+
 ```
+Layer 1: Database Isolation (Frappe Built-in)
+├── Each site has its own MariaDB database
+├── No SQL queries can cross database boundaries
+└── Complete isolation of all data, users, and sessions
+
+Layer 2: Domain-Based Routing (Frappe Built-in)
+├── Each site is accessed via its own domain/subdomain
+├── Frappe routes requests to the correct site based on Host header
+└── No cross-site request possible via standard HTTP
+
+Layer 3: Role-Based Permissions (App-Level)
+├── Within each site, roles control access to features
+├── Agency Admin → full agency management
+├── Team Lead / Staff → scoped operational access
+└── Customer → portal-only access to own bookings
+```
+
+### 3.3 Tenant Provisioning
+
+New tenants are created via the `bench` CLI:
+
+```bash
+# Create a new tenant site
+bench new-site agency1.localhost \
+    --db-root-password <db_root_password> \
+    --admin-password <admin_password>
+
+# Install the Horizon CRM app on the new site
+bench --site agency1.localhost install-app horizon_crm
+
+# Or use the convenience command:
+bench --site agency1.localhost horizon-crm create-tenant \
+    --agency-name "Acme Travel" \
+    --admin-email admin@acmetravel.com \
+    --admin-password SecurePass123
+```
+
+The `install.py` hook automatically:
+1. Creates custom roles (Agency Admin, Team Lead, Staff, Customer)
+2. Seeds default Travel Types and Destinations
+3. Initializes the Travel Agency singleton using the site domain name
+
+### 3.4 Travel Agency as Singleton
+
+Each site has exactly one `Travel Agency` record (DocType with `issingle: 1`). This singleton stores the agency's configuration:
+- Agency name, contact info, logo
+- Admin user (who gets the Agency Admin role)
+- Subscription plan and staff limits
+
+Since each tenant is its own site, there is no need for an `agency` Link field on operational DocTypes — all data within a site belongs to that one agency.
 
 ---
 
@@ -193,18 +238,20 @@ R=Read, W=Write, C=Create, D=Delete, E=Export
 ### Request Flow
 ```
 Customer Browser → Frappe Web Server
+                  → Host header → site resolution (tenant isolation)
                   → www/ route matching
                   → get_context() loads data
-                  → Permission check (user's agency + customer link)
+                  → Permission check (user + customer link)
                   → Jinja template rendering
                   → HTML response
 ```
 
 ### Portal Security
 - All portal pages check `frappe.session.user`
-- Customer data filtered by both agency AND customer record
+- Customer data filtered by customer record linked to portal user
 - CSRF protection via Frappe's built-in token system
 - Rate limiting on inquiry submission
+- Site-per-tenant ensures customers only see their own agency's data
 
 ---
 

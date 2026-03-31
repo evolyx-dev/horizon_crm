@@ -6,7 +6,9 @@ echo "  Horizon CRM - Docker Environment Setup"
 echo "============================================"
 
 BENCH_DIR="/workspace/frappe-bench"
-SITE_NAME="horizon.localhost"
+DEFAULT_SITE="horizon.localhost"
+DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD:-123}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
 
 # Check if bench is already initialized
 if [ ! -f "$BENCH_DIR/Procfile" ]; then
@@ -41,23 +43,23 @@ else
     echo "[4/6] horizon_crm app not found, skipping..."
 fi
 
-# Create site if not exists
-if [ ! -d "$BENCH_DIR/sites/$SITE_NAME" ]; then
-    echo "[5/6] Creating site: $SITE_NAME..."
-    bench new-site "$SITE_NAME" \
-        --db-root-password 123 \
-        --admin-password admin \
+# Create default site if not exists
+if [ ! -d "$BENCH_DIR/sites/$DEFAULT_SITE" ]; then
+    echo "[5/6] Creating default site: $DEFAULT_SITE..."
+    bench new-site "$DEFAULT_SITE" \
+        --db-root-password "$DB_ROOT_PASSWORD" \
+        --admin-password "$ADMIN_PASSWORD" \
         --mariadb-user-host-login-scope='%' \
         --no-setup
-    bench --site "$SITE_NAME" set-config developer_mode 1
+    bench --site "$DEFAULT_SITE" set-config developer_mode 1
 else
-    echo "[5/6] Site $SITE_NAME already exists, skipping..."
+    echo "[5/6] Site $DEFAULT_SITE already exists, skipping..."
 fi
 
-# Install app on site
+# Install app on default site
 if [ -d "$BENCH_DIR/apps/horizon_crm" ]; then
-    echo "[6/6] Installing horizon_crm on site..."
-    bench --site "$SITE_NAME" install-app horizon_crm 2>/dev/null || true
+    echo "[6/6] Installing horizon_crm on default site..."
+    bench --site "$DEFAULT_SITE" install-app horizon_crm 2>/dev/null || true
 else
     echo "[6/6] Skipping app install (app not found)..."
 fi
@@ -65,10 +67,20 @@ fi
 echo ""
 echo "============================================"
 echo "  Setup Complete!"
-echo "  Site: $SITE_NAME"
-echo "  URL:  http://localhost:8000"
-echo "  User: Administrator"
-echo "  Pass: admin"
+echo "  Default Site: $DEFAULT_SITE"
+echo "  URL:          http://localhost:8000"
+echo "  User:         Administrator"
+echo "  Pass:         $ADMIN_PASSWORD"
+echo ""
+echo "  To create additional tenant sites:"
+echo "    bench new-site agency2.localhost \\"
+echo "      --db-root-password $DB_ROOT_PASSWORD \\"
+echo "      --admin-password <password>"
+echo "    bench --site agency2.localhost install-app horizon_crm"
+echo "    bench --site agency2.localhost horizon-crm create-tenant \\"
+echo "      --agency-name 'Agency Two' \\"
+echo "      --admin-email admin@agency2.com \\"
+echo "      --admin-password <password>"
 echo ""
 echo "  Run: bench start"
 echo "============================================"

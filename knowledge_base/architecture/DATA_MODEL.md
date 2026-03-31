@@ -1,35 +1,34 @@
 # Horizon CRM — Data Model Reference
 
-**Version:** 1.0  
-**Date:** 2026-03-30  
+**Version:** 2.0  
+**Date:** 2026-03-31  
 
 ---
 
 ## Entity Relationship Diagram (Text)
 
+**Multi-Tenancy:** Site-per-tenant. Each site = one agency with its own database.  
+No `agency` Link field is needed on DocTypes — all data within a site belongs to one Travel Agency (singleton).
+
 ```
 ┌──────────────────┐       ┌──────────────────┐
-│  Travel Agency   │──1:N──│ Travel Agency     │
-│  (Tenant)        │       │ Staff             │
-└────────┬─────────┘       └──────────────────┘
-         │                         │
-         │ 1:N                     │ N:1
-         │                         ▼
-         │                 ┌──────────────────┐
-         │                 │  Travel Team      │
-         │                 └──────────────────┘
-         │
-    ┌────┴────┬──────────┬───────────┬────────────┐
-    │         │          │           │            │
-    ▼         ▼          ▼           ▼            ▼
-┌────────┐┌────────┐┌─────────┐┌─────────┐┌──────────┐
-│Inquiry ││Customer││Booking  ││Supplier ││Itinerary │
-└───┬────┘└────────┘└────┬────┘└─────────┘└──────────┘
-    │                    │
-    │                    ▼
-    │              ┌──────────┐
-    └──────────────│ Feedback │
-                   └──────────┘
+│ Travel Agency    │──1:N──│ Travel Agency     │
+│ (Singleton)      │       │ Staff             │
+└──────────────────┘       └────────┬─────────┘
+                                    │ N:1
+                                    ▼
+                           ┌──────────────────┐
+                           │  Travel Team      │
+                           └──────────────────┘
+
+┌────────┐  ┌────────┐  ┌─────────┐  ┌─────────┐  ┌──────────┐
+│Inquiry │  │Customer│  │Booking  │  │Supplier │  │Itinerary │
+└───┬────┘  └────────┘  └────┬────┘  └─────────┘  └──────────┘
+    │                        │
+    │                        ▼
+    │                  ┌──────────┐
+    └──────────────────│ Feedback │
+                       └──────────┘
 ```
 
 ---
@@ -62,7 +61,6 @@
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | staff_user | Link: User | Yes | Linked user account |
-| agency | Link: Travel Agency | Yes | Parent agency |
 | role_in_agency | Select | Yes | Agency Admin / Team Lead / Staff |
 | team | Link: Travel Team | No | Assigned team |
 | designation | Data | No | Job title |
@@ -79,7 +77,6 @@
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | team_name | Data | Yes | Team display name |
-| agency | Link: Travel Agency | Yes | Parent agency |
 | team_lead | Link: Travel Agency Staff | No | Team lead |
 | description | Small Text | No | Team description |
 
@@ -93,7 +90,6 @@
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | inquiry_number | Data | Auto | INQ-XXXXX |
-| agency | Link: Travel Agency | Yes | Parent agency |
 | customer | Link: Travel Customer | No | Linked customer |
 | customer_name | Data | Yes | Quick name entry |
 | customer_email | Data | Yes | Contact email |
@@ -136,7 +132,6 @@
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | itinerary_name | Data | Yes | Display name |
-| agency | Link: Travel Agency | Yes | Parent agency |
 | inquiry | Link: Travel Inquiry | No | Source inquiry |
 | booking | Link: Travel Booking | No | Linked booking |
 | start_date | Date | Yes | Start date |
@@ -173,7 +168,6 @@
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | booking_number | Data | Auto | BK-XXXXX |
-| agency | Link: Travel Agency | Yes | Parent agency |
 | inquiry | Link: Travel Inquiry | No | Source inquiry |
 | customer | Link: Travel Customer | Yes | Customer |
 | assigned_to | Link: Travel Agency Staff | No | Assigned agent |
@@ -217,7 +211,6 @@
 | customer_name | Data | Yes | Full name |
 | email | Data | Yes | Email address |
 | phone | Data | No | Phone number |
-| agency | Link: Travel Agency | Yes | Parent agency |
 | portal_user | Link: User | No | Portal user account |
 | nationality | Data | No | Nationality |
 | passport_number | Data | No | Passport number |
@@ -237,7 +230,6 @@
 |-------|------|----------|-------------|
 | supplier_name | Data | Yes | Supplier name |
 | supplier_type | Select | Yes | Hotel / Airline / Tour Operator / Transport / Other |
-| agency | Link: Travel Agency | Yes | Parent agency |
 | contact_email | Data | No | Email |
 | phone | Data | No | Phone |
 | website | Data | No | Website |
@@ -298,7 +290,6 @@
 |-------|------|----------|-------------|
 | booking | Link: Travel Booking | Yes | Related booking |
 | customer | Link: Travel Customer | Yes | Customer |
-| agency | Link: Travel Agency | Yes | Parent agency |
 | rating | Rating | Yes | 1-5 stars |
 | overall_experience | Select | No | Excellent / Good / Average / Poor / Terrible |
 | comments | Text | No | Feedback text |
