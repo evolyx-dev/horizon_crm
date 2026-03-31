@@ -13,6 +13,7 @@ def after_install():
     create_default_destinations()
     create_default_lost_reasons()
     initialize_agency_settings()
+    set_branding()
     frappe.db.commit()
 
 
@@ -86,6 +87,24 @@ def initialize_agency_settings():
         agency.status = "Active"
         agency.max_staff = 10
         agency.save(ignore_permissions=True)
+
+
+def set_branding():
+    """Set white label branding to Evolyx Lab."""
+    # Website Settings
+    ws = frappe.get_single("Website Settings")
+    ws.app_name = "Evolyx Lab"
+    ws.save(ignore_permissions=True)
+
+    # System Settings
+    ss = frappe.get_single("System Settings")
+    ss.app_name = "Evolyx Lab"
+    ss.save(ignore_permissions=True)
+
+    # Navbar Settings - set custom logo
+    ns = frappe.get_single("Navbar Settings")
+    ns.app_logo = "/assets/horizon_crm/images/logo.svg"
+    ns.save(ignore_permissions=True)
 
 
 def create_default_lost_reasons():

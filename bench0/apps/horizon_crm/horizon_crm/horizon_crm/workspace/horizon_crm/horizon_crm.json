@@ -1,0 +1,281 @@
+{
+ "app": "horizon_crm",
+ "charts": [
+  {
+   "chart_name": "Inquiry Pipeline",
+   "label": "Inquiry Pipeline"
+  },
+  {
+   "chart_name": "Monthly Bookings",
+   "label": "Monthly Bookings"
+  },
+  {
+   "chart_name": "Revenue Trend",
+   "label": "Revenue Trend"
+  },
+  {
+   "chart_name": "Top Destinations",
+   "label": "Top Destinations"
+  },
+  {
+   "chart_name": "Inquiry Sources",
+   "label": "Inquiry Sources"
+  }
+ ],
+ "content": "[{\"id\":\"nc_section\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Dashboard</b></span>\",\"col\":12}},{\"id\":\"nc_open\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Open Inquiries\",\"col\":4}},{\"id\":\"nc_won\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Won This Month\",\"col\":4}},{\"id\":\"nc_active\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Active Bookings\",\"col\":4}},{\"id\":\"nc_revenue\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Revenue\",\"col\":4}},{\"id\":\"nc_balance\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Outstanding Balance\",\"col\":4}},{\"id\":\"nc_customers\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Customer Count\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"chart_pipeline\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Inquiry Pipeline\",\"col\":6}},{\"id\":\"chart_sources\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Inquiry Sources\",\"col\":6}},{\"id\":\"chart_bookings\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Bookings\",\"col\":6}},{\"id\":\"chart_revenue\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Revenue Trend\",\"col\":6}},{\"id\":\"chart_destinations\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Destinations\",\"col\":12}},{\"id\":\"spacer2\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"sc_section\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Quick Access</b></span>\",\"col\":12}},{\"id\":\"sc_inquiry\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Travel Inquiry\",\"col\":3}},{\"id\":\"sc_booking\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Travel Booking\",\"col\":3}},{\"id\":\"sc_customer\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Travel Customer\",\"col\":3}},{\"id\":\"sc_itinerary\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Travel Itinerary\",\"col\":3}},{\"id\":\"spacer3\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"card_pipeline\",\"type\":\"card\",\"data\":{\"card_name\":\"Pipeline\",\"col\":4}},{\"id\":\"card_customers\",\"type\":\"card\",\"data\":{\"card_name\":\"Customers\",\"col\":4}},{\"id\":\"card_operations\",\"type\":\"card\",\"data\":{\"card_name\":\"Operations\",\"col\":4}},{\"id\":\"card_organization\",\"type\":\"card\",\"data\":{\"card_name\":\"Organization\",\"col\":4}},{\"id\":\"card_reference\",\"type\":\"card\",\"data\":{\"card_name\":\"Reference Data\",\"col\":4}}]",
+ "creation": "2025-07-17 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "travel",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Horizon CRM",
+ "links": [
+  {
+   "description": "Manage travel inquiries and sales pipeline",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pipeline",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Inquiry",
+   "link_count": 0,
+   "link_to": "Travel Inquiry",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Booking",
+   "link_count": 0,
+   "link_to": "Travel Booking",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "description": "Customer management and feedback",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customers",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Customer",
+   "link_count": 0,
+   "link_to": "Travel Customer",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Feedback",
+   "link_count": 0,
+   "link_to": "Travel Feedback",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "description": "Trip planning and supplier management",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Operations",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Itinerary",
+   "link_count": 0,
+   "link_to": "Travel Itinerary",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Supplier",
+   "link_count": 0,
+   "link_to": "Travel Supplier",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "description": "Teams, staff, and agency settings",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Organization",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Team",
+   "link_count": 0,
+   "link_to": "Travel Team",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Agency Staff",
+   "link_count": 0,
+   "link_to": "Travel Agency Staff",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Agency",
+   "link_count": 0,
+   "link_to": "Travel Agency",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "description": "Destinations, travel types, and lost reasons",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reference Data",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Destination",
+   "link_count": 0,
+   "link_to": "Travel Destination",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Type",
+   "link_count": 0,
+   "link_to": "Travel Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Travel Lost Reason",
+   "link_count": 0,
+   "link_to": "Travel Lost Reason",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-07-17 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Horizon CRM",
+ "name": "Horizon CRM",
+ "number_cards": [
+  {
+   "label": "Open Inquiries",
+   "number_card_name": "Open Inquiries"
+  },
+  {
+   "label": "Won This Month",
+   "number_card_name": "Won This Month"
+  },
+  {
+   "label": "Active Bookings",
+   "number_card_name": "Active Bookings"
+  },
+  {
+   "label": "Total Revenue",
+   "number_card_name": "Total Revenue"
+  },
+  {
+   "label": "Outstanding Balance",
+   "number_card_name": "Outstanding Balance"
+  },
+  {
+   "label": "Customer Count",
+   "number_card_name": "Customer Count"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "#FF6B6B",
+   "doc_view": "List",
+   "label": "Travel Inquiry",
+   "link_to": "Travel Inquiry",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "#FF8E53",
+   "doc_view": "List",
+   "label": "Travel Booking",
+   "link_to": "Travel Booking",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "#0984E3",
+   "doc_view": "List",
+   "label": "Travel Customer",
+   "link_to": "Travel Customer",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "#00B894",
+   "doc_view": "List",
+   "label": "Travel Itinerary",
+   "link_to": "Travel Itinerary",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Horizon CRM",
+ "type": "Workspace"
+}

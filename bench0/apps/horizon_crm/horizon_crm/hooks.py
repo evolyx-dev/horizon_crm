@@ -70,3 +70,21 @@ export_python_type_annotations = True
 
 # Require all whitelisted methods to have type annotations
 require_type_annotated_api_methods = True
+
+# Fixtures
+# --------
+# Export standard records (workspace, charts, number cards) with the app
+fixtures = [
+	{
+		"dt": "Workspace",
+		"filters": [["module", "=", "Horizon CRM"]],
+	},
+	{
+		"dt": "Number Card",
+		"filters": [["module", "=", "Horizon CRM"]],
+	},
+	{
+		"dt": "Dashboard Chart",
+		"filters": [["module", "=", "Horizon CRM"]],
+	},
+]

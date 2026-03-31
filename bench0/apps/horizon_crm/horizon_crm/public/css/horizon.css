@@ -1,4 +1,6 @@
-/* Horizon CRM - Custom Desk Styles */
+/* Horizon CRM - Custom Desk Styles
+ * Inspired by Frappe CRM's UI patterns
+ */
 
 :root {
     --horizon-primary: #FF6B6B;
@@ -19,7 +21,10 @@
     --horizon-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Status indicator colors */
+/* ═══════════════════════════════════════════════════════════════════════
+   STATUS INDICATORS
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .indicator-pill.green,
 .indicator-pill[data-status="Active"],
 .indicator-pill[data-status="Confirmed"],
@@ -53,7 +58,7 @@
     --indicator-color: var(--horizon-info);
 }
 
-/* List view enhancements */
+/* List view status pills */
 .list-row .level-left .list-row--col .indicator-pill {
     font-weight: 500;
     padding: 2px 10px;
@@ -62,7 +67,31 @@
     letter-spacing: 0.3px;
 }
 
-/* Form view enhancements */
+/* ═══════════════════════════════════════════════════════════════════════
+   WORKSPACE SIDEBAR (Frappe CRM Sidebar Inspired)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Highlight Horizon CRM workspace in sidebar */
+.desk-sidebar .sidebar-menu a[data-name="Horizon CRM"] {
+    font-weight: 600;
+}
+
+.desk-sidebar .sidebar-menu a[data-name="Horizon CRM"]::before {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 16px;
+    background: var(--horizon-gradient);
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FORM STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Title styling */
 [data-doctype="Travel Agency"] .page-head .title-area .title-text,
 [data-doctype="Travel Inquiry"] .page-head .title-area .title-text,
 [data-doctype="Travel Booking"] .page-head .title-area .title-text,
@@ -70,7 +99,7 @@
     font-weight: 700;
 }
 
-/* Card style for sections */
+/* Section headers with accent borders */
 .frappe-control[data-fieldname="section_customer"] .section-head,
 .frappe-control[data-fieldname="section_travel"] .section-head,
 .frappe-control[data-fieldname="section_financial"] .section-head,
@@ -82,7 +111,8 @@
 .frappe-control[data-fieldname="section_lost"] .section-head,
 .frappe-control[data-fieldname="section_documents"] .section-head,
 .frappe-control[data-fieldname="section_preferences"] .section-head,
-.frappe-control[data-fieldname="section_details"] .section-head {
+.frappe-control[data-fieldname="section_details"] .section-head,
+.frappe-control[data-fieldname="section_followup"] .section-head {
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
@@ -92,22 +122,205 @@
     padding-bottom: 8px;
 }
 
-/* Custom button styling */
-.btn-primary-dark {
-    background: var(--horizon-gradient);
-    border: none;
-    color: white;
+/* Lost reason section - red accent */
+[data-doctype="Travel Inquiry"] .frappe-control[data-fieldname="section_lost"] .section-head {
+    border-bottom-color: var(--horizon-danger);
+    color: var(--horizon-danger);
+}
+
+/* Form section spacing */
+[data-doctype^="Travel"] .form-section:not(:first-child) {
+    margin-top: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INQUIRY PIPELINE VISUALIZATION (Frappe CRM Deal Stages Inspired)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.horizon-pipeline {
+    display: flex;
+    align-items: center;
+    padding: 16px 0;
+    margin: 8px 0;
+}
+
+.pipeline-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.pipeline-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--horizon-border);
+    border: 3px solid var(--horizon-border);
+    transition: all 0.3s ease;
+}
+
+.pipeline-stage.completed .pipeline-dot {
+    background: var(--horizon-success);
+    border-color: var(--horizon-success);
+}
+
+.pipeline-stage.active .pipeline-dot {
+    background: var(--horizon-primary);
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+}
+
+.pipeline-stage.lost .pipeline-dot {
+    background: var(--horizon-danger);
+    border-color: var(--horizon-danger);
+    box-shadow: 0 0 0 4px rgba(214, 48, 49, 0.2);
+}
+
+.pipeline-stage.lost.active .pipeline-dot {
+    background: var(--horizon-danger);
+    border-color: var(--horizon-danger);
+}
+
+.pipeline-label {
+    font-size: 11px;
+    color: var(--horizon-text-light);
+    margin-top: 6px;
     font-weight: 500;
+    white-space: nowrap;
+}
+
+.pipeline-stage.active .pipeline-label,
+.pipeline-stage.completed .pipeline-label {
+    color: var(--horizon-text);
+    font-weight: 600;
+}
+
+.pipeline-stage.lost .pipeline-label {
+    color: var(--horizon-danger);
+    font-weight: 600;
+}
+
+.pipeline-line {
+    flex: 1;
+    height: 3px;
+    background: var(--horizon-border);
+    margin: 0 4px;
+    margin-bottom: 20px;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.pipeline-line.completed {
+    background: var(--horizon-success);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAYMENT PROGRESS BAR (Frappe CRM Deal Value Inspired)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.horizon-payment-progress {
+    padding: 12px 0;
+    margin: 4px 0;
+}
+
+.payment-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.payment-progress-header .progress-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--horizon-text-light);
+}
+
+.payment-progress-header .progress-amount {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--horizon-text);
+}
+
+.payment-progress-bar {
+    height: 8px;
+    background: var(--horizon-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.payment-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease, background 0.3s ease;
+}
+
+.payment-progress-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.payment-progress-footer span {
+    font-size: 11px;
+    color: var(--horizon-text-light);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CUSTOMER ACTIVITY SIDEBAR (Frappe CRM SidePanel Inspired)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.horizon-customer-sidebar {
+    padding: 12px 0;
+    margin: 4px 0;
+}
+
+.horizon-customer-sidebar .sidebar-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--horizon-text-light);
+    margin-bottom: 12px;
+}
+
+.sidebar-stats {
+    display: flex;
+    gap: 16px;
+}
+
+.sidebar-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    padding: 8px;
+    background: var(--horizon-bg);
     border-radius: 8px;
-    transition: all 0.2s ease;
 }
 
-.btn-primary-dark:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--horizon-shadow-hover);
+.sidebar-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--horizon-text);
 }
 
-/* Dashboard cards */
+.sidebar-stat-label {
+    font-size: 11px;
+    color: var(--horizon-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DASHBOARD & STAT CARDS
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .horizon-dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -151,20 +364,15 @@
     opacity: 0.3;
 }
 
-.horizon-stat-card.primary {
-    border-left: 4px solid var(--horizon-primary);
-}
-.horizon-stat-card.success {
-    border-left: 4px solid var(--horizon-success);
-}
-.horizon-stat-card.warning {
-    border-left: 4px solid var(--horizon-warning);
-}
-.horizon-stat-card.info {
-    border-left: 4px solid var(--horizon-info);
-}
+.horizon-stat-card.primary { border-left: 4px solid var(--horizon-primary); }
+.horizon-stat-card.success { border-left: 4px solid var(--horizon-success); }
+.horizon-stat-card.warning { border-left: 4px solid var(--horizon-warning); }
+.horizon-stat-card.info { border-left: 4px solid var(--horizon-info); }
 
-/* Booking status timeline */
+/* ═══════════════════════════════════════════════════════════════════════
+   BOOKING STATUS TIMELINE
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .booking-timeline {
     display: flex;
     align-items: center;
@@ -194,21 +402,38 @@
     white-space: nowrap;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .horizon-dashboard {
-        grid-template-columns: 1fr;
-    }
-    
-    .horizon-stat-card .stat-value {
-        font-size: 22px;
-    }
+/* ═══════════════════════════════════════════════════════════════════════
+   WORKSPACE NUMBER CARDS & CHARTS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Enhanced number card styling in workspace context */
+.workspace-container .number-widget-box {
+    border-radius: var(--horizon-radius);
+    transition: all 0.2s ease;
 }
 
-/* Lost reason section - red accent when visible */
-[data-doctype="Travel Inquiry"] .frappe-control[data-fieldname="section_lost"] .section-head {
-    border-bottom-color: var(--horizon-danger);
-    color: var(--horizon-danger);
+.workspace-container .number-widget-box:hover {
+    box-shadow: var(--horizon-shadow-hover);
+    transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Custom button styling */
+.btn-primary-dark {
+    background: var(--horizon-gradient);
+    border: none;
+    color: white;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary-dark:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--horizon-shadow-hover);
 }
 
 /* Rating display */
@@ -217,9 +442,11 @@
     letter-spacing: 2px;
 }
 
-/* Form section cards */
-[data-doctype^="Travel"] .form-section:not(:first-child) {
-    margin-top: 8px;
+/* Emergency contact highlight */
+.frappe-control[data-fieldname="emergency_contact_name"] .control-label,
+.frappe-control[data-fieldname="emergency_contact_phone"] .control-label {
+    color: var(--horizon-danger);
+    font-weight: 600;
 }
 
 /* Improved list view row styling */
@@ -227,9 +454,29 @@
     gap: 8px;
 }
 
-/* Emergency contact highlight */
-.frappe-control[data-fieldname="emergency_contact_name"] .control-label,
-.frappe-control[data-fieldname="emergency_contact_phone"] .control-label {
-    color: var(--horizon-danger);
-    font-weight: 600;
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .horizon-dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .horizon-stat-card .stat-value {
+        font-size: 22px;
+    }
+    
+    .sidebar-stats {
+        flex-direction: column;
+    }
+    
+    .horizon-pipeline {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pipeline-line {
+        min-width: 20px;
+    }
 }
