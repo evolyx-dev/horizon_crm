@@ -18,6 +18,11 @@ bench0/sites/assets/
 bench0/sites/apps.json
 bench0/sites/apps.txt
 bench0/sites/common_site_config.json
+bench0/sites/*/logs/
+bench0/sites/*/indexes/
+bench0/sites/*/touched_tables.json
+bench0/sites/*/site_config.json
+bench0/sites/*/error-snapshots/
 
 # Frappe framework (managed by bench, not our code)
 bench0/apps/frappe/
@@ -27,6 +32,10 @@ node_modules/
 tests/node_modules/
 tests/test-results/
 tests/playwright-report/
+tests/allure-results/
+
+# Test reports (regenerated on each run)
+reports/
 
 # OS
 .DS_Store
