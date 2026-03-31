@@ -10,26 +10,41 @@
     </div>
 
     {% if bookings %}
-    <ul class="portal-booking-list">
+    <div class="portal-booking-filters mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div id="filter-status"></div>
+            </div>
+            <div class="col-md-4">
+                <div id="filter-search"></div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="portal-booking-list" id="booking-list">
         {% for booking in bookings %}
-        <li class="portal-booking-item">
+        <li class="portal-booking-item" data-status="{{ booking.status }}">
             <div class="booking-info">
                 <h5>
                     <a href="/portal/bookings/{{ booking.name }}">{{ booking.booking_number }}</a>
                 </h5>
-                <p>
-                    {{ frappe.utils.formatdate(booking.departure_date) }} — 
-                    {{ frappe.utils.formatdate(booking.return_date) }} · 
-                    {{ booking.num_travelers }} traveler{{ 's' if booking.num_travelers > 1 else '' }} · 
+                <p class="text-muted text-medium">
+                    {{ frappe.utils.formatdate(booking.departure_date) }} —
+                    {{ frappe.utils.formatdate(booking.return_date) }} ·
+                    {{ booking.num_travelers }} traveler{{ 's' if booking.num_travelers > 1 else '' }} ·
                     {{ frappe.utils.fmt_money(booking.total_amount, currency=booking.currency) }}
                 </p>
             </div>
-            <div style="text-align: right;">
-                <span class="booking-status {{ booking.status | lower | replace(' ', '-') }}">
-                    {{ booking.status }}
+            <div class="booking-meta">
+                {% set status_color = {
+                    'Confirmed': 'green', 'In Progress': 'orange',
+                    'Completed': 'blue', 'Cancelled': 'red'
+                }.get(booking.status, 'grey') %}
+                <span class="indicator-pill {{ status_color }}">
+                    <span>{{ booking.status }}</span>
                 </span>
                 {% if booking.balance_amount > 0 %}
-                <p style="margin: 4px 0 0; font-size: 12px; color: var(--horizon-secondary);">
+                <p class="balance-note text-muted mt-1">
                     Balance: {{ frappe.utils.fmt_money(booking.balance_amount, currency=booking.currency) }}
                 </p>
                 {% endif %}
@@ -38,11 +53,59 @@
         {% endfor %}
     </ul>
     {% else %}
-    <div style="text-align: center; padding: 60px 20px; color: var(--horizon-text-light);">
-        <p style="font-size: 48px; margin-bottom: 12px;">✈️</p>
+    <div class="portal-empty-state">
+        <div class="empty-icon">✈️</div>
         <h3>No bookings yet</h3>
-        <p>Ready to explore? <a href="/portal/inquiry">Plan your next trip</a>!</p>
+        <p class="text-muted">Ready to explore?</p>
+        <a href="/portal/inquiry" class="btn btn-primary btn-md mt-2">Plan your next trip</a>
     </div>
     {% endif %}
 </div>
+
+<script>
+frappe.ready(function() {
+    // Filter controls
+    var status_filter = frappe.ui.form.make_control({
+        df: {
+            fieldtype: 'Select',
+            fieldname: 'status_filter',
+            label: 'Filter by Status',
+            options: '\nConfirmed\nIn Progress\nCompleted\nCancelled'
+        },
+        parent: $('#filter-status'),
+        render_input: true
+    });
+    status_filter.refresh();
+
+    var search_filter = frappe.ui.form.make_control({
+        df: {
+            fieldtype: 'Data',
+            fieldname: 'search',
+            label: 'Search Bookings',
+            placeholder: 'Search by booking number...'
+        },
+        parent: $('#filter-search'),
+        render_input: true
+    });
+    search_filter.refresh();
+
+    function apply_filters() {
+        var status_val = status_filter.get_value();
+        var search_val = (search_filter.get_value() || '').toLowerCase();
+
+        $('#booking-list .portal-booking-item').each(function() {
+            var $item = $(this);
+            var item_status = $item.data('status');
+            var item_text = $item.text().toLowerCase();
+            var show = true;
+            if (status_val && item_status !== status_val) show = false;
+            if (search_val && item_text.indexOf(search_val) === -1) show = false;
+            $item.toggle(show);
+        });
+    }
+
+    status_filter.$input.on('change', apply_filters);
+    search_filter.$input.on('input', frappe.utils.debounce(apply_filters, 300));
+});
+</script>
 {% endblock %}

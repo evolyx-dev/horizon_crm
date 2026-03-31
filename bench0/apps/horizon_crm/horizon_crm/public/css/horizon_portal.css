@@ -155,29 +155,63 @@
     color: var(--horizon-text-light);
 }
 
-.portal-booking-item .booking-status {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
+.portal-booking-item .booking-meta {
+    text-align: right;
+    flex-shrink: 0;
 }
 
-.booking-status.confirmed {
-    background: rgba(0, 184, 148, 0.1);
-    color: var(--horizon-success);
-}
-.booking-status.in-progress {
-    background: rgba(255, 142, 83, 0.1);
+.portal-booking-item .booking-meta .balance-note {
+    font-size: 12px;
+    margin: 4px 0 0;
     color: var(--horizon-secondary);
 }
-.booking-status.completed {
-    background: rgba(9, 132, 227, 0.1);
-    color: var(--horizon-info);
+
+/* Use Frappe indicator-pill for status badges */
+.portal-booking-item .indicator-pill {
+    font-size: 12px;
+    font-weight: 600;
 }
-.booking-status.cancelled {
-    background: rgba(214, 48, 49, 0.1);
-    color: var(--horizon-danger);
+
+/* Booking filter section */
+.portal-booking-filters .frappe-control {
+    margin-bottom: 12px;
+}
+
+.portal-booking-filters .frappe-control input.input-with-feedback,
+.portal-booking-filters .frappe-control select.input-with-feedback {
+    border: 1px solid var(--horizon-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.portal-booking-filters .frappe-control input.input-with-feedback:focus,
+.portal-booking-filters .frappe-control select.input-with-feedback:focus {
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+/* Empty state */
+.portal-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--horizon-text-light);
+}
+
+.portal-empty-state .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.portal-empty-state h3 {
+    color: var(--horizon-text);
+}
+
+.portal-empty-state .btn-primary {
+    background: var(--horizon-gradient);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
 }
 
 /* Portal Form */
@@ -189,52 +223,65 @@
     box-shadow: var(--horizon-shadow);
 }
 
-.portal-form .form-group {
+/* Frappe UI controls inside portal form */
+.portal-form .frappe-control {
     margin-bottom: 16px;
 }
 
-.portal-form label {
+.portal-form .frappe-control .control-label {
     font-size: 13px;
     font-weight: 600;
     color: var(--horizon-text);
     margin-bottom: 6px;
-    display: block;
 }
 
-.portal-form input,
-.portal-form select,
-.portal-form textarea {
+.portal-form .frappe-control .control-input-wrapper .control-input {
     width: 100%;
-    padding: 10px 14px;
+}
+
+.portal-form .frappe-control input.input-with-feedback,
+.portal-form .frappe-control select.input-with-feedback,
+.portal-form .frappe-control textarea.input-with-feedback {
     border: 1px solid var(--horizon-border);
     border-radius: 8px;
+    padding: 10px 14px;
     font-size: 14px;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: var(--horizon-card-bg);
 }
 
-.portal-form input:focus,
-.portal-form select:focus,
-.portal-form textarea:focus {
+.portal-form .frappe-control input.input-with-feedback:focus,
+.portal-form .frappe-control select.input-with-feedback:focus,
+.portal-form .frappe-control textarea.input-with-feedback:focus {
     outline: none;
     border-color: var(--horizon-primary);
     box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
 }
 
-.portal-form .btn-submit {
+/* Frappe date picker portal override */
+.portal-form .frappe-control[data-fieldtype="Date"] .input-with-feedback {
+    cursor: pointer;
+}
+
+/* Submit button in portal - use Frappe btn-primary */
+.portal-form .btn-primary {
     background: var(--horizon-gradient);
-    color: white;
     border: none;
-    padding: 12px 32px;
+    padding: 10px 28px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.portal-form .btn-submit:hover {
+.portal-form .btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.portal-form .btn-primary:disabled {
+    opacity: 0.7;
+    transform: none;
 }
 
 /* Rating stars */

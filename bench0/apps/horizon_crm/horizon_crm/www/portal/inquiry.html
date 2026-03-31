@@ -10,113 +10,146 @@
     </div>
 
     <div class="portal-form">
-        <form id="inquiry-form">
-            <input type="hidden" name="csrf_token" value="{{ frappe.session.csrf_token }}">
-
+        <div id="inquiry-form">
             <div class="row">
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="destination">Where do you want to go? *</label>
-                        <input type="text" id="destination" name="destination" required 
-                               placeholder="e.g., Bali, Paris, Maldives...">
-                    </div>
+                    <div id="field-destination"></div>
                 </div>
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="travel_type">Type of Travel</label>
-                        <select id="travel_type" name="travel_type">
-                            <option value="">Select type...</option>
-                            {% for tt in travel_types %}
-                            <option value="{{ tt.name }}">{{ tt.type_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    <div id="field-travel_type"></div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="departure_date">Departure Date *</label>
-                        <input type="date" id="departure_date" name="departure_date" required>
-                    </div>
+                    <div id="field-departure_date"></div>
                 </div>
                 <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="return_date">Return Date *</label>
-                        <input type="date" id="return_date" name="return_date" required>
-                    </div>
+                    <div id="field-return_date"></div>
                 </div>
                 <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="num_travelers">Number of Travelers</label>
-                        <input type="number" id="num_travelers" name="num_travelers" min="1" value="1">
-                    </div>
+                    <div id="field-num_travelers"></div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="budget_min">Minimum Budget</label>
-                        <input type="number" id="budget_min" name="budget_min" min="0" step="100" placeholder="0">
-                    </div>
+                    <div id="field-budget_min"></div>
                 </div>
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="budget_max">Maximum Budget</label>
-                        <input type="number" id="budget_max" name="budget_max" min="0" step="100" placeholder="0">
-                    </div>
+                    <div id="field-budget_max"></div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="notes">Additional Details</label>
-                <textarea id="notes" name="notes" rows="4" 
-                          placeholder="Tell us about any special requirements, preferences, or activities you'd like..."></textarea>
-            </div>
+            <div id="field-notes"></div>
 
-            <button type="submit" class="btn-submit">Submit Inquiry</button>
-        </form>
+            <button id="btn-submit" class="btn btn-primary btn-md mt-3">
+                Submit Inquiry
+            </button>
+        </div>
     </div>
 </div>
 
 <script>
-document.getElementById('inquiry-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const btn = this.querySelector('.btn-submit');
-    btn.disabled = true;
-    btn.textContent = 'Submitting...';
-    
-    frappe.call({
-        method: 'horizon_crm.api.portal.submit_inquiry',
-        args: {
-            destination: this.destination.value,
-            departure_date: this.departure_date.value,
-            return_date: this.return_date.value,
-            num_travelers: parseInt(this.num_travelers.value) || 1,
-            travel_type: this.travel_type.value || null,
-            budget_min: parseFloat(this.budget_min.value) || 0,
-            budget_max: parseFloat(this.budget_max.value) || 0,
-            notes: this.notes.value
-        },
-        callback: function(r) {
-            if (r.message) {
-                frappe.msgprint({
-                    title: 'Inquiry Submitted!',
-                    message: 'Your travel inquiry has been submitted successfully. Our team will contact you soon.',
-                    indicator: 'green'
-                });
-                setTimeout(function() {
-                    window.location.href = '/portal';
-                }, 2000);
-            }
-        },
-        error: function() {
-            btn.disabled = false;
-            btn.textContent = 'Submit Inquiry';
+frappe.ready(function() {
+    // Build travel type options from Jinja context
+    var type_options = "\n{% for tt in travel_types %}{{ tt.type_name }}\n{% endfor %}";
+
+    var fields = {};
+
+    var field_defs = [
+        { parent: '#field-destination', df: {
+            fieldtype: 'Data', fieldname: 'destination', label: 'Where do you want to go?',
+            reqd: 1, placeholder: 'e.g., Bali, Paris, Maldives...'
+        }},
+        { parent: '#field-travel_type', df: {
+            fieldtype: 'Select', fieldname: 'travel_type', label: 'Type of Travel',
+            options: type_options
+        }},
+        { parent: '#field-departure_date', df: {
+            fieldtype: 'Date', fieldname: 'departure_date', label: 'Departure Date', reqd: 1
+        }},
+        { parent: '#field-return_date', df: {
+            fieldtype: 'Date', fieldname: 'return_date', label: 'Return Date', reqd: 1
+        }},
+        { parent: '#field-num_travelers', df: {
+            fieldtype: 'Int', fieldname: 'num_travelers', label: 'Number of Travelers', default: 1
+        }},
+        { parent: '#field-budget_min', df: {
+            fieldtype: 'Currency', fieldname: 'budget_min', label: 'Minimum Budget'
+        }},
+        { parent: '#field-budget_max', df: {
+            fieldtype: 'Currency', fieldname: 'budget_max', label: 'Maximum Budget'
+        }},
+        { parent: '#field-notes', df: {
+            fieldtype: 'Small Text', fieldname: 'notes', label: 'Additional Details',
+            placeholder: 'Tell us about any special requirements, preferences, or activities you\'d like...'
+        }}
+    ];
+
+    field_defs.forEach(function(def) {
+        var ctrl = frappe.ui.form.make_control({
+            df: def.df,
+            parent: $(def.parent),
+            render_input: true
+        });
+        ctrl.refresh();
+        if (def.df.default) {
+            ctrl.set_value(def.df.default);
         }
+        fields[def.df.fieldname] = ctrl;
+    });
+
+    // Submit handler
+    $('#btn-submit').on('click', function() {
+        var btn = $(this);
+        var dest = fields.destination.get_value();
+        var dep = fields.departure_date.get_value();
+        var ret = fields.return_date.get_value();
+
+        if (!dest) {
+            frappe.msgprint({ title: 'Missing Field', message: 'Please enter a destination.', indicator: 'orange' });
+            return;
+        }
+        if (!dep) {
+            frappe.msgprint({ title: 'Missing Field', message: 'Please select a departure date.', indicator: 'orange' });
+            return;
+        }
+        if (!ret) {
+            frappe.msgprint({ title: 'Missing Field', message: 'Please select a return date.', indicator: 'orange' });
+            return;
+        }
+
+        btn.prop('disabled', true).text('Submitting...');
+
+        frappe.call({
+            method: 'horizon_crm.api.portal.submit_inquiry',
+            args: {
+                destination: dest,
+                departure_date: dep,
+                return_date: ret,
+                num_travelers: parseInt(fields.num_travelers.get_value()) || 1,
+                travel_type: fields.travel_type.get_value() || null,
+                budget_min: parseFloat(fields.budget_min.get_value()) || 0,
+                budget_max: parseFloat(fields.budget_max.get_value()) || 0,
+                notes: fields.notes.get_value() || ''
+            },
+            callback: function(r) {
+                if (r.message) {
+                    frappe.msgprint({
+                        title: 'Inquiry Submitted!',
+                        message: 'Your travel inquiry has been submitted successfully. Our team will contact you soon.',
+                        indicator: 'green'
+                    });
+                    setTimeout(function() {
+                        window.location.href = '/portal';
+                    }, 2000);
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false).text('Submit Inquiry');
+            }
+        });
     });
 });
 </script>

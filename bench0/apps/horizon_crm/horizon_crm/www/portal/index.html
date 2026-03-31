@@ -45,12 +45,24 @@
         {% for booking in recent_bookings %}
         <li class="portal-booking-item">
             <div class="booking-info">
-                <h5>{{ booking.booking_number }}</h5>
-                <p>{{ booking.departure_date }} — {{ booking.return_date }} · {{ booking.num_travelers }} traveler{{ 's' if booking.num_travelers > 1 else '' }}</p>
+                <h5>
+                    <a href="/portal/bookings/{{ booking.name }}">{{ booking.booking_number }}</a>
+                </h5>
+                <p class="text-muted text-medium">
+                    {{ frappe.utils.formatdate(booking.departure_date) }} —
+                    {{ frappe.utils.formatdate(booking.return_date) }} ·
+                    {{ booking.num_travelers }} traveler{{ 's' if booking.num_travelers > 1 else '' }}
+                </p>
             </div>
-            <span class="booking-status {{ booking.status | lower | replace(' ', '-') }}">
-                {{ booking.status }}
-            </span>
+            <div class="booking-meta">
+                {% set status_color = {
+                    'Confirmed': 'green', 'In Progress': 'orange',
+                    'Completed': 'blue', 'Cancelled': 'red'
+                }.get(booking.status, 'grey') %}
+                <span class="indicator-pill {{ status_color }}">
+                    <span>{{ booking.status }}</span>
+                </span>
+            </div>
         </li>
         {% endfor %}
     </ul>
