@@ -2,12 +2,12 @@
 
 ## Overview
 
-Horizon CRM uses two testing layers:
+All tests live under `horizon_crm/tests/`:
 
-| Layer | Framework | Scope | Location |
-|-------|-----------|-------|----------|
-| Unit / Integration | Frappe Test Runner (pytest) | DocType controllers, API methods, permissions | `bench0/apps/horizon_crm/horizon_crm/tests/` |
-| E2E / Acceptance | Playwright | Full browser workflows, UI, security | `tests/e2e/` |
+| Layer | Framework | Location |
+|-------|-----------|----------|
+| Unit / Integration | Frappe Test Runner (pytest) | `horizon_crm/tests/test_doctypes.py` |
+| E2E / Acceptance | Playwright | `horizon_crm/tests/e2e/` |
 
 ---
 
@@ -23,20 +23,20 @@ bench --site horizon.localhost run-tests --app horizon_crm
 
 ```bash
 bench --site horizon.localhost run-tests \
-  --module horizon_crm.horizon_crm.doctype.travel_agency.test_travel_agency
+  --module horizon_crm.tests.test_doctypes
 ```
 
 ### Running a Single Test
 
 ```bash
 bench --site horizon.localhost run-tests \
-  --module horizon_crm.horizon_crm.doctype.travel_agency.test_travel_agency \
-  --test test_agency_creation
+  --module horizon_crm.tests.test_doctypes \
+  --test test_travel_lead_creation
 ```
 
 ### Writing Unit Tests
 
-Create `test_<doctype>.py` next to the DocType definition:
+Add test classes to `horizon_crm/tests/test_doctypes.py` (or create new `test_*.py` files in the same directory):
 
 ```python
 import frappe
@@ -44,7 +44,6 @@ from frappe.tests import IntegrationTestCase
 
 class TestTravelAgency(IntegrationTestCase):
     def setUp(self):
-        # Runs before each test
         pass
 
     def tearDown(self):
@@ -60,37 +59,7 @@ class TestTravelAgency(IntegrationTestCase):
         })
         agency.insert()
         self.assertEqual(agency.agency_name, "Unit Test Agency")
-        self.assertEqual(agency.status, "Active")
         agency.delete()
-
-    def test_agency_isolation(self):
-        # Create two agencies
-        agency1 = frappe.get_doc({...}).insert()
-        agency2 = frappe.get_doc({...}).insert()
-
-        # Login as agency1 admin
-        frappe.set_user("admin@agency1.test")
-
-        # Should not see agency2 data
-        customers = frappe.get_all("Travel Customer",
-            filters={"agency": agency2.name})
-        self.assertEqual(len(customers), 0)
-```
-
-### Test Fixtures
-
-Place test data in `test_records.json` next to the DocType:
-
-```json
-[
-  {
-    "doctype": "Travel Agency",
-    "agency_name": "Fixture Agency",
-    "contact_email": "fixture@test.example",
-    "max_staff": 10,
-    "status": "Active"
-  }
-]
 ```
 
 ---
@@ -100,16 +69,17 @@ Place test data in `test_records.json` next to the DocType:
 ### Prerequisites
 
 ```bash
-cd tests
+cd horizon_crm/tests
 npm install
-npx playwright install   # Downloads browser binaries
+npx playwright install --with-deps chromium
 ```
 
 ### Running All E2E Tests
 
+Make sure the dev server is running on `localhost:8000`, then:
+
 ```bash
-# Ensure the dev server is running on localhost:8000
-cd tests
+cd horizon_crm/tests
 npx playwright test
 ```
 
@@ -122,11 +92,8 @@ npx playwright test e2e/01-auth.spec.ts
 # Security tests
 npx playwright test e2e/06-security.spec.ts
 
-# Or use the npm scripts:
-npm run test:auth
-npm run test:security
-npm run test:booking
-# ... etc (see package.json for all suite shortcuts)
+# Multi-tenant tests
+npx playwright test --project=multi-tenant
 
 # Run with visible browser
 npx playwright test --headed
@@ -138,55 +105,52 @@ npx playwright test --ui
 npx playwright test --debug
 ```
 
-### Running in Docker
-
-```bash
-# From project root
-docker compose run --rm playwright npx playwright test
-
-# Or if playwright service is running
-docker compose exec playwright npx playwright test
-```
-
 ### E2E Test Structure
 
 ```
-tests/
-├── package.json              # Dependencies & scripts
+horizon_crm/tests/
+├── test_doctypes.py          # Server-side unit tests (pytest)
 ├── playwright.config.ts      # Playwright configuration
-├── allure-results/           # Allure raw results (auto-generated)
-├── test-results/             # Playwright test artifacts (videos, screenshots)
-└── e2e/
-    ├── fixtures.ts           # Shared utilities & test helpers
-    ├── global-setup.ts       # Creates test users & agencies (runs once)
-    ├── 01-auth.spec.ts       # Authentication & session tests
-    ├── 02-agency.spec.ts     # Agency CRUD tests
-    ├── 03-staff.spec.ts      # Staff management tests
-    ├── 04-inquiry.spec.ts    # Inquiry workflow tests
-    ├── 05-booking.spec.ts    # Booking workflow tests
-    ├── 06-security.spec.ts   # Security, RBAC, CSRF, XSS, SQLi tests
-    ├── 07-portal.spec.ts     # Customer portal tests
-    ├── 08-ui-ux.spec.ts      # UI/UX & responsive tests
-    └── 09-other-doctypes.spec.ts  # Itinerary, Supplier, Feedback tests
+├── package.json              # Node dependencies & scripts
+├── e2e/
+│   ├── fixtures.ts           # Shared utilities & test helpers
+│   ├── global-setup.ts       # Creates test users & data (runs once)
+│   ├── global-teardown.ts    # Cleans up test data
+│   ├── 01-auth.spec.ts       # Authentication & sessions
+│   ├── 02-agency.spec.ts     # Agency CRUD
+│   ├── 03-staff.spec.ts      # Staff management
+│   ├── 04-inquiry.spec.ts    # Inquiry workflow
+│   ├── 05-booking.spec.ts    # Booking workflow
+│   ├── 06-security.spec.ts   # RBAC, CSRF, XSS, SQLi
+│   ├── 07-portal.spec.ts     # Customer portal
+│   ├── 08-ui-ux.spec.ts      # UI/UX & responsive
+│   ├── 09-other-doctypes.spec.ts # Itinerary, suppliers, feedback, teams
+│   ├── 10-multi-tenant.spec.ts   # Multi-site isolation
+│   └── 11-lead-and-branding.spec.ts # Lead pipeline, branding
+├── test-results/             # Playwright artifacts (gitignored)
+├── allure-results/           # Allure raw results (gitignored)
+└── node_modules/             # (gitignored)
 ```
 
-### Test Suites Coverage
+### Test Suite Coverage
 
 | Suite | File | What it Tests |
 |-------|------|---------------|
-| Auth | `01-auth.spec.ts` | Login, logout, session, cookies, invalid credentials |
-| Agency | `02-agency.spec.ts` | CRUD, status toggle, permission checks |
-| Staff | `03-staff.spec.ts` | Staff CRUD, role assignment, max limit |
-| Inquiry | `04-inquiry.spec.ts` | Status workflow, inquiry→booking conversion |
-| Booking | `05-booking.spec.ts` | Lifecycle, payment tracking, balance calc, summary API |
-| Security | `06-security.spec.ts` | Cross-role access, SQL injection, XSS, CSRF |
-| Portal | `07-portal.spec.ts` | Dashboard, bookings, inquiry submission, feedback |
-| UI/UX | `08-ui-ux.spec.ts` | Desktop/mobile layout, CSS/JS loading, responsive |
-| Others | `09-other-doctypes.spec.ts` | Itinerary, Supplier, Feedback, Teams |
+| Auth | `01-auth` | Login, logout, session, cookies, invalid credentials |
+| Agency | `02-agency` | CRUD, status toggle, permission checks |
+| Staff | `03-staff` | Staff CRUD, role assignment, max limit |
+| Inquiry | `04-inquiry` | Status workflow, inquiry → booking conversion |
+| Booking | `05-booking` | Lifecycle, payment tracking, balance calc, summary API |
+| Security | `06-security` | Cross-role access, SQL injection, XSS, CSRF |
+| Portal | `07-portal` | Dashboard, bookings, inquiry submission, feedback |
+| UI/UX | `08-ui-ux` | Desktop/mobile layout, CSS/JS loading, responsive |
+| Others | `09-other-doctypes` | Itinerary, suppliers (6 types), feedback, teams |
+| Multi-Tenant | `10-multi-tenant` | Site isolation, tenant data boundary |
+| Leads & Branding | `11-lead-and-branding` | Lead pipeline, favicon, logo, CSS/JS assets |
+
+**Playwright projects:** Tests run across `chromium` (desktop), `mobile` (iPhone 13), and `multi-tenant` (API-only with two sites).
 
 ### Writing New E2E Tests
-
-Import fixtures from `fixtures.ts`:
 
 ```typescript
 import { test, expect } from "@playwright/test";
@@ -224,171 +188,59 @@ test.describe("My Feature", () => {
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FRAPPE_URL` | `http://localhost:8000` | Base URL of Frappe site |
-| `CI` | — | Set in CI to enable retries and forbid .only |
+| `CI` | — | Enables retries and forbids `.only` |
 
 ---
 
 ## Test Reports & Video Capture
 
-Horizon CRM generates two types of test reports, both with **full video recordings** for every test.
-
-### Video Capture Configuration
-
-Video recording is enabled for **all tests** (not just failures) via `playwright.config.ts`:
+Video recording is on for **all tests** via `playwright.config.ts`:
 
 ```typescript
 use: {
-  video: "on",        // Record video for EVERY test
-  screenshot: "on",   // Take screenshot after each test
-  trace: "on-first-retry",  // Full trace on retry
+  video: "on",
+  screenshot: "on",
+  trace: "on-first-retry",
 }
 ```
 
-Artifacts are stored in `tests/test-results/<test-name>/`:
-- `video.webm` — Full video recording of the test
-- `test-finished-1.png` — Screenshot at test completion
-- `trace.zip` — Trace file (on retry only)
+Artifacts:
+- `horizon_crm/tests/test-results/<test-name>/video.webm`
+- `horizon_crm/tests/test-results/<test-name>/test-finished-1.png`
+- `horizon_crm/tests/test-results/<test-name>/trace.zip` (on retry only)
 
-### Report Types
-
-| Report | Format | Videos | Best For |
-|--------|--------|--------|----------|
-| Playwright HTML | Single-file HTML | Embedded in each test | Quick local review |
-| Allure Report | Interactive dashboard | Attached per test | Team sharing, CI, history |
-
----
-
-### 1. Playwright HTML Report
-
-Generated automatically after each test run.
+### Playwright HTML Report
 
 ```bash
-cd tests
-
-# Run tests (generates report in ../reports/html/)
-npm test
-
-# Open the HTML report in browser
-npm run report:html
+cd horizon_crm/tests
+npx playwright test
+npx playwright show-report
 ```
 
-**Features:**
-- Embedded videos for every test (click a test → see video)
-- Embedded screenshots
-- Filter by status (passed/failed/skipped)
-- Trace viewer for retried tests
-
----
-
-### 2. Allure Report (Recommended for Teams)
-
-Allure provides a rich interactive dashboard with video/screenshot attachments, test history, trends, and environment info.
-
-#### Quick Start
+### Allure Report
 
 ```bash
-cd tests
-
-# Clean previous results, run tests, and generate report
-npm run test:report
-
-# Open the generated Allure report
-npm run report:allure:open
-```
-
-#### Step-by-Step
-
-```bash
-cd tests
-
-# 1. Clean stale results (recommended before fresh run)
-npm run clean
-
-# 2. Run all E2E tests
-npm test
-
-# 3. Generate Allure HTML report from raw results
-npm run report:allure:generate
-
-# 4. Open Allure report in browser
-npm run report:allure:open
-
-# Or combine generate + open:
-npm run report:allure
-```
-
-#### Allure Report Features
-
-- **Dashboard**: Overview of pass/fail rates, duration, trends
-- **Test details**: Each test shows steps, video recording, and screenshot
-- **Video attachments**: Click any test → Attachments tab → play `video.webm`
-- **Screenshot attachments**: Inline screenshot preview per test
-- **Environment info**: Shows `BASE_URL` and `NODE_VERSION`
-- **Categories**: Automatic grouping by test suite and failure type
-- **History**: Track pass/fail trends across runs (when `allure-results/` is preserved)
-
-#### Directory Structure After Test Run
-
-```
-tests/
-├── allure-results/           # Raw Allure JSON + video/screenshot attachments
-│   ├── *-result.json         # Test result data
-│   ├── *-attachment.webm     # Video recordings (1 per test)
-│   └── *-attachment.png      # Screenshots (1 per test)
-├── test-results/             # Playwright native artifacts
-│   └── <test-name>/
-│       ├── video.webm
-│       └── test-finished-1.png
-reports/
-├── html/                     # Playwright HTML report
-│   └── index.html
-└── allure-report/            # Generated Allure HTML report
-    └── index.html
+cd horizon_crm/tests
+npx playwright test
+npx allure generate allure-results --clean -o allure-report
+npx allure open allure-report
 ```
 
 ---
 
-### NPM Scripts Reference
+## Debugging Failures
 
-| Script | Description |
-|--------|-------------|
-| `npm test` | Run all E2E tests |
-| `npm run test:headed` | Run with visible browser |
-| `npm run test:ui` | Interactive Playwright UI |
-| `npm run test:debug` | Step-through debug mode |
-| `npm run test:auth` | Run auth tests only |
-| `npm run test:agency` | Run agency tests only |
-| `npm run test:staff` | Run staff tests only |
-| `npm run test:inquiry` | Run inquiry tests only |
-| `npm run test:booking` | Run booking tests only |
-| `npm run test:security` | Run security tests only |
-| `npm run test:portal` | Run portal tests only |
-| `npm run test:ui-ux` | Run UI/UX tests only |
-| `npm run test:doctypes` | Run other doctypes tests only |
-| `npm run clean` | Delete all test results and reports |
-| `npm run report:html` | Open Playwright HTML report |
-| `npm run report:allure:generate` | Generate Allure report from results |
-| `npm run report:allure:open` | Open Allure report in browser |
-| `npm run report:allure` | Generate + open Allure report |
-| `npm run test:report` | Clean → test → generate Allure report |
-
----
-
-### Debugging Failures
-
-1. **Videos**: Every test has a video in `test-results/<test>/video.webm` and in the Allure attachments
-2. **Screenshots**: Captured after each test in `test-results/<test>/`
-3. **Trace**: Generated on first retry — view with:
+1. **Videos**: Every test has a video in `test-results/<test>/video.webm`
+2. **Screenshots**: Captured after each test
+3. **Trace**: View with:
    ```bash
    npx playwright show-trace test-results/<test>/trace.zip
    ```
-4. **Allure Report**: Open the test in Allure → click "Attachments" tab to view video inline
+4. **Headed mode**: Re-run failing test with `--headed --debug`
 
 ---
 
 ## CI Integration
-
-Example GitHub Actions workflow:
 
 ```yaml
 name: E2E Tests
@@ -407,24 +259,19 @@ jobs:
             sleep 5
           done
       - name: Install test deps
-        working-directory: tests
+        working-directory: horizon_crm/tests
         run: npm ci && npx playwright install --with-deps chromium
       - name: Run E2E tests
-        working-directory: tests
-        run: npm run test:report
+        working-directory: horizon_crm/tests
+        run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-html-report
-          path: reports/html/
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: allure-report
-          path: reports/allure-report/
+          name: playwright-report
+          path: horizon_crm/tests/playwright-report/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-videos
-          path: tests/test-results/**/video.webm
+          path: horizon_crm/tests/test-results/**/video.webm
 ```

@@ -12,88 +12,80 @@
 
 ```bash
 # 1. Clone the repository
-git clone <repo-url> frappe_space
-cd frappe_space
+git clone <repo-url> horizon_crm
+cd horizon_crm
 
-# 2. Start all services
-docker compose up -d
+# 2. Start all services (MariaDB + Redis + Frappe bench)
+docker compose up
 
-# 3. Wait for first-time bootstrap (runs init.sh internally)
-docker compose logs -f frappe
+# 3. Wait for first-time bootstrap (watch the logs)
+#    init.sh creates bench, installs the app, seeds data, and starts the server.
 
 # 4. Access the application
-# Desk:   http://localhost:8000
-# Portal: http://localhost:8000/portal
-# Login:  Administrator / admin
+#    Desk:   http://localhost:8000
+#    Portal: http://localhost:8000/portal
+#    Login:  Administrator / admin
 ```
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│  docker-compose.yml                         │
-│                                             │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
-│  │ MariaDB  │  │ Redis    │  │ Redis    │  │
-│  │ :3306    │  │ Cache    │  │ Queue    │  │
-│  │          │  │ :6379    │  │ :6380    │  │
-│  └──────────┘  └──────────┘  └──────────┘  │
-│                                             │
-│  ┌──────────────────────────────────────┐   │
-│  │ Frappe Dev Server (:8000)            │   │
-│  │  bench0/ mounted as volume           │   │
-│  │  horizon_crm/ mounted for hot-reload │   │
-│  └──────────────────────────────────────┘   │
-│                                             │
-│  ┌──────────────────────────────────────┐   │
-│  │ Playwright (:9323)                   │   │
-│  │  tests/ mounted                      │   │
-│  └──────────────────────────────────────┘   │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────┐
+│  docker-compose.yml                                  │
+│                                                      │
+│  ┌──────────┐  ┌──────────────┐  ┌──────────────┐   │
+│  │ MariaDB  │  │ Redis Cache  │  │ Redis Queue  │   │
+│  │ :3306    │  │ :6379        │  │ :6379        │   │
+│  └──────────┘  └──────────────┘  └──────────────┘   │
+│                                                      │
+│  ┌──────────────────────────────────────────────┐    │
+│  │ Frappe Dev Server (frappe/bench:latest)       │    │
+│  │  /workspace/app ← repo bind-mount            │    │
+│  │  /workspace/frappe-bench ← bench volume       │    │
+│  │  :8000 web  :9000 socketio                   │    │
+│  └──────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────┘
 ```
 
 ## Service Details
 
-### MariaDB
-- **Image**: `mariadb:10.6`
-- **Port**: 3306 (internal only by default)
-- **Credentials**: root / frappe
-- **Character Set**: utf8mb4 / utf8mb4_unicode_ci
-- **Volume**: `mariadb-data` (persistent)
+| Service | Image | Port (host) | Notes |
+|---------|-------|-------------|-------|
+| mariadb | `mariadb:10.6` | 3307 | utf8mb4, persistent volume |
+| redis-cache | `redis:7-alpine` | 13000 | In-memory cache |
+| redis-queue | `redis:7-alpine` | 11000 | Background job queue |
+| frappe | `frappe/bench:latest` | 8000, 9000 | Dev server + socketio |
 
-### Redis Cache
-- **Image**: `redis:7-alpine`
-- **Port**: 6379
+## Environment Variables
 
-### Redis Queue
-- **Image**: `redis:7-alpine`
-- **Port**: 6380
+Set these in `.env` or pass via the command line:
 
-### Frappe Dev
-- **Build**: `./docker/Dockerfile`
-- **Port**: 8000 (mapped to host)
-- **Volumes**:
-  - `bench-data` → `/home/frappe/frappe-bench`
-  - `./bench0/apps/horizon_crm` → hot-reload mount
-  - `./tests` → test files
-
-### Playwright
-- **Image**: `mcr.microsoft.com/playwright:v1.42.0-jammy`
-- **Port**: 9323
-- **Working dir**: `/tests`
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_ROOT_PASSWORD` | `123` | MariaDB root password |
+| `ADMIN_PASSWORD` | `admin` | Frappe Administrator password |
+| `DB_PORT` | `3307` | Host port for MariaDB |
+| `REDIS_CACHE_PORT` | `13000` | Host port for Redis cache |
+| `REDIS_QUEUE_PORT` | `11000` | Host port for Redis queue |
+| `BENCH_PORT` | `8000` | Host port for bench web |
+| `SOCKETIO_PORT` | `9000` | Host port for socketio |
+| `SITE_NAME` | `horizon.localhost` | Frappe site name |
 
 ## Common Commands
 
 ### Start / Stop
 
 ```bash
-# Start all services
+# Start all services (foreground — see logs)
+docker compose up
+
+# Start in background
 docker compose up -d
 
 # Stop all services
 docker compose down
 
-# Stop and remove volumes (DESTRUCTIVE — resets DB)
+# Stop and remove volumes (DESTRUCTIVE — resets DB & bench)
 docker compose down -v
 
 # Restart a single service
@@ -103,13 +95,8 @@ docker compose restart frappe
 ### Logs
 
 ```bash
-# View all logs
-docker compose logs -f
-
-# View only Frappe logs
-docker compose logs -f frappe
-
-# View last 100 lines
+docker compose logs -f              # All services
+docker compose logs -f frappe       # Frappe only
 docker compose logs --tail=100 frappe
 ```
 
@@ -119,75 +106,63 @@ docker compose logs --tail=100 frappe
 # Enter Frappe container
 docker compose exec frappe bash
 
-# Enter as root
-docker compose exec -u root frappe bash
-
-# Run bench commands
-docker compose exec frappe bench --site horizon.localhost console
-docker compose exec frappe bench --site horizon.localhost migrate
-docker compose exec frappe bench build
+# Run bench commands inside the container
+cd /workspace/frappe-bench
+bench --site horizon.localhost migrate
+bench --site horizon.localhost console
+bench build --app horizon_crm
+bench watch
 ```
 
 ### Database
 
 ```bash
 # Access MariaDB console
-docker compose exec mariadb mysql -u root -pfrappe
+docker compose exec mariadb mysql -u root -p123
 
 # Backup
-docker compose exec frappe bench --site horizon.localhost backup
+docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench --site horizon.localhost backup"
 
 # Restore
-docker compose exec frappe bench --site horizon.localhost restore <backup-file>
+docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench --site horizon.localhost restore <backup-file>"
 ```
 
-## First-Time Setup (Manual)
+## Init Script (`docker/init.sh`)
 
-If `docker/init.sh` does not run automatically, execute these steps inside the Frappe container:
+On first launch, the frappe container runs `docker/init.sh` which:
 
-```bash
-docker compose exec frappe bash
+1. **Initializes bench** (`bench init` with `version-15`)
+2. **Configures services** (db_host=mariadb, redis-cache, redis-queue)
+3. **Removes Redis from Procfile** (already provided by Docker)
+4. **Installs the app** (`bench get-app file:///workspace/app`)
+5. **Creates the site** (horizon.localhost, installs horizon_crm)
+6. **Starts bench** (`bench start`)
 
-# Initialize bench
-bench init --skip-redis-config-generation frappe-bench
-cd frappe-bench
-
-# Configure
-bench set-config -g db_host mariadb
-bench set-config -g redis_cache redis://redis-cache:6379
-bench set-config -g redis_queue redis://redis-queue:6380
-
-# Install app
-bench get-app /workspace/horizon_crm   # or wherever it's mounted
-bench new-site horizon.localhost \
-  --mariadb-root-password frappe \
-  --admin-password admin \
-  --no-mariadb-socket
-bench --site horizon.localhost install-app horizon_crm
-bench use horizon.localhost
-```
+On subsequent launches, it detects the existing bench/site and runs `migrate` instead.
 
 ## Hot-Reload Workflow
 
-The `horizon_crm` app source is bind-mounted into the container. Changes to Python files are picked up by the bench development server automatically.
+The app source (repo root) is bind-mounted at `/workspace/app` inside the container.
 
-For JavaScript/CSS changes:
-```bash
-# Rebuild assets
-docker compose exec frappe bench build --app horizon_crm
+- **Python changes**: Picked up automatically by the bench dev server
+- **JS/CSS changes**:
+  ```bash
+  docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench build --app horizon_crm"
+  ```
 
-# Or build in watch mode
-docker compose exec frappe bench watch
-```
+## Self-Hosting Compose
 
-## Troubleshooting Docker
+A minimal compose for production/self-hosting is available at `docker/docker-compose.yml` (3 services: MariaDB, Redis, Frappe).
+
+## Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
-| Port 8000 in use | `docker compose down` then `lsof -i :8000` to find conflict |
-| MariaDB won't start | Check `docker compose logs mariadb`. Often disk space or permissions. |
-| Redis connection refused | Ensure redis services are running: `docker compose ps` |
-| bench init hangs | May be network issue pulling frappe; check `docker compose logs frappe` |
-| Permission denied | Files may be owned by container user. Run `sudo chown -R $USER:$USER .` |
-| Site not found | Run `bench use horizon.localhost` inside container |
-| Assets 404 | Run `bench build --app horizon_crm` inside container |
+| Port in use | Change port via env vars: `BENCH_PORT=8001 docker compose up` |
+| MariaDB won't start | Check logs: `docker compose logs mariadb`. Often disk space. |
+| Redis connection refused | `docker compose ps` — ensure redis containers are running |
+| bench init hangs | Network issue pulling frappe. Check `docker compose logs frappe` |
+| Permission denied | `sudo chown -R $USER:$USER .` |
+| Site not found | Enter container and run `bench use horizon.localhost` |
+| Assets 404 | `docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench build"` |
+| First start is slow | bench init downloads frappe + node deps. Subsequent starts are fast. |

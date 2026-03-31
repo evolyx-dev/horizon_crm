@@ -22,9 +22,10 @@ yarn-error.log
 .yarn/
 
 # E2E Test artifacts
-tests/test-results/
-tests/playwright-report/
-tests/allure-results/
+horizon_crm/tests/test-results/
+horizon_crm/tests/playwright-report/
+horizon_crm/tests/allure-results/
+horizon_crm/tests/node_modules/
 
 # Test reports (regenerated on each run)
 reports/

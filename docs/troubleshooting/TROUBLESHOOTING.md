@@ -19,7 +19,7 @@ cat sites/currentsite.txt
 
 **Fix**: Ensure `modules.txt` contains the correct module name:
 ```bash
-cat bench0/apps/horizon_crm/horizon_crm/modules.txt
+cat horizon_crm/modules.txt
 # Should contain: Horizon CRM
 ```
 
@@ -178,7 +178,7 @@ web_include_css = "/assets/horizon_crm/css/horizon_portal.css"
 **Fix**:
 ```bash
 # Validate JSON
-python -m json.tool bench0/apps/horizon_crm/horizon_crm/horizon_crm/doctype/my_doctype/my_doctype.json
+python -m json.tool horizon_crm/horizon_crm/doctype/my_doctype/my_doctype.json
 
 # Run migration
 bench --site horizon.localhost migrate
@@ -352,5 +352,5 @@ bench --site horizon.localhost clear-log-table --days 30
 
 1. **Frappe Forum**: https://discuss.frappe.io
 2. **Frappe Documentation**: https://frappeframework.com/docs
-3. **Project Knowledge Base**: See `knowledge_base/` folder
+3. **Project Documentation**: See `docs/` folder
 4. **Check Logs**: `bench0/logs/` directory

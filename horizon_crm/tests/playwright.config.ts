@@ -11,7 +11,7 @@ export default defineConfig({
   workers: 1,
   reporter: [
     ["list"],
-    ["html", { open: "never", outputFolder: "../reports/html" }],
+    ["html", { open: "never", outputFolder: "./playwright-report" }],
     [
       "allure-playwright",
       {

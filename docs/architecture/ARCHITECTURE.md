@@ -47,8 +47,10 @@
 ## 2. App Structure
 
 ```
-bench0/apps/horizon_crm/
-├── horizon_crm/
+horizon_crm/                        # ← Repo root IS the Frappe app
+├── pyproject.toml
+├── docker-compose.yml              # Docker-first dev stack
+├── horizon_crm/                    # Python module
 │   ├── __init__.py
 │   ├── hooks.py                    # App hooks: permissions, events, portal, favicon
 │   ├── modules.txt                 # Module definitions
@@ -114,8 +116,15 @@ bench0/apps/horizon_crm/
 │   │   └── pages/
 │   │       └── __init__.py
 │   │
-│   ├── tests/                      # Server-side unit tests
-│   │   └── test_doctypes.py
+│   ├── tests/                      # ALL tests (unit + E2E)
+│   │   ├── test_doctypes.py        # Server-side unit/integration
+│   │   ├── playwright.config.ts    # E2E configuration
+│   │   ├── package.json            # E2E Node deps
+│   │   └── e2e/                    # Playwright E2E specs
+│   │       ├── fixtures.ts
+│   │       ├── global-setup.ts
+│   │       ├── 01-auth.spec.ts … 11-lead-and-branding.spec.ts
+│   │       └── global-teardown.ts
 │   │
 │   └── www/                        # Portal pages
 │       └── portal/
@@ -294,7 +303,7 @@ services:
     # Custom image: Python 3.11-slim-bookworm, Node 18
     # Runs bench start on port 8000
     # Developer mode enabled (FRAPPE_DEVELOPER_MODE=1)
-    # Volumes: ./bench0 mounted at /home/frappe/frappe-bench
+    # Volumes: repo root mounted at /workspace/app, bench volume at /workspace/frappe-bench
     
   mariadb:
     # MariaDB 10.6 on port 3307 (mapped from 3306)

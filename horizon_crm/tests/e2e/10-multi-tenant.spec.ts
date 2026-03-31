@@ -14,7 +14,8 @@ import path from "path";
 
 const SITE1_URL = "http://127.0.0.1:8000";
 const SITE2_URL = "http://127.0.0.1:8001";
-const BENCH_DIR = path.resolve(__dirname, "../../bench0");
+// From horizon_crm/tests/e2e/ → repo root is ../../../, bench0 is a sibling
+const BENCH_DIR = path.resolve(__dirname, "../../../bench0");
 
 /** Authenticate as Administrator on a Frappe site */
 async function apiLogin(baseURL: string): Promise<APIRequestContext> {
@@ -66,12 +67,13 @@ test.describe("Multi-Tenant Site Isolation", () => {
         cwd: BENCH_DIR,
         stdio: "ignore",
         detached: true,
+        env: { ...process.env },
       }
     );
     site2Server.unref();
 
     // Wait for tenant2 server to be ready
-    await waitForServer(SITE2_URL);
+    await waitForServer(SITE2_URL, 60_000);
 
     site1 = await apiLogin(SITE1_URL);
     site2 = await apiLogin(SITE2_URL);

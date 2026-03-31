@@ -8,9 +8,9 @@
 
 **Problem:** `playwright.config.ts` outputted allure results to `../reports/allure-results/` but the `package.json` scripts expected `./allure-results`. Stale results accumulated across runs (371 results for ~60 tests).
 
-**Fix:** Changed allure output folder to `./allure-results` (relative to `tests/`). Added `npm run clean` script to clear stale results before a fresh run.
+**Fix:** Changed allure output folder to `./allure-results` (relative to `horizon_crm/tests/`). Added `npm run clean` script to clear stale results before a fresh run.
 
-**Files changed:** `tests/playwright.config.ts`, `tests/package.json`
+**Files changed:** `horizon_crm/tests/playwright.config.ts`, `horizon_crm/tests/package.json`
 
 ---
 
@@ -20,7 +20,7 @@
 
 **Fix:** Added `allure-commandline@^2.36.0` to `devDependencies`.
 
-**Files changed:** `tests/package.json`
+**Files changed:** `horizon_crm/tests/package.json`
 
 ---
 
@@ -30,7 +30,7 @@
 
 **Fix:** Added additional filters for `WebSocket`, `socket.io`, `ERR_CONNECTION`, `ResizeObserver`, `PWA`, and HTTP status response errors.
 
-**Files changed:** `tests/e2e/08-ui-ux.spec.ts`
+**Files changed:** `horizon_crm/tests/e2e/08-ui-ux.spec.ts`
 
 ---
 
@@ -40,7 +40,7 @@
 
 **Fix:** Updated all references to match actual file names and variable names.
 
-**Files changed:** `knowledge_base/how-to/TESTING_GUIDE.md`
+**Files changed:** `docs/how-to/TESTING_GUIDE.md`
 
 ---
 
@@ -50,7 +50,7 @@
 
 **Fix:** Added comprehensive sections covering both Playwright HTML and Allure reports, video capture configuration, directory structure, and a full NPM scripts reference table.
 
-**Files changed:** `knowledge_base/how-to/TESTING_GUIDE.md`
+**Files changed:** `docs/how-to/TESTING_GUIDE.md`
 
 ---
 
@@ -62,7 +62,7 @@
 
 **Fix:** Rewrote `global-setup.ts` to create users with NO special roles. The app's `Travel Agency Staff` hooks (`travel_agency_staff.py` → `ROLE_MAP` + `after_insert`) now assign the correct custom roles (Agency Admin, Agency Team Lead, Agency Staff). Added cleanup of stale `System Manager` roles from previous runs. Added verification step that checks each user got the correct role and adds it manually if hooks didn't fire.
 
-**Files changed:** `tests/e2e/global-setup.ts`
+**Files changed:** `horizon_crm/tests/e2e/global-setup.ts`
 
 ---
 
@@ -72,7 +72,7 @@
 
 **Fix:** Verified that `Travel Agency Staff` DocType has working server-side hooks (`ROLE_MAP` in `travel_agency_staff.py`). Global-setup now relies on these hooks and includes a verification loop with fallback manual role assignment.
 
-**Files changed:** `tests/e2e/global-setup.ts`
+**Files changed:** `horizon_crm/tests/e2e/global-setup.ts`
 
 ---
 
@@ -82,7 +82,7 @@
 
 **Fix:** Created `global-teardown.ts` with cleanup functions (`cleanupDocs`, `cleanupByPattern`) that delete test-created feedback, bookings, inquiries, teams, suppliers, itineraries, and test customers after all tests complete. Added teardown project to `playwright.config.ts`.
 
-**Files changed:** `tests/e2e/global-teardown.ts` (new), `tests/playwright.config.ts`
+**Files changed:** `horizon_crm/tests/e2e/global-teardown.ts` (new), `horizon_crm/tests/playwright.config.ts`
 
 ---
 
@@ -92,7 +92,7 @@
 
 **Fix:** Refactored both files to use separate documents: `workflowInquiryName`/`workflowBookingName` for mutation tests and `readOnlyInquiryName`/`readOnlyBookingName` for assertions that don't change state.
 
-**Files changed:** `tests/e2e/04-inquiry.spec.ts`, `tests/e2e/05-booking.spec.ts`
+**Files changed:** `horizon_crm/tests/e2e/04-inquiry.spec.ts`, `horizon_crm/tests/e2e/05-booking.spec.ts`
 
 ---
 
@@ -102,7 +102,7 @@
 
 **Fix:** Added `Viewport` and `minimal-ui` to the harmless error exclusion list. Also changed assertion to `toEqual([])` for better error diagnostics.
 
-**Files changed:** `tests/e2e/08-ui-ux.spec.ts`
+**Files changed:** `horizon_crm/tests/e2e/08-ui-ux.spec.ts`
 
 ---
 
@@ -112,7 +112,7 @@
 
 **Fix:** Changed local retries from 0 to 1.
 
-**Files changed:** `tests/playwright.config.ts`
+**Files changed:** `horizon_crm/tests/playwright.config.ts`
 
 ---
 

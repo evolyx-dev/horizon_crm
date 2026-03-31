@@ -1,0 +1,67 @@
+name: horizon_crm
+services:
+  mariadb:
+    image: mariadb:10.6
+    container_name: horizon_mariadb
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-123}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    ports:
+      - "${DB_PORT:-3307}:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-cache:
+    image: redis:7-alpine
+    container_name: horizon_redis_cache
+    restart: unless-stopped
+    ports:
+      - "${REDIS_CACHE_PORT:-13000}:6379"
+
+  redis-queue:
+    image: redis:7-alpine
+    container_name: horizon_redis_queue
+    restart: unless-stopped
+    ports:
+      - "${REDIS_QUEUE_PORT:-11000}:6379"
+
+  frappe:
+    image: frappe/bench:latest
+    container_name: horizon_frappe
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+    environment:
+      - SHELL=/bin/bash
+      - FRAPPE_DEVELOPER_MODE=1
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-123}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    volumes:
+      - .:/workspace/app:cached
+      - bench-data:/workspace/frappe-bench
+    ports:
+      - "${BENCH_PORT:-8000}:8000"
+      - "${SOCKETIO_PORT:-9000}:9000"
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    command: bash /workspace/app/docker/init.sh
+
+volumes:
+  mariadb-data:
+  bench-data:

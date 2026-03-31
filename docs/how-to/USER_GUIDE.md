@@ -30,54 +30,21 @@
 - Docker & Docker Compose installed
 - Git
 
-### Start Services
+### Quick Start (Docker)
 
 ```bash
 # Clone the repository
-git clone <repo-url> frappe_space
-cd frappe_space
+git clone <repo-url> horizon_crm
+cd horizon_crm
 
-# Start MariaDB and Redis containers
-docker compose up -d mariadb redis-cache redis-queue
+# Start all services (MariaDB + Redis + Frappe bench)
+docker compose up
 
-# Wait for MariaDB to be healthy
-docker compose ps   # Ensure mariadb shows "healthy"
+# Wait for bootstrap to complete (watch the logs).
+# First run takes a few minutes to initialize.
 ```
 
-### Initialize Bench (first time only)
-
-```bash
-cd bench0
-
-# Create a Python virtual environment
-python3 -m venv env
-source env/bin/activate
-
-# Install Frappe framework
-pip install -e apps/frappe
-
-# Initialize bench configuration
-bench setup env
-bench build
-```
-
-### Create the Default Site
-
-```bash
-# Create the first site (default tenant)
-bench new-site horizon.localhost \
-    --db-root-password 123 \
-    --admin-password admin \
-    --mariadb-root-username root
-
-# Install the app
-bench --site horizon.localhost install-app horizon_crm
-
-# Start the development server
-bench start
-```
-
-The app is now accessible at **http://horizon.localhost:8000**
+Once ready, the app is accessible at **http://localhost:8000**
 
 ---
 

@@ -53,18 +53,16 @@ Horizon CRM uses Frappe's **site-per-tenant** model. Each travel agency gets its
 - **Shared application code** (all sites run the same `horizon_crm` app)
 
 ```
-bench0/
+frappe-bench/                     # Inside Docker: /workspace/frappe-bench
 ├── apps/
 │   ├── frappe/          ← Framework (shared)
-│   └── horizon_crm/    ← CRM app (shared)
+│   └── horizon_crm/    ← CRM app (symlink to repo root)
 ├── sites/
 │   ├── common_site_config.json    ← Global config
 │   ├── horizon.localhost/         ← Agency 1 (own DB)
 │   ├── tenant2.localhost/         ← Agency 2 (own DB)
 │   └── agency3.example.com/       ← Agency 3 (own DB)
 └── config/
-    ├── redis_cache.conf
-    └── redis_queue.conf
 ```
 
 ### Component Diagram
@@ -115,37 +113,23 @@ bench0/
 
 ```bash
 # 1. Clone the repository
-git clone <repo-url> frappe_space
-cd frappe_space
+git clone <repo-url> horizon_crm
+cd horizon_crm
 
-# 2. Start infrastructure services
-docker compose up -d mariadb redis-cache redis-queue
+# 2. Start all services (MariaDB + Redis + Frappe bench)
+docker compose up
 
-# 3. Verify services are healthy
-docker compose ps
-# mariadb should show "healthy"
-```
-
-### Initialize Bench
-
-```bash
-cd bench0
-
-# Create Python virtual environment
-python3 -m venv env
-source env/bin/activate
-
-# Install Frappe and Horizon CRM
-pip install -e apps/frappe
-pip install -e apps/horizon_crm
-
-# Build frontend assets
-bench build --app horizon_crm
+# First run bootstraps automatically: creates bench, installs app, creates site.
+# Watch the logs for "bench start" — then access http://localhost:8000
 ```
 
 ### Verify Installation
 
 ```bash
+# Enter the container
+docker compose exec frappe bash
+cd /workspace/frappe-bench
+
 # Check installed apps
 bench version
 # Output: frappe x.y.z, horizon_crm x.y.z
@@ -285,7 +269,7 @@ Add to crontab for daily backups:
 crontab -e
 
 # Add daily backup at 2 AM for all sites
-0 2 * * * cd /path/to/bench0 && bench --site all backup --with-files >> /var/log/bench-backup.log 2>&1
+0 2 * * * docker compose -f /path/to/horizon_crm/docker-compose.yml exec -T frappe bash -c "cd /workspace/frappe-bench && bench --site all backup --with-files" >> /var/log/bench-backup.log 2>&1
 ```
 
 ### Restore from Backup
