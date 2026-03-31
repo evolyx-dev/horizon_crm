@@ -161,8 +161,26 @@ Output:
 ### Desk Layout
 The Frappe Desk has three main areas:
 - **Navbar** (top): Search bar, notifications, user menu with Evolyx Lab logo
-- **Sidebar** (left): Workspace navigation with links to modules. The **Horizon CRM** workspace is highlighted with a coral accent bar
+- **Sidebar** (left): Organized workspace navigation with collapsible sections
 - **Main Content** (center): The active workspace, list views, or forms
+
+### Sidebar Navigation
+
+The Horizon CRM sidebar is organized into logical sections with icons for quick identification:
+
+| Section | Items | Icon |
+|---------|-------|------|
+| **Dashboard** | Workspace home | 📊 Layout Dashboard |
+| **CRM Pipeline** | Travel Lead, Travel Inquiry, Travel Booking | 👤 🔖 📅 |
+| **Customers** | Travel Customer, Travel Feedback | 🧑 ⭐ |
+| **Billing** | Travel Invoice | 💳 |
+| **Trip Planning** | Travel Itinerary, Travel Supplier, Travel Destination | 📍 🏢 🏛 |
+| **Team** | Travel Team, Travel Agency Staff | 👥 🧑‍💼 |
+| **Settings** | Travel Agency, Travel Type, Kanban Board | ⚙️ 📄 |
+
+Each section can be collapsed/expanded by clicking the chevron arrow.
+
+![Horizon CRM Sidebar](../../images/sidebar_full.png)
 
 ### Navigation
 - Click **Horizon CRM** in the sidebar to access the main workspace
@@ -194,6 +212,8 @@ The Horizon CRM workspace is your command center. It contains:
 | Travel Itinerary | List | Itinerary plans |
 | Inquiry Kanban | Kanban | Inquiry pipeline board |
 | Booking Kanban | Kanban | Booking status board |
+
+![Horizon CRM Dashboard](../../images/01_dashboard.png)
 
 ---
 
@@ -238,6 +258,10 @@ When an inquiry is marked as **Won**, you can create a booking directly from it 
 If an inquiry is marked as **Lost**, a lost reason section appears. Select from predefined reasons:
 - Competitor, Budget Too High, Bad Timing, No Response, Changed Plans, Destination Change, Service Dissatisfaction, Other
 
+![Travel Inquiry List](../../images/03_inquiry_list.png)
+
+![Travel Inquiry Form](../../images/04_inquiry_form.png)
+
 ---
 
 ## 6. Working with Kanban Boards
@@ -274,6 +298,8 @@ Columns represent booking statuses:
 2. **Click** a card to open the full record
 3. Cards show key details: customer name, status indicator, dates
 4. The board auto-saves when you move a card
+
+![Kanban Board](../../images/08_kanban.png)
 
 ---
 
@@ -316,6 +342,8 @@ On the booking form, a visual progress bar shows:
 | Completed | Travel completed successfully |
 | Cancelled | Booking was cancelled |
 
+![Travel Booking List](../../images/05_booking_list.png)
+
 ---
 
 ## 8. Managing Customers
@@ -339,6 +367,10 @@ On the customer form, a sidebar panel shows activity stats:
 
 ### Link Customer to Portal
 A Travel Customer can be linked to a portal user (Agency Customer role) for self-service access. See [Customer Portal](#12-customer-portal).
+
+![Travel Customer List](../../images/06_customer_list.png)
+
+![Travel Customer Form](../../images/10_customer_form.png)
 
 ---
 
@@ -617,7 +649,7 @@ bench --site <site> console
 | Call Logs | ✅ Call Logs | ❌ | Future enhancement |
 | Email Integration | ✅ Email | ✅ Frappe Email | Via Frappe built-in |
 | Dashboard | ✅ Vue Dashboard | ✅ Workspace | Number cards + charts |
-| Sidebar | ✅ Custom Vue | ✅ Enhanced CSS | Frappe Desk sidebar with CRM styling |
+| Sidebar | ✅ Custom Vue | ✅ Workspace Sidebar | Organized sections: CRM Pipeline, Customers, Billing, Trip Planning, Team, Settings |
 | Customer Portal | ❌ | ✅ | Self-service booking portal |
 | Multi-tenancy | ❌ | ✅ | Site-per-tenant isolation |
 | Itinerary Planning | ❌ | ✅ | Day-by-day travel plans |

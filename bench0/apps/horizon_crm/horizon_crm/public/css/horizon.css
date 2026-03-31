@@ -1,28 +1,40 @@
 /* Horizon CRM - Custom Desk Styles
  * Evolyx Lab — Travel Agency CRM
+ * Inspired by Frappe CRM's clean, modern design
  */
 
 :root {
     --horizon-primary: #FF6B6B;
     --horizon-primary-dark: #E85555;
+    --horizon-primary-light: rgba(255, 107, 107, 0.08);
     --horizon-secondary: #FF8E53;
     --horizon-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-    --horizon-text: #2D3436;
-    --horizon-text-light: #636E72;
-    --horizon-bg: #F8F9FA;
+    --horizon-text: #1F272E;
+    --horizon-text-muted: #74808B;
+    --horizon-text-light: #A3B1BF;
+    --horizon-bg: #F4F5F6;
+    --horizon-bg-subtle: #FAFBFC;
     --horizon-card-bg: #FFFFFF;
-    --horizon-border: #E9ECEF;
-    --horizon-success: #00B894;
-    --horizon-warning: #FDCB6E;
-    --horizon-danger: #D63031;
-    --horizon-info: #0984E3;
-    --horizon-radius: 12px;
-    --horizon-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    --horizon-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
+    --horizon-border: #E2E6E9;
+    --horizon-border-light: #EEF0F2;
+    --horizon-success: #22C55E;
+    --horizon-warning: #F59E0B;
+    --horizon-danger: #EF4444;
+    --horizon-info: #3B82F6;
+    --horizon-purple: #8B5CF6;
+    --horizon-cyan: #06B6D4;
+    --horizon-radius: 10px;
+    --horizon-radius-sm: 6px;
+    --horizon-radius-lg: 14px;
+    --horizon-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --horizon-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --horizon-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --horizon-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --horizon-font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Oxygen, sans-serif;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   STATUS INDICATORS
+   STATUS INDICATORS — Refined pill design
    ═══════════════════════════════════════════════════════════════════════ */
 
 .indicator-pill.green,
@@ -31,7 +43,9 @@
 .indicator-pill[data-status="Completed"],
 .indicator-pill[data-status="Won"],
 .indicator-pill[data-status="Approved"],
-.indicator-pill[data-status="Received"] {
+.indicator-pill[data-status="Received"],
+.indicator-pill[data-status="Paid"],
+.indicator-pill[data-status="Converted"] {
     --indicator-color: var(--horizon-success);
 }
 
@@ -39,7 +53,9 @@
 .indicator-pill[data-status="Inactive"],
 .indicator-pill[data-status="Cancelled"],
 .indicator-pill[data-status="Lost"],
-.indicator-pill[data-status="Refunded"] {
+.indicator-pill[data-status="Refunded"],
+.indicator-pill[data-status="Do Not Contact"],
+.indicator-pill[data-status="Overdue"] {
     --indicator-color: var(--horizon-danger);
 }
 
@@ -48,7 +64,9 @@
 .indicator-pill[data-status="Contacted"],
 .indicator-pill[data-status="Quoted"],
 .indicator-pill[data-status="Shared"],
-.indicator-pill[data-status="Pending"] {
+.indicator-pill[data-status="Pending"],
+.indicator-pill[data-status="Sent"],
+.indicator-pill[data-status="Partially Paid"] {
     --indicator-color: var(--horizon-secondary);
 }
 
@@ -58,39 +76,48 @@
     --indicator-color: var(--horizon-info);
 }
 
-/* List view status pills */
+.indicator-pill[data-status="Interested"] {
+    --indicator-color: var(--horizon-warning);
+}
+
+.indicator-pill[data-status="Qualified"] {
+    --indicator-color: var(--horizon-cyan);
+}
+
+/* List view status pills — polished look */
 .list-row .level-left .list-row--col .indicator-pill {
-    font-weight: 500;
-    padding: 2px 10px;
+    font-weight: 600;
+    padding: 3px 10px;
     border-radius: 20px;
     font-size: 11px;
     letter-spacing: 0.3px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   WORKSPACE SIDEBAR — Frappe CRM-Inspired
+   WORKSPACE SIDEBAR — Frappe CRM-Inspired Clean Design
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Overall sidebar refinement */
 .desk-sidebar {
     background: var(--horizon-card-bg);
-    border-right: 1px solid var(--horizon-border);
-    padding: 8px 4px;
+    border-right: 1px solid var(--horizon-border-light);
+    padding: 6px 0;
 }
 
-/* Sidebar menu items — clean modern look */
+/* Sidebar menu items — clean, spacious, modern look */
 .desk-sidebar .sidebar-menu .standard-sidebar-item a {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
-    margin: 1px 8px;
-    border-radius: 8px;
-    font-size: 13px;
+    padding: 7px 14px;
+    margin: 1px 6px;
+    border-radius: var(--horizon-radius-sm);
+    font-size: 13.5px;
     font-weight: 500;
     color: var(--horizon-text);
     transition: all 0.15s ease;
     text-decoration: none;
     line-height: 1.4;
+    position: relative;
 }
 
 .desk-sidebar .sidebar-menu .standard-sidebar-item a:hover {
@@ -100,11 +127,12 @@
 
 .desk-sidebar .sidebar-menu .standard-sidebar-item a.selected,
 .desk-sidebar .sidebar-menu .standard-sidebar-item a[aria-current="page"] {
-    background: rgba(255, 107, 107, 0.08);
+    background: var(--horizon-primary-light);
     color: var(--horizon-primary);
     font-weight: 600;
 }
 
+/* Active left accent bar */
 .desk-sidebar .sidebar-menu .standard-sidebar-item a.selected::before,
 .desk-sidebar .sidebar-menu .standard-sidebar-item a[aria-current="page"]::before {
     content: "";
@@ -113,16 +141,16 @@
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 20px;
-    background: var(--horizon-gradient);
+    height: 18px;
+    background: var(--horizon-primary);
     border-radius: 0 3px 3px 0;
 }
 
 /* Sidebar item icons */
 .desk-sidebar .sidebar-menu .standard-sidebar-item a .sidebar-item-icon {
     margin-right: 10px;
-    font-size: 16px;
-    opacity: 0.65;
+    font-size: 15px;
+    opacity: 0.55;
     transition: opacity 0.15s ease;
     flex-shrink: 0;
 }
@@ -143,27 +171,39 @@
     display: inline-block;
     width: 3px;
     height: 16px;
-    background: var(--horizon-gradient);
+    background: var(--horizon-primary);
     border-radius: 2px;
     margin-right: 6px;
     vertical-align: middle;
 }
 
-/* Sidebar section headers */
-.desk-sidebar .sidebar-menu .sidebar-group-title {
-    font-size: 10px;
+/* Sidebar section category headers */
+.desk-sidebar .sidebar-menu .sidebar-group-title,
+.sidebar-menu .sidebar-sub-group-title {
+    font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     color: var(--horizon-text-light);
-    padding: 16px 20px 4px;
-    opacity: 0.7;
+    padding: 18px 20px 6px;
+    margin-top: 4px;
 }
 
-/* Sidebar - workspace page sidebar (left nav on workspace page) */
+/* Workspace page sidebar (left nav within workspace) — Card Break sections */
+.workspace-sidebar-section .sidebar-label,
+.sidebar-menu .desk-sidebar-item.sidebar-section,
+.layout-side-section .sidebar-menu .sidebar-text-item {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--horizon-text-light);
+    padding: 14px 16px 4px;
+}
+
 .layout-side-section .sidebar-menu .desk-sidebar-item {
-    border-radius: 8px;
-    margin: 2px 0;
+    border-radius: var(--horizon-radius-sm);
+    margin: 1px 4px;
     transition: background 0.15s ease;
 }
 
@@ -172,43 +212,71 @@
 }
 
 .layout-side-section .sidebar-menu .desk-sidebar-item.selected {
-    background: rgba(255, 107, 107, 0.08);
+    background: var(--horizon-primary-light);
     border-left: 3px solid var(--horizon-primary);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   FORM STYLES
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Title styling */
-[data-doctype="Travel Agency"] .page-head .title-area .title-text,
-[data-doctype="Travel Inquiry"] .page-head .title-area .title-text,
-[data-doctype="Travel Booking"] .page-head .title-area .title-text,
-[data-doctype="Travel Itinerary"] .page-head .title-area .title-text {
-    font-weight: 700;
+.layout-side-section .sidebar-menu .desk-sidebar-item a {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--horizon-text);
+    padding: 7px 12px;
+    display: block;
+    text-decoration: none;
 }
 
-/* Section headers with accent borders */
-.frappe-control[data-fieldname="section_customer"] .section-head,
-.frappe-control[data-fieldname="section_travel"] .section-head,
-.frappe-control[data-fieldname="section_financial"] .section-head,
-.frappe-control[data-fieldname="section_dates"] .section-head,
-.frappe-control[data-fieldname="section_items"] .section-head,
-.frappe-control[data-fieldname="section_payments"] .section-head,
-.frappe-control[data-fieldname="section_contact"] .section-head,
-.frappe-control[data-fieldname="section_subscription"] .section-head,
-.frappe-control[data-fieldname="section_lost"] .section-head,
-.frappe-control[data-fieldname="section_documents"] .section-head,
-.frappe-control[data-fieldname="section_preferences"] .section-head,
-.frappe-control[data-fieldname="section_details"] .section-head,
-.frappe-control[data-fieldname="section_followup"] .section-head {
-    font-size: 13px;
+.layout-side-section .sidebar-menu .desk-sidebar-item.selected a {
+    color: var(--horizon-primary);
     font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FORM STYLES — Clean, modern form design
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Form page background */
+.page-container[data-page-doctype^="Travel"] .layout-main-section,
+.page-container[data-page-doctype="Invoice"] .layout-main-section {
+    background: var(--horizon-bg-subtle);
+}
+
+/* Form card body — clean card feel */
+[data-doctype^="Travel"] .form-layout,
+[data-doctype="Travel Invoice"] .form-layout {
+    background: var(--horizon-card-bg);
+    border-radius: var(--horizon-radius);
+    border: 1px solid var(--horizon-border-light);
+}
+
+/* Title styling */
+[data-doctype^="Travel"] .page-head .title-area .title-text {
+    font-weight: 700;
+    color: var(--horizon-text);
+}
+
+/* Section headers with clean accent */
+[data-doctype^="Travel"] .section-head,
+[data-doctype="Invoice Item"] .section-head {
+    font-size: 12px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--horizon-text-light);
-    border-bottom: 2px solid var(--horizon-primary);
-    padding-bottom: 8px;
+    letter-spacing: 0.8px;
+    color: var(--horizon-text-muted);
+    border-bottom: none;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+[data-doctype^="Travel"] .section-head::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 30px;
+    height: 2px;
+    background: var(--horizon-primary);
+    border-radius: 1px;
 }
 
 /* Lost reason section - red accent */
@@ -217,9 +285,52 @@
     color: var(--horizon-danger);
 }
 
+[data-doctype="Travel Inquiry"] .frappe-control[data-fieldname="section_lost"] .section-head::after {
+    background: var(--horizon-danger);
+}
+
 /* Form section spacing */
 [data-doctype^="Travel"] .form-section:not(:first-child) {
-    margin-top: 8px;
+    margin-top: 6px;
+}
+
+/* Cleaner form input fields */
+[data-doctype^="Travel"] .form-group .control-input input,
+[data-doctype^="Travel"] .form-group .control-input select,
+[data-doctype^="Travel"] .form-group .control-input .link-field .awesomplete input {
+    border-radius: var(--horizon-radius-sm);
+    border-color: var(--horizon-border);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+[data-doctype^="Travel"] .form-group .control-input input:focus,
+[data-doctype^="Travel"] .form-group .control-input select:focus {
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 3px var(--horizon-primary-light);
+}
+
+/* Control labels */
+[data-doctype^="Travel"] .frappe-control .control-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--horizon-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Form dashboard area — lighter */
+[data-doctype^="Travel"] .form-dashboard-section {
+    background: var(--horizon-bg-subtle);
+    border-bottom: 1px solid var(--horizon-border-light);
+    padding: 10px 15px;
+}
+
+/* Form dashboard indicators */
+[data-doctype^="Travel"] .form-dashboard-section .indicator-pill {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -360,7 +471,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   CUSTOMER ACTIVITY SIDEBAR
+   CUSTOMER ACTIVITY SIDEBAR — Clean stat blocks
    ═══════════════════════════════════════════════════════════════════════ */
 
 .horizon-customer-sidebar {
@@ -369,17 +480,17 @@
 }
 
 .horizon-customer-sidebar .sidebar-title {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
     color: var(--horizon-text-light);
     margin-bottom: 12px;
 }
 
 .sidebar-stats {
     display: flex;
-    gap: 16px;
+    gap: 12px;
 }
 
 .sidebar-stat {
@@ -387,79 +498,101 @@
     flex-direction: column;
     align-items: center;
     flex: 1;
-    padding: 8px;
+    padding: 10px 8px;
     background: var(--horizon-bg);
-    border-radius: 8px;
+    border-radius: var(--horizon-radius-sm);
+    border: 1px solid var(--horizon-border-light);
 }
 
 .sidebar-stat-value {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--horizon-text);
 }
 
 .sidebar-stat-label {
-    font-size: 11px;
-    color: var(--horizon-text-light);
+    font-size: 10px;
+    color: var(--horizon-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
     margin-top: 2px;
+    font-weight: 600;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   DASHBOARD & STAT CARDS
+   DASHBOARD & STAT CARDS — Polished metric cards
    ═══════════════════════════════════════════════════════════════════════ */
 
 .horizon-dashboard {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
-    padding: 16px 0;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    padding: 14px 0;
 }
 
 .horizon-stat-card {
     background: var(--horizon-card-bg);
     border-radius: var(--horizon-radius);
-    padding: 20px;
-    box-shadow: var(--horizon-shadow);
+    padding: 18px 20px;
+    box-shadow: var(--horizon-shadow-xs);
     transition: all 0.2s ease;
-    border: 1px solid var(--horizon-border);
+    border: 1px solid var(--horizon-border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.horizon-stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--horizon-border);
+    transition: background 0.2s ease;
 }
 
 .horizon-stat-card:hover {
-    box-shadow: var(--horizon-shadow-hover);
+    box-shadow: var(--horizon-shadow-md);
     transform: translateY(-2px);
 }
 
 .horizon-stat-card .stat-label {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
     color: var(--horizon-text-light);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .horizon-stat-card .stat-value {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 800;
     color: var(--horizon-text);
-    line-height: 1.2;
+    line-height: 1.1;
+    font-family: var(--horizon-font);
 }
 
 .horizon-stat-card .stat-icon {
     float: right;
-    font-size: 24px;
-    opacity: 0.3;
+    font-size: 22px;
+    opacity: 0.2;
+    margin-top: -4px;
 }
 
-.horizon-stat-card.primary { border-left: 4px solid var(--horizon-primary); }
-.horizon-stat-card.success { border-left: 4px solid var(--horizon-success); }
-.horizon-stat-card.warning { border-left: 4px solid var(--horizon-warning); }
-.horizon-stat-card.info { border-left: 4px solid var(--horizon-info); }
+.horizon-stat-card.primary::before { background: var(--horizon-primary); }
+.horizon-stat-card.success::before { background: var(--horizon-success); }
+.horizon-stat-card.warning::before { background: var(--horizon-warning); }
+.horizon-stat-card.info::before { background: var(--horizon-info); }
+
+.horizon-stat-card.primary { border-left: 3px solid var(--horizon-primary); }
+.horizon-stat-card.success { border-left: 3px solid var(--horizon-success); }
+.horizon-stat-card.warning { border-left: 3px solid var(--horizon-warning); }
+.horizon-stat-card.info { border-left: 3px solid var(--horizon-info); }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BOOKING STATUS TIMELINE
+   BOOKING STATUS TIMELINE — Stepped progress
    ═══════════════════════════════════════════════════════════════════════ */
 
 .booking-timeline {
@@ -475,6 +608,7 @@
     background: var(--horizon-border);
     border-radius: 2px;
     position: relative;
+    transition: background 0.3s ease;
 }
 
 .booking-timeline .step.active {
@@ -489,21 +623,43 @@
     font-size: 10px;
     color: var(--horizon-text-light);
     white-space: nowrap;
+    font-weight: 500;
+}
+
+.booking-timeline .step.active .step-label {
+    color: var(--horizon-primary);
+    font-weight: 600;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   WORKSPACE NUMBER CARDS & CHARTS
+   WORKSPACE NUMBER CARDS & CHARTS — Polished widgets
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Enhanced number card styling in workspace context */
 .workspace-container .number-widget-box {
     border-radius: var(--horizon-radius);
     transition: all 0.2s ease;
 }
 
 .workspace-container .number-widget-box:hover {
-    box-shadow: var(--horizon-shadow-hover);
+    box-shadow: var(--horizon-shadow-md);
     transform: translateY(-1px);
+}
+
+.workspace-container .number-widget-box .widget-body .number-card {
+    padding: 16px 20px;
+}
+
+.workspace-container .number-widget-box .widget-body .number {
+    font-size: 28px;
+    font-weight: 800;
+    font-family: var(--horizon-font);
+}
+
+/* Chart card polish */
+.workspace-container .chart-widget-box .widget {
+    border-radius: var(--horizon-radius);
+    border: 1px solid var(--horizon-border-light);
+    box-shadow: var(--horizon-shadow-xs);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -515,14 +671,18 @@
     background: var(--horizon-gradient);
     border: none;
     color: white;
-    font-weight: 500;
-    border-radius: 8px;
+    font-weight: 600;
+    border-radius: var(--horizon-radius-sm);
+    padding: 8px 20px;
     transition: all 0.2s ease;
+    letter-spacing: 0.3px;
 }
 
 .btn-primary-dark:hover {
     transform: translateY(-1px);
-    box-shadow: var(--horizon-shadow-hover);
+    box-shadow: var(--horizon-shadow-md);
+    color: white;
+    opacity: 0.92;
 }
 
 /* Rating display */
@@ -538,9 +698,90 @@
     font-weight: 600;
 }
 
-/* Improved list view row styling */
+/* ═══════════════════════════════════════════════════════════════════════
+   LIST VIEW ENHANCEMENTS — Clean, modern table rows
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* List view container */
+[data-doctype^="Travel"] .frappe-list .result,
+[data-doctype="Travel Invoice"] .frappe-list .result {
+    border-radius: var(--horizon-radius);
+    overflow: hidden;
+}
+
+/* List view header row */
+[data-doctype^="Travel"] .list-row-head,
+[data-doctype="Travel Invoice"] .list-row-head {
+    background: var(--horizon-bg);
+    border-bottom: 2px solid var(--horizon-border);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--horizon-text-muted);
+}
+
+/* List view data rows */
+[data-doctype^="Travel"] .list-row,
+[data-doctype="Travel Invoice"] .list-row {
+    border-bottom: 1px solid var(--horizon-border-light);
+    transition: background 0.1s ease;
+}
+
+[data-doctype^="Travel"] .list-row:hover,
+[data-doctype="Travel Invoice"] .list-row:hover {
+    background: var(--horizon-primary-light);
+}
+
+/* List row link color */
+[data-doctype^="Travel"] .list-row .level-left .list-row--col .ellipsis a,
+[data-doctype="Travel Invoice"] .list-row .level-left .list-row--col .ellipsis a {
+    color: var(--horizon-text);
+    font-weight: 500;
+}
+
+[data-doctype^="Travel"] .list-row .level-left .list-row--col .ellipsis a:hover {
+    color: var(--horizon-primary);
+}
+
+/* List view row spacing */
 [data-doctype^="Travel"] .list-row .level-left {
-    gap: 8px;
+    gap: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGE HEADER & BREADCRUMB POLISH
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Page head clean look */
+[data-doctype^="Travel"] .page-head,
+[data-doctype="Travel Invoice"] .page-head {
+    border-bottom: 1px solid var(--horizon-border-light);
+}
+
+/* Primary action button in page head */
+[data-doctype^="Travel"] .page-head .page-actions .btn-primary,
+[data-doctype="Travel Invoice"] .page-head .page-actions .btn-primary {
+    background: var(--horizon-primary);
+    border-color: var(--horizon-primary);
+    border-radius: var(--horizon-radius-sm);
+    font-weight: 600;
+    padding: 6px 16px;
+    transition: all 0.15s ease;
+}
+
+[data-doctype^="Travel"] .page-head .page-actions .btn-primary:hover {
+    background: var(--horizon-primary-dark);
+    border-color: var(--horizon-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--horizon-shadow);
+}
+
+/* Secondary action buttons */
+[data-doctype^="Travel"] .page-head .page-actions .btn-default {
+    border-radius: var(--horizon-radius-sm);
+    font-weight: 500;
+    transition: all 0.15s ease;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -568,28 +809,60 @@
     .pipeline-line {
         min-width: 20px;
     }
+
+    .kanban .kanban-column {
+        min-width: 260px;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   KANBAN BOARD ENHANCEMENTS
+   KANBAN BOARD ENHANCEMENTS — Frappe CRM-inspired card design
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Kanban column header styling */
-.kanban .kanban-column .kanban-column-header {
-    padding: 10px 14px;
-    border-radius: 10px 10px 0 0;
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* Kanban container - horizontal scroll */
+.frappe-control[data-fieldname="kanban"] .kanban,
+.page-container .kanban {
+    padding: 8px 4px;
 }
 
-/* Kanban card styling */
-.kanban .kanban-column .kanban-card {
+/* Kanban column */
+.kanban .kanban-column {
+    border-radius: var(--horizon-radius);
+    border: 1px solid var(--horizon-border-light);
+    background: var(--horizon-bg);
+    margin: 0 6px;
+    min-width: 280px;
+}
+
+/* Kanban column header */
+.kanban .kanban-column .kanban-column-header {
+    padding: 12px 14px;
+    border-radius: var(--horizon-radius) var(--horizon-radius) 0 0;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    background: var(--horizon-card-bg);
+    border-bottom: 1px solid var(--horizon-border-light);
+}
+
+/* Column header count badge */
+.kanban .kanban-column .kanban-column-header .column-title .kanban-badge {
+    background: var(--horizon-border);
+    color: var(--horizon-text-muted);
     border-radius: 10px;
-    border: 1px solid var(--horizon-border);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-    transition: all 0.2s ease;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+/* Kanban card - modern clean card */
+.kanban .kanban-column .kanban-card {
+    border-radius: var(--horizon-radius-sm);
+    border: 1px solid var(--horizon-border-light);
+    box-shadow: var(--horizon-shadow-xs);
+    transition: all 0.15s ease;
     margin: 6px 8px;
     padding: 12px 14px;
     background: var(--horizon-card-bg);
@@ -604,6 +877,7 @@
 
 .kanban .kanban-column .kanban-card:active {
     cursor: grabbing;
+    box-shadow: var(--horizon-shadow-md);
 }
 
 /* Kanban card title */
@@ -612,58 +886,112 @@
     font-size: 13px;
     color: var(--horizon-text);
     text-decoration: none;
+    line-height: 1.4;
 }
 
 .kanban .kanban-card .kanban-card-title a:hover {
     color: var(--horizon-primary);
 }
 
-/* Kanban column rounded */
-.kanban .kanban-column {
+/* Kanban card meta - secondary info below title */
+.kanban .kanban-card .kanban-card-meta {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.kanban .kanban-card .kanban-card-meta .text-muted {
+    font-size: 12px;
+    color: var(--horizon-text-muted);
+}
+
+/* Kanban card tags */
+.kanban .kanban-card .kanban-card-body .like-disabled-input .tag-btn {
     border-radius: 10px;
-    border: 1px solid var(--horizon-border);
-    background: var(--horizon-bg);
-    margin: 0 6px;
+    font-size: 10.5px;
+    padding: 1px 8px;
+    font-weight: 500;
+}
+
+/* Kanban card assigned users - avatar row */
+.kanban .kanban-card .kanban-card-body .avatar-group {
+    margin-top: 8px;
+}
+
+.kanban .kanban-card .kanban-card-body .avatar-group .avatar {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--horizon-card-bg);
+    transition: transform 0.1s ease;
+}
+
+.kanban .kanban-card .kanban-card-body .avatar-group .avatar:hover {
+    transform: scale(1.1);
+    z-index: 1;
 }
 
 /* Kanban add card button */
 .kanban .kanban-column .add-card {
-    border-radius: 8px;
+    border-radius: var(--horizon-radius-sm);
     margin: 4px 8px 8px;
-    padding: 6px 0;
+    padding: 8px 0;
     font-size: 12px;
+    font-weight: 500;
     color: var(--horizon-text-light);
-    transition: color 0.15s ease;
+    transition: all 0.15s ease;
+    border: 1px dashed transparent;
 }
 
 .kanban .kanban-column .add-card:hover {
     color: var(--horizon-primary);
+    border-color: var(--horizon-primary);
+    background: var(--horizon-primary-light);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   WORKSPACE SHORTCUT CARDS POLISH
+   WORKSPACE SHORTCUT CARDS — Polished widget tiles
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Enhanced shortcut cards on workspace */
+/* Shortcut card tiles on workspace dashboard */
 .workspace-container .shortcut-widget-box .widget {
-    border-radius: 10px;
+    border-radius: var(--horizon-radius);
     transition: all 0.2s ease;
-    border: 1px solid var(--horizon-border);
+    border: 1px solid var(--horizon-border-light);
+    box-shadow: var(--horizon-shadow-xs);
 }
 
 .workspace-container .shortcut-widget-box .widget:hover {
-    box-shadow: var(--horizon-shadow);
+    box-shadow: var(--horizon-shadow-md);
     transform: translateY(-2px);
+    border-color: var(--horizon-primary);
 }
 
-/* Quick list widget styling */
+/* Shortcut widget label */
+.workspace-container .shortcut-widget-box .widget .widget-label {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Quick list widget */
 .workspace-container .quick-list-widget-box .widget {
     border-radius: var(--horizon-radius);
-    border: 1px solid var(--horizon-border);
+    border: 1px solid var(--horizon-border-light);
+    box-shadow: var(--horizon-shadow-xs);
+}
+
+/* Section heading in workspace */
+.workspace-container .widget-group .widget-group-head .widget-group-title {
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--horizon-text-muted);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   NAVBAR BRAND ACCENT
+   NAVBAR BRAND & GLOBAL POLISH
    ═══════════════════════════════════════════════════════════════════════ */
 
 .navbar .navbar-brand .app-logo {
@@ -672,4 +1000,61 @@
 
 .navbar .navbar-brand .app-logo:hover {
     transform: scale(1.05);
+}
+
+/* Smooth page transitions */
+.page-container {
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Comment / Activity section polish */
+[data-doctype^="Travel"] .comment-box .reply .ql-editor {
+    border-radius: var(--horizon-radius-sm);
+    border: 1px solid var(--horizon-border);
+    transition: border-color 0.15s ease;
+}
+
+[data-doctype^="Travel"] .comment-box .reply .ql-editor:focus {
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 3px var(--horizon-primary-light);
+}
+
+/* Dialog modal polish */
+.modal-dialog .modal-content {
+    border-radius: var(--horizon-radius);
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal-dialog .modal-header {
+    border-bottom: 1px solid var(--horizon-border-light);
+    padding: 16px 20px;
+}
+
+.modal-dialog .modal-footer {
+    border-top: 1px solid var(--horizon-border-light);
+    padding: 12px 20px;
+}
+
+.modal-dialog .modal-footer .btn-primary {
+    background: var(--horizon-primary);
+    border-color: var(--horizon-primary);
+    border-radius: var(--horizon-radius-sm);
+    font-weight: 600;
+}
+
+.modal-dialog .modal-footer .btn-primary:hover {
+    background: var(--horizon-primary-dark);
+    border-color: var(--horizon-primary-dark);
+}
+
+/* Print format - clean */
+@media print {
+    .horizon-pipeline,
+    .booking-timeline { display: none; }
 }
