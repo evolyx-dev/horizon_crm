@@ -190,6 +190,11 @@
             "link_doctype": "Travel Feedback",
             "link_fieldname": "booking",
             "group": "Feedback"
+        },
+        {
+            "link_doctype": "Travel Invoice",
+            "link_fieldname": "booking",
+            "group": "Invoices"
         }
     ],
     "modified": "2026-03-30 12:00:00.000000",

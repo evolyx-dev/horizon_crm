@@ -10,6 +10,7 @@
   "column_break_header",
   "assigned_to",
   "source",
+  "lead",
   "section_customer",
   "customer",
   "customer_name",
@@ -27,6 +28,10 @@
   "budget_min",
   "column_break_budget",
   "budget_max",
+  "section_followup",
+  "follow_up_date",
+  "column_break_followup",
+  "follow_up_notes",
   "section_lost",
   "lost_reason",
   "column_break_lost",
@@ -77,6 +82,13 @@
    "fieldtype": "Select",
    "label": "Source",
    "options": "\nWalk-in\nPhone\nEmail\nWebsite\nReferral\nSocial Media"
+  },
+  {
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "label": "Lead",
+   "options": "Travel Lead",
+   "description": "Source lead that generated this inquiry"
   },
   {
    "fieldname": "section_customer",

@@ -116,6 +116,19 @@ def create_kanban_boards():
                 "Cancelled": "Red",
             },
         },
+        {
+            "name": "Lead Pipeline",
+            "doctype_ref": "Travel Lead",
+            "field": "status",
+            "columns": {
+                "New": "Blue",
+                "Contacted": "Orange",
+                "Interested": "Yellow",
+                "Qualified": "Cyan",
+                "Converted": "Green",
+                "Do Not Contact": "Red",
+            },
+        },
     ]
     for board in boards:
         if not frappe.db.exists("Kanban Board", board["name"]):

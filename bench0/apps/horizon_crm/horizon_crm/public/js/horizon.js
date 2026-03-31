@@ -5,9 +5,14 @@
 frappe.provide("horizon_crm");
 
 horizon_crm.STATUS_COLORS = {
-    // Travel Inquiry
+    // Travel Lead
     "New": "blue",
     "Contacted": "orange",
+    "Interested": "yellow",
+    "Qualified": "cyan",
+    "Converted": "green",
+    "Do Not Contact": "red",
+    // Travel Inquiry
     "Quoted": "orange",
     "Won": "green",
     "Lost": "red",
@@ -25,6 +30,11 @@ horizon_crm.STATUS_COLORS = {
     "Shared": "orange",
     "Approved": "green",
     "Archived": "grey",
+    // Invoice
+    "Sent": "orange",
+    "Paid": "green",
+    "Partially Paid": "yellow",
+    "Overdue": "red",
     // Payment
     "Pending": "orange",
     "Received": "green",
@@ -112,6 +122,11 @@ frappe.ui.form.on("Travel Inquiry", {
         // Customer activity sidebar (Frappe CRM inspired)
         if (!frm.is_new() && frm.doc.customer) {
             horizon_crm.render_customer_sidebar(frm, frm.doc.customer);
+        }
+
+        // WhatsApp button for inquiry contact
+        if (!frm.is_new() && frm.doc.customer_phone) {
+            horizon_crm.add_whatsapp_button(frm, "customer_phone");
         }
     },
 
@@ -263,6 +278,14 @@ frappe.ui.form.on("Travel Booking", {
                     frappe.set_route("Form", "Travel Customer", frm.doc.customer);
                 }, __("Go To"));
             }
+
+            // Create Invoice action
+            frm.add_custom_button(__("Create Invoice"), function() {
+                frappe.new_doc("Travel Invoice", {
+                    booking: frm.doc.name,
+                    customer: frm.doc.customer,
+                });
+            }, __("Actions"));
         }
     }
 });
@@ -378,6 +401,13 @@ frappe.ui.form.on("Travel Customer", {
             frm.add_custom_button(__("New Inquiry"), function() {
                 frappe.new_doc("Travel Inquiry", { customer: frm.doc.name });
             }, __("Create"));
+
+            frm.add_custom_button(__("New Invoice"), function() {
+                frappe.new_doc("Travel Invoice", { customer: frm.doc.name });
+            }, __("Create"));
+
+            // WhatsApp button (prefer mobile_no, fallback to phone)
+            horizon_crm.add_whatsapp_button(frm, frm.doc.mobile_no ? "mobile_no" : "phone");
         }
     }
 });
@@ -410,5 +440,216 @@ $(document).ready(function() {
     // Add Horizon CRM branding class to body when on CRM pages
     if (frappe.boot && frappe.boot.app_name === "Evolyx Lab") {
         $("body").addClass("horizon-crm-active");
+    }
+});
+
+// ─── WhatsApp Click-to-Chat Helper ─────────────────────────────────────
+horizon_crm.add_whatsapp_button = function(frm, phone_field) {
+    const phone = frm.doc[phone_field];
+    if (!phone) return;
+
+    // Strip non-numeric characters except leading +
+    const cleaned = phone.replace(/[^0-9+]/g, "").replace(/^\+/, "");
+    if (!cleaned) return;
+
+    frm.add_custom_button(
+        __("WhatsApp"),
+        function() {
+            window.open("https://wa.me/" + cleaned, "_blank");
+        },
+        __("Communication")
+    );
+};
+
+// ─── Travel Lead ───────────────────────────────────────────────────────
+frappe.ui.form.on("Travel Lead", {
+    refresh(frm) {
+        let color = horizon_crm.STATUS_COLORS[frm.doc.status] || "grey";
+        frm.page.set_indicator(frm.doc.status, color);
+
+        if (!frm.is_new()) {
+            // Lead pipeline visualization
+            horizon_crm.render_lead_pipeline(frm);
+
+            // WhatsApp button (prefer mobile_no, fallback to phone)
+            horizon_crm.add_whatsapp_button(frm, frm.doc.mobile_no ? "mobile_no" : "phone");
+
+            // Follow-up alert
+            if (frm.doc.next_follow_up) {
+                const today = frappe.datetime.nowdate();
+                const diff = frappe.datetime.get_diff(frm.doc.next_follow_up, today);
+                if (diff < 0) {
+                    frm.dashboard.add_indicator(
+                        __("Follow-up overdue by {0} day(s)", [Math.abs(diff)]),
+                        "red"
+                    );
+                } else if (diff === 0) {
+                    frm.dashboard.add_indicator(__("Follow-up due today"), "orange");
+                } else if (diff <= 3) {
+                    frm.dashboard.add_indicator(
+                        __("Follow-up in {0} day(s)", [diff]),
+                        "blue"
+                    );
+                }
+            }
+
+            // Convert to Inquiry action (for Qualified leads)
+            if (frm.doc.status === "Qualified" || frm.doc.status === "Interested") {
+                frm.add_custom_button(__("Create Inquiry"), function() {
+                    frappe.new_doc("Travel Inquiry", {
+                        lead: frm.doc.name,
+                        customer_name: frm.doc.lead_name,
+                        customer_email: frm.doc.email,
+                        customer_phone: frm.doc.phone || frm.doc.mobile_no,
+                        destination: frm.doc.interested_destination,
+                        travel_type: frm.doc.travel_type,
+                        source: frm.doc.source,
+                    });
+                }, __("Actions"));
+            }
+
+            // Convert to Customer action
+            if (frm.doc.status === "Converted") {
+                frm.add_custom_button(__("Create Customer"), function() {
+                    frappe.new_doc("Travel Customer", {
+                        lead: frm.doc.name,
+                        customer_name: frm.doc.lead_name,
+                        email: frm.doc.email,
+                        phone: frm.doc.phone,
+                        mobile_no: frm.doc.mobile_no,
+                    });
+                }, __("Actions"));
+            }
+
+            // Dashboard: show related inquiries/customers
+            Promise.all([
+                frappe.xcall("frappe.client.get_count", {
+                    doctype: "Travel Inquiry",
+                    filters: { lead: frm.doc.name }
+                }),
+                frappe.xcall("frappe.client.get_count", {
+                    doctype: "Travel Customer",
+                    filters: { lead: frm.doc.name }
+                })
+            ]).then(([inquiries, customers]) => {
+                if (inquiries > 0) {
+                    frm.dashboard.add_indicator(__("{0} Inquiry(s)", [inquiries]), "blue");
+                }
+                if (customers > 0) {
+                    frm.dashboard.add_indicator(__("{0} Customer(s)", [customers]), "green");
+                }
+            });
+        }
+    }
+});
+
+// ─── Lead Pipeline Visualizer ──────────────────────────────────────────
+horizon_crm.render_lead_pipeline = function(frm) {
+    const stages = ["New", "Contacted", "Interested", "Qualified", "Converted"];
+    const currentIdx = stages.indexOf(frm.doc.status);
+    const isDNC = frm.doc.status === "Do Not Contact";
+
+    let html = '<div class="horizon-pipeline">';
+    stages.forEach((stage, idx) => {
+        let cls = "pipeline-stage";
+        if (isDNC) {
+            cls += idx === 0 ? " lost" : "";
+        } else if (idx < currentIdx) {
+            cls += " completed";
+        } else if (idx === currentIdx) {
+            cls += " active";
+        }
+        html += `<div class="${cls}">
+            <div class="pipeline-dot"></div>
+            <div class="pipeline-label">${stage}</div>
+        </div>`;
+        if (idx < stages.length - 1) {
+            const lineClass = (!isDNC && idx < currentIdx) ? "pipeline-line completed" : "pipeline-line";
+            html += `<div class="${lineClass}"></div>`;
+        }
+    });
+    if (isDNC) {
+        html += `<div class="pipeline-line"></div>`;
+        html += `<div class="pipeline-stage lost active">
+            <div class="pipeline-dot"></div>
+            <div class="pipeline-label">Do Not Contact</div>
+        </div>`;
+    }
+    html += '</div>';
+    frm.dashboard.add_section(html);
+};
+
+// ─── Travel Invoice ────────────────────────────────────────────────────
+frappe.ui.form.on("Travel Invoice", {
+    refresh(frm) {
+        let color = horizon_crm.STATUS_COLORS[frm.doc.status] || "grey";
+        frm.page.set_indicator(frm.doc.status, color);
+
+        // Outstanding amount indicator
+        if (!frm.is_new()) {
+            if (frm.doc.outstanding_amount > 0) {
+                frm.dashboard.add_indicator(
+                    __("Outstanding: {0}", [format_currency(frm.doc.outstanding_amount)]),
+                    "orange"
+                );
+            } else if (frm.doc.grand_total > 0 && frm.doc.outstanding_amount <= 0) {
+                frm.dashboard.add_indicator(__("Fully Paid"), "green");
+            }
+
+            // Quick links
+            if (frm.doc.booking) {
+                frm.add_custom_button(__("View Booking"), function() {
+                    frappe.set_route("Form", "Travel Booking", frm.doc.booking);
+                }, __("Go To"));
+            }
+            if (frm.doc.customer) {
+                frm.add_custom_button(__("View Customer"), function() {
+                    frappe.set_route("Form", "Travel Customer", frm.doc.customer);
+                }, __("Go To"));
+            }
+        }
+    },
+
+    tax_percent(frm) {
+        frm.trigger("calculate_totals");
+    },
+
+    discount(frm) {
+        frm.trigger("calculate_totals");
+    },
+
+    paid_amount(frm) {
+        frm.trigger("calculate_totals");
+    },
+
+    calculate_totals(frm) {
+        let subtotal = 0;
+        (frm.doc.items || []).forEach(item => {
+            item.amount = flt(item.quantity) * flt(item.rate);
+            subtotal += item.amount;
+        });
+        frm.set_value("subtotal", subtotal);
+        const tax_amount = subtotal * flt(frm.doc.tax_percent) / 100;
+        frm.set_value("tax_amount", tax_amount);
+        const grand_total = subtotal + tax_amount - flt(frm.doc.discount);
+        frm.set_value("grand_total", grand_total);
+        frm.set_value("outstanding_amount", grand_total - flt(frm.doc.paid_amount));
+        frm.refresh_fields();
+    }
+});
+
+frappe.ui.form.on("Invoice Item", {
+    quantity(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        frappe.model.set_value(cdt, cdn, "amount", flt(row.quantity) * flt(row.rate));
+        frm.trigger("calculate_totals");
+    },
+    rate(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        frappe.model.set_value(cdt, cdn, "amount", flt(row.quantity) * flt(row.rate));
+        frm.trigger("calculate_totals");
+    },
+    items_remove(frm) {
+        frm.trigger("calculate_totals");
     }
 });

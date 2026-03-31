@@ -1,0 +1,288 @@
+{
+ "actions": [],
+ "autoname": "LEAD-.#####",
+ "creation": "2026-03-31 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "lead_name",
+  "status",
+  "source",
+  "column_break_header",
+  "email",
+  "phone",
+  "mobile_no",
+  "section_company",
+  "company_name",
+  "designation",
+  "column_break_company",
+  "industry",
+  "website",
+  "section_assignment",
+  "assigned_to",
+  "lead_owner",
+  "column_break_assign",
+  "priority",
+  "next_follow_up",
+  "section_travel_interest",
+  "interested_destination",
+  "travel_type",
+  "column_break_interest",
+  "expected_travel_date",
+  "expected_budget",
+  "num_travelers",
+  "section_address",
+  "city",
+  "country",
+  "column_break_addr",
+  "address",
+  "section_notes",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "lead_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name",
+   "reqd": 1
+  },
+  {
+   "default": "New",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "New\nContacted\nInterested\nQualified\nConverted\nDo Not Contact",
+   "reqd": 1
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Lead Source",
+   "options": "\nWebsite\nPhone\nEmail\nWalk-in\nReferral\nSocial Media\nFacebook\nInstagram\nGoogle Ads\nTravel Fair\nPartner Agency\nOther"
+  },
+  {
+   "fieldname": "column_break_header",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "options": "Phone",
+   "description": "Used for WhatsApp integration"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_company",
+   "fieldtype": "Section Break",
+   "label": "Company / Organization"
+  },
+  {
+   "fieldname": "company_name",
+   "fieldtype": "Data",
+   "label": "Company Name"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation"
+  },
+  {
+   "fieldname": "column_break_company",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "industry",
+   "fieldtype": "Data",
+   "label": "Industry"
+  },
+  {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website"
+  },
+  {
+   "fieldname": "section_assignment",
+   "fieldtype": "Section Break",
+   "label": "Assignment & Follow-up"
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assigned To",
+   "options": "Travel Agency Staff"
+  },
+  {
+   "fieldname": "lead_owner",
+   "fieldtype": "Link",
+   "label": "Lead Owner",
+   "options": "User",
+   "default": "__user"
+  },
+  {
+   "fieldname": "column_break_assign",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nUrgent"
+  },
+  {
+   "fieldname": "next_follow_up",
+   "fieldtype": "Date",
+   "label": "Next Follow-up"
+  },
+  {
+   "fieldname": "section_travel_interest",
+   "fieldtype": "Section Break",
+   "label": "Travel Interest"
+  },
+  {
+   "fieldname": "interested_destination",
+   "fieldtype": "Link",
+   "label": "Interested Destination",
+   "options": "Travel Destination"
+  },
+  {
+   "fieldname": "travel_type",
+   "fieldtype": "Link",
+   "label": "Travel Type",
+   "options": "Travel Type"
+  },
+  {
+   "fieldname": "column_break_interest",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expected_travel_date",
+   "fieldtype": "Date",
+   "label": "Expected Travel Date"
+  },
+  {
+   "fieldname": "expected_budget",
+   "fieldtype": "Currency",
+   "label": "Expected Budget"
+  },
+  {
+   "default": "1",
+   "fieldname": "num_travelers",
+   "fieldtype": "Int",
+   "label": "Number of Travelers"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_address",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "column_break_addr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Full Address"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text Editor",
+   "label": "Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Conversion",
+   "link_doctype": "Travel Inquiry",
+   "link_fieldname": "lead"
+  },
+  {
+   "group": "Customer",
+   "link_doctype": "Travel Customer",
+   "link_fieldname": "lead"
+  }
+ ],
+ "modified": "2026-03-31 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Horizon CRM",
+ "name": "Travel Lead",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "Agency Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Agency Team Lead",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Agency Staff",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "lead_name",
+ "track_changes": 1,
+ "track_views": 1
+}
