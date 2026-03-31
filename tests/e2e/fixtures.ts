@@ -11,36 +11,26 @@ export function getCsrfToken(): string {
 /** Credentials for different roles used in tests */
 export const USERS = {
   admin: { email: "Administrator", password: "admin" },
-  agencyAdmin1: {
+  agencyAdmin: {
     email: "admin@agency1.test",
     password: "Test@1234",
-    agency: "Test Agency Alpha",
   },
-  agencyAdmin2: {
-    email: "admin@agency2.test",
-    password: "Test@1234",
-    agency: "Test Agency Beta",
-  },
-  teamLead1: {
+  teamLead: {
     email: "lead@agency1.test",
     password: "Test@1234",
-    agency: "Test Agency Alpha",
   },
-  staff1: {
+  staff: {
     email: "staff@agency1.test",
     password: "Test@1234",
-    agency: "Test Agency Alpha",
   },
-  customer1: {
+  customer: {
     email: "customer@agency1.test",
     password: "Test@1234",
-    agency: "Test Agency Alpha",
   },
 };
 
 /** Log in to Frappe desk via API */
 export async function login(page: Page, email: string, password: string) {
-  // Navigate to login page first to get cookies/CSRF
   await page.goto("/login", { waitUntil: "domcontentloaded" });
   const resp = await page.request.post("/api/method/login", {
     form: { usr: email, pwd: password },
@@ -49,21 +39,18 @@ export async function login(page: Page, email: string, password: string) {
     const body = await resp.text();
     throw new Error(`Login failed for ${email}: ${resp.status()} ${body}`);
   }
-  // Navigate to desk — Frappe may use /app or /desk depending on version
   await page.goto("/app", { waitUntil: "domcontentloaded" });
-  // Wait for Frappe to fully initialize and provide CSRF token
   try {
     await page.waitForFunction(() => (window as any).frappe?.csrf_token, null, {
       timeout: 15_000,
     });
   } catch {
-    // If /app redirected to /desk, the CSRF token should still be available
+    // CSRF token should still be available even if redirected
   }
   csrfToken = await page.evaluate(() => {
     return (window as any).frappe?.csrf_token || "";
   });
   if (!csrfToken) {
-    // Fallback: extract from cookie or retry
     throw new Error(`Failed to extract CSRF token for ${email}`);
   }
 }

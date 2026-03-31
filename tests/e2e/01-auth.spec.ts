@@ -7,27 +7,45 @@ import { USERS, login, logout } from "./fixtures";
 
 test.describe("Authentication", () => {
   test("Administrator can log in to desk", async ({ page }) => {
+    // Arrange — no special setup needed
+
+    // Act — login as Administrator
     await login(page, USERS.admin.email, USERS.admin.password);
+
+    // Assert — should reach the desk
     await expect(page).toHaveURL(/\/(app|desk)/);
     await expect(page.locator(".navbar")).toBeVisible();
   });
 
   test("Agency Admin can log in to desk", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+    // Arrange — no special setup needed
+
+    // Act — login as Agency Admin
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Assert — should reach the desk
     await expect(page).toHaveURL(/\/(app|desk)/);
     await expect(page.locator(".navbar")).toBeVisible();
   });
 
   test("Agency Staff can log in to desk", async ({ page }) => {
-    await login(page, USERS.staff1.email, USERS.staff1.password);
+    // Arrange — no special setup needed
+
+    // Act — login as Staff
+    await login(page, USERS.staff.email, USERS.staff.password);
+
+    // Assert — should reach the desk
     await expect(page).toHaveURL(/\/(app|desk)/);
   });
 
   test("Customer is redirected to portal", async ({ page }) => {
-    await login(page, USERS.customer1.email, USERS.customer1.password);
-    // Customer role_home_page should redirect to /portal
+    // Arrange — no special setup needed
+
+    // Act — login as customer and navigate to desk
+    await login(page, USERS.customer.email, USERS.customer.password);
     await page.goto("/app", { waitUntil: "domcontentloaded" });
-    // Customer should not see desk sidebar admin items
+
+    // Assert — customer should not see admin sidebar items
     const sidebar = page.locator(".desk-sidebar");
     if (await sidebar.isVisible()) {
       await expect(
@@ -37,44 +55,54 @@ test.describe("Authentication", () => {
   });
 
   test("Invalid credentials show error", async ({ page }) => {
+    // Arrange — no special setup needed
+
+    // Act — attempt login with bad credentials
     const resp = await page.request.post("/api/method/login", {
       form: { usr: "nonexistent@test.com", pwd: "wrongpassword" },
     });
+
+    // Assert — should get 401
     expect(resp.status()).toBe(401);
   });
 
   test("Unauthenticated user cannot access API", async ({ page }) => {
-    // Fresh page has no session — navigating to desk should redirect to login
+    // Arrange — fresh page with no session
+
+    // Act — navigate to desk
     await page.goto("/app", { waitUntil: "domcontentloaded" });
+
+    // Assert — should redirect to login
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 
   test("Logout clears the session", async ({ browser }) => {
-    // Use a dedicated context so we can verify session is truly cleared
+    // Arrange — create a dedicated context and login
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
 
-    // Verify we can access protected resources before logout
+    // Act — verify access, then logout and clear cookies
     const before = await page.request.get("/api/resource/Travel Booking");
     expect(before.ok()).toBeTruthy();
-
-    // Logout
     await logout(page);
-
-    // Clear cookies to simulate a truly logged-out state
     await ctx.clearCookies();
 
-    // After clearing cookies, API should deny access
+    // Assert — API should deny access
     const resp = await page.request.get("/api/resource/Travel Booking");
     expect([403, 401]).toContain(resp.status());
     await ctx.close();
   });
 
   test("Session cookie is HttpOnly", async ({ page, context }) => {
+    // Arrange — login
     await login(page, USERS.admin.email, USERS.admin.password);
+
+    // Act — read cookies
     const cookies = await context.cookies();
     const sidCookie = cookies.find((c) => c.name === "sid");
+
+    // Assert — sid must be HttpOnly
     expect(sidCookie).toBeDefined();
     expect(sidCookie!.httpOnly).toBeTruthy();
   });

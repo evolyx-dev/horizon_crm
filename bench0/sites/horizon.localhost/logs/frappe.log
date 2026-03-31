@@ -1,0 +1,510 @@
+2026-03-30 17:31:22,953 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:31:48,787 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'email': 'admin@agency1.test', 'first_name': 'Agency1 Admin', 'new_password': '********', 'send_welcome_email': 0}
+2026-03-30 17:31:58,117 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'email': 'admin@agency1.test', 'first_name': 'Agency1 Admin', 'new_password': '********', 'send_welcome_email': 0}
+2026-03-30 17:32:16,073 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:34:00,077 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:34:25,431 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'agency_name': 'Test Agency Alpha', 'contact_email': 'admin@agency1.test', 'admin_user': 'admin@agency1.test', 'max_staff': 10, 'status': 'Active'}
+2026-03-30 17:35:41,199 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:13,192 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:13,317 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:13,420 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:13,528 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:13,630 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:42,579 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:42,717 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:42,810 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:42,910 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:43,005 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:43,133 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:37:43,278 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 17:39:23,788 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 17:39:23,809 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 17:39:26,092 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 17:42:42,916 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'customer': 'CUST-00002', 'agency': 'Test Agency Alpha', 'travel_type': 'Honeymoon', 'destination': 'Paris', 'departure_date': '2025-06-01', 'return_date': '2025-06-15', 'number_of_travelers': 2, 'budget': 5000, 'status': 'New', 'source': 'Website'}
+2026-03-30 17:42:16,362 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'customer': 'CUST-00003', 'agency': 'Test Agency Alpha', 'travel_type': 'Honeymoon', 'destination': 'Bali', 'departure_date': '2025-07-01', 'return_date': '2025-07-14', 'number_of_travelers': 2, 'total_amount': 10000, 'status': 'Draft'}
+2026-03-30 17:42:20,174 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'customer': 'CUST-00004', 'agency': 'Test Agency Alpha', 'travel_type': 'Adventure', 'destination': 'Tokyo', 'departure_date': '2025-08-01', 'return_date': '2025-08-10', 'number_of_travelers': 1, 'budget': 3000, 'status': 'New', 'source': 'Phone'}
+2026-03-30 17:42:32,278 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'travel_type': 'Honeymoon', 'destination': 'Maldives', 'departure_date': '2025-09-01', 'return_date': '2025-09-10', 'number_of_travelers': 2, 'budget': 8000, 'notes': 'E2E portal test inquiry', 'cmd': 'horizon_crm.api.portal.submit_inquiry'}
+2026-03-30 17:42:36,270 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'booking': 'BK-00001', 'rating': 5, 'comments': 'Excellent trip! E2E test feedback.', 'cmd': 'horizon_crm.api.portal.submit_feedback'}
+2026-03-30 17:42:37,974 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 17:42:40,639 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'filters': '{"agency":"Test Agency Beta"}', 'limit_page_length': 20}
+2026-03-30 17:44:08,272 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'itinerary_name': 'E2E Itinerary 1774892648218', 'agency': 'Test Agency Alpha', 'destination': 'Paris', 'duration_days': 5, 'total_cost': 0, 'items': [{'day_number': 1, 'title': 'Arrival & Hotel Check-in', 'description': 'Transfer from airport', 'cost': 200}, {'day_number': 2, 'title': 'Eiffel Tower Tour', 'description': 'Full day sightseeing', 'cost': 150}]}
+2026-03-30 17:52:11,177 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 17:52:11,193 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 17:52:13,415 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 17:53:28,628 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'status': 'Suspended'}
+2026-03-30 17:54:04,319 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'agency_name': 'Unauthorized Agency', 'contact_email': 'hack@test.example', 'max_staff': 5}
+2026-03-30 17:54:42,279 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'agency': 'Test Agency Alpha', 'role': 'Agency Staff', 'is_active': 1}
+2026-03-30 17:54:44,668 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'customer': 'CUST-00002', 'agency': 'Test Agency Alpha', 'travel_type': 'Honeymoon', 'destination': 'Paris', 'departure_date': '2025-06-01', 'return_date': '2025-06-15', 'number_of_travelers': 2, 'budget': 5000, 'status': 'New', 'source': 'Website'}
+2026-03-30 17:54:48,191 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'customer': 'CUST-00003', 'agency': 'Test Agency Alpha', 'travel_type': 'Honeymoon', 'destination': 'Bali', 'departure_date': '2025-07-01', 'return_date': '2025-07-14', 'number_of_travelers': 2, 'total_amount': 10000, 'status': 'Draft'}
+2026-03-30 17:54:51,843 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'customer': 'CUST-00004', 'agency': 'Test Agency Alpha', 'travel_type': 'Adventure', 'destination': 'Tokyo', 'departure_date': '2025-08-01', 'return_date': '2025-08-10', 'number_of_travelers': 1, 'budget': 3000, 'status': 'New', 'source': 'Phone'}
+2026-03-30 17:55:02,397 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'travel_type': 'Honeymoon', 'destination': 'Maldives', 'departure_date': '2025-09-01', 'return_date': '2025-09-10', 'number_of_travelers': 2, 'budget': 8000, 'notes': 'E2E portal test inquiry', 'cmd': 'horizon_crm.api.portal.submit_inquiry'}
+2026-03-30 17:55:06,460 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'booking': 'BK-00003', 'rating': 5, 'comments': 'Excellent trip! E2E test feedback.', 'cmd': 'horizon_crm.api.portal.submit_feedback'}
+2026-03-30 17:55:08,292 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 17:55:09,888 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'filters': '{"agency":"Test Agency Beta"}', 'limit_page_length': 20}
+2026-03-30 17:56:59,882 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'itinerary_name': 'E2E Itinerary 1774893419863', 'agency': 'Test Agency Alpha', 'destination': 'Paris', 'duration_days': 5, 'total_cost': 0, 'items': [{'day_number': 1, 'title': 'Arrival & Hotel Check-in', 'description': 'Transfer from airport', 'cost': 200}, {'day_number': 2, 'title': 'Eiffel Tower Tour', 'description': 'Full day sightseeing', 'cost': 150}]}
+2026-03-30 18:40:24,323 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 18:40:29,983 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'agency_name': 'Unauthorized Agency', 'contact_email': 'hack@test.example', 'max_staff': 5}
+2026-03-30 18:40:53,129 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'agency': 'Test Agency Alpha', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-30 18:41:13,622 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:41:42,833 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:41:57,340 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:42:01,905 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:42:34,437 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'customer_name': 'Hacked Name'}
+2026-03-30 18:42:08,500 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:42:28,001 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'travel_type': 'Honeymoon', 'destination': 'Maldives', 'departure_date': '2025-09-01', 'return_date': '2025-09-10', 'num_travelers': 2, 'budget_min': 5000, 'budget_max': 8000, 'notes': 'E2E portal test inquiry', 'cmd': 'horizon_crm.api.portal.submit_inquiry'}
+2026-03-30 18:42:31,529 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'booking': 'BK-00008', 'rating': 5, 'comments': 'Excellent trip! E2E test feedback.', 'cmd': 'horizon_crm.api.portal.submit_feedback'}
+2026-03-30 18:42:32,822 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 18:42:34,026 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'filters': '{"agency":"Test Agency Beta"}', 'limit_page_length': 20}
+2026-03-30 18:46:41,441 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 18:47:07,221 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'agency_name': 'Unauthorized Agency', 'contact_email': 'hack@test.example', 'max_staff': 5}
+2026-03-30 18:47:29,179 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'agency': 'Test Agency Alpha', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-30 18:47:49,691 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:48:11,513 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:48:23,246 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:48:27,659 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:49:00,092 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'customer_name': 'Hacked Name'}
+2026-03-30 18:48:33,555 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:48:55,282 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'travel_type': 'Honeymoon', 'destination': 'Maldives', 'departure_date': '2025-09-01', 'return_date': '2025-09-10', 'num_travelers': 2, 'budget_min': 5000, 'budget_max': 8000, 'notes': 'E2E portal test inquiry', 'cmd': 'horizon_crm.api.portal.submit_inquiry'}
+2026-03-30 18:49:00,257 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'booking': 'BK-00012', 'rating': 5, 'comments': 'Excellent trip! E2E test feedback.', 'cmd': 'horizon_crm.api.portal.submit_feedback'}
+2026-03-30 18:49:01,671 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 18:49:02,797 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'filters': '{"agency":"Test Agency Beta"}', 'limit_page_length': 20}
+2026-03-30 18:49:41,749 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'doctype': 'Travel Agency', 'fields': '["`tabTravel Agency`.`name`","`tabTravel Agency`.`owner`","`tabTravel Agency`.`creation`","`tabTravel Agency`.`modified`","`tabTravel Agency`.`modified_by`","`tabTravel Agency`.`_user_tags`","`tabTravel Agency`.`_comments`","`tabTravel Agency`.`_assign`","`tabTravel Agency`.`_liked_by`","`tabTravel Agency`.`docstatus`","`tabTravel Agency`.`idx`","`tabTravel Agency`.`agency_name`","`tabTravel Agency`.`agency_code`","`tabTravel Agency`.`status`","`tabTravel Agency`.`logo`"]', 'filters': '[]', 'order_by': '`tabTravel Agency`.`modified` desc', 'start': '0', 'page_length': '20', 'view': 'List', 'group_by': '', 'with_comment_count': '1', 'cmd': 'frappe.desk.reportview.get'}
+2026-03-30 18:51:04,930 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 18:51:05,007 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 18:51:39,911 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 18:51:39,948 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 18:52:03,582 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'agency_name': 'Unauthorized Agency', 'contact_email': 'hack@test.example', 'max_staff': 5}
+2026-03-30 18:52:21,459 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'agency': 'Test Agency Alpha', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-30 18:52:41,602 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:53:05,494 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:53:16,318 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:53:21,701 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:53:24,583 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'customer_name': 'Hacked Name'}
+2026-03-30 18:53:26,992 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 18:53:49,218 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'travel_type': 'Honeymoon', 'destination': 'Maldives', 'departure_date': '2025-09-01', 'return_date': '2025-09-10', 'num_travelers': 2, 'budget_min': 5000, 'budget_max': 8000, 'notes': 'E2E portal test inquiry', 'cmd': 'horizon_crm.api.portal.submit_inquiry'}
+2026-03-30 18:53:52,473 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'booking': 'BK-00016', 'rating': 5, 'comments': 'Excellent trip! E2E test feedback.', 'cmd': 'horizon_crm.api.portal.submit_feedback'}
+2026-03-30 18:53:54,094 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 18:53:55,212 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'filters': '{"agency":"Test Agency Beta"}', 'limit_page_length': 20}
+2026-03-30 19:26:24,284 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 19:26:24,318 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 19:26:10,291 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'phone': '+0000000000'}
+2026-03-30 19:26:23,002 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-30 19:27:12,379 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 19:27:42,664 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 19:33:40,692 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 19:33:40,723 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 19:33:59,419 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'phone': '+0000000000'}
+2026-03-30 19:34:16,745 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-30 19:34:57,979 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-30 19:34:59,114 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'hack@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-30 19:35:24,055 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 19:35:57,308 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'doctype': 'Travel Inquiry', 'fields': '["`tabTravel Inquiry`.`name`","`tabTravel Inquiry`.`owner`","`tabTravel Inquiry`.`creation`","`tabTravel Inquiry`.`modified`","`tabTravel Inquiry`.`modified_by`","`tabTravel Inquiry`.`_user_tags`","`tabTravel Inquiry`.`_comments`","`tabTravel Inquiry`.`_assign`","`tabTravel Inquiry`.`_liked_by`","`tabTravel Inquiry`.`docstatus`","`tabTravel Inquiry`.`idx`","`tabTravel Inquiry`.`inquiry_number`","`tabTravel Inquiry`.`status`","`tabTravel Inquiry`.`customer_name`"]', 'filters': '[]', 'order_by': '`tabTravel Inquiry`.`modified` desc', 'start': '0', 'page_length': '20', 'view': 'List', 'group_by': '', 'with_comment_count': '1', 'cmd': 'frappe.desk.reportview.get'}
+2026-03-30 19:37:10,857 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-30 19:37:10,953 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-30 19:37:30,745 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'phone': '+0000000000'}
+2026-03-30 19:37:48,656 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 01:38:16,654 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 01:38:18,071 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'hack@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 03:40:12,759 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:17:58,926 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'frappe.auth.get_logged_user'}
+2026-03-31 04:18:25,241 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-31 04:18:25,286 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:18:39,105 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'phone': '+0000000000'}
+2026-03-31 04:18:52,360 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:20:06,712 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:20:08,876 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'hack@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:20:37,930 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:21:44,570 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-31 04:21:44,594 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:21:23,121 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'phone': '+0000000000'}
+2026-03-31 04:21:32,990 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:22:43,772 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:22:14,888 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'hack@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:22:38,141 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:26:49,089 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-31 04:27:04,347 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'phone': '+0000000000'}
+2026-03-31 04:27:16,404 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:27:55,124 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:27:57,325 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'hack@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:28:22,929 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:29:27,184 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-31 04:29:27,205 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:29:38,966 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'phone': '+0000000000'}
+2026-03-31 04:29:47,155 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:30:16,908 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:30:18,413 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'hack@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:30:40,602 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:31:43,343 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-31 04:31:43,382 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:32:24,250 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-31 04:32:24,302 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:33:09,993 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'phone': '+0000000000'}
+2026-03-31 04:32:50,506 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:34:01,092 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:34:03,208 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'hack@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:33:56,258 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:35:01,176 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'cmd': 'logout'}
+2026-03-31 04:35:01,211 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:35:12,560 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'phone': '+0000000000'}
+2026-03-31 04:35:23,102 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'overflow@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:35:52,268 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:25,508 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'staff_user': 'hack@test.example', 'role_in_agency': 'Staff', 'is_active': 1}
+2026-03-31 04:36:11,273 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'limit_page_length': 20}
+2026-03-31 04:36:31,217 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'doctype': 'Travel Inquiry', 'filters': '[]', 'fields': '[]', 'distinct': 'false', 'limit': '1001', 'cmd': 'frappe.desk.reportview.get_count'}
+2026-03-31 04:36:48,990 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'filters': '{"customer_name":"Booking Test Customer"}', 'limit_page_length': '100'}
+2026-03-31 04:36:49,006 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'filters': '{"customer_name":"Inquiry Test Customer"}', 'limit_page_length': '100'}
+2026-03-31 04:36:49,023 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {'filters': '{"customer_name":"Test Customer One"}', 'limit_page_length': '100'}
+2026-03-31 04:36:49,066 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,090 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,115 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,161 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,187 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,212 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,237 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,319 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,399 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,476 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,550 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:49,626 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:51,659 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}
+2026-03-31 04:36:51,694 ERROR frappe New Exception collected in error log
+Site: horizon.localhost
+Form Dict: {}

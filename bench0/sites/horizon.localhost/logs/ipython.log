@@ -1,0 +1,83 @@
+2026-03-30 17:37:28,679 INFO ipython === bench console session ===
+2026-03-30 17:37:28,679 INFO ipython import frappe
+2026-03-30 17:37:28,679 INFO ipython for email in ["admin@agency1.test", "admin@agency2.test", "lead@agency1.test", "staff@agency1.test", "customer@agency1.test"]:
+    if frappe.db.exists("User", email):
+        frappe.delete_doc("User", email, force=True)
+        print(f"Deleted {email}")
+    else:
+        print(f"Not found: {email}")
+frappe.db.commit()
+2026-03-30 17:37:28,679 INFO ipython === session end ===
+2026-03-30 18:02:37,772 INFO ipython === bench console session ===
+2026-03-30 18:02:37,772 INFO ipython from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+2026-03-30 18:02:37,772 INFO ipython setup_complete({"language": "English", "country": "India", "timezone": "Asia/Kolkata", "currency": "INR"})
+2026-03-30 18:02:37,772 INFO ipython frappe.db.commit()
+2026-03-30 18:02:37,772 INFO ipython === session end ===
+2026-03-30 18:18:11,252 INFO ipython === bench console session ===
+2026-03-30 18:18:11,252 INFO ipython # Check current staff records and their role_in_agency values
+2026-03-30 18:18:11,253 INFO ipython staff = frappe.get_all("Travel Agency Staff", fields=["name", "staff_user", "role_in_agency", "agency"])
+2026-03-30 18:18:11,253 INFO ipython for s in staff:
+    print(f"  {s.name}: user={s.staff_user}, role_in_agency={s.role_in_agency}, agency={s.agency}")
+2026-03-30 18:18:11,253 INFO ipython # Check if teamLead1 has the Agency Team Lead role
+2026-03-30 18:18:11,253 INFO ipython user = frappe.get_doc("User", "lead@agency1.test")
+2026-03-30 18:18:11,253 INFO ipython roles = [r.role for r in user.roles]
+2026-03-30 18:18:11,253 INFO ipython print(f"\nlead@agency1.test roles: {roles}")
+2026-03-30 18:18:11,253 INFO ipython user2 = frappe.get_doc("User", "staff@agency1.test")
+2026-03-30 18:18:11,253 INFO ipython roles2 = [r.role for r in user2.roles]
+2026-03-30 18:18:11,253 INFO ipython print(f"staff@agency1.test roles: {roles2}")
+2026-03-30 18:18:11,253 INFO ipython === session end ===
+2026-03-30 18:18:31,414 INFO ipython === bench console session ===
+2026-03-30 18:18:31,415 INFO ipython # Fix lead staff record: role_in_agency should be "Team Lead"
+2026-03-30 18:18:31,415 INFO ipython lead_staff = frappe.get_all("Travel Agency Staff", filters={"staff_user": "lead@agency1.test"}, pluck="name")
+2026-03-30 18:18:31,415 INFO ipython if lead_staff:
+    doc = frappe.get_doc("Travel Agency Staff", lead_staff[0])
+    doc.role_in_agency = "Team Lead"
+    doc.save(ignore_permissions=True)
+    print(f"Updated {lead_staff[0]} role_in_agency to Team Lead")
+2026-03-30 18:18:31,415 INFO ipython # Fix lead user: add Agency Team Lead role
+2026-03-30 18:18:31,415 INFO ipython user = frappe.get_doc("User", "lead@agency1.test")
+2026-03-30 18:18:31,415 INFO ipython existing_roles = [r.role for r in user.roles]
+2026-03-30 18:18:31,415 INFO ipython if "Agency Team Lead" not in existing_roles:
+    user.append("roles", {"role": "Agency Team Lead"})
+    user.save(ignore_permissions=True)
+    print("Added Agency Team Lead role to lead@agency1.test")
+else:
+    print("lead@agency1.test already has Agency Team Lead role")
+2026-03-30 18:18:31,415 INFO ipython frappe.db.commit()
+2026-03-30 18:18:31,415 INFO ipython print("Done")
+2026-03-30 18:18:31,416 INFO ipython === session end ===
+2026-03-30 18:26:19,147 INFO ipython === bench console session ===
+2026-03-30 18:26:19,147 INFO ipython # Clean up stale test inquiry records (created with wrong fields, may have partial data)
+2026-03-30 18:26:19,147 INFO ipython stale = frappe.get_all("Travel Inquiry", pluck="name")
+2026-03-30 18:26:19,147 INFO ipython print(f"Travel Inquiries: {stale}")
+2026-03-30 18:26:19,147 INFO ipython for name in stale:
+    doc = frappe.get_doc("Travel Inquiry", name) 
+    print(f"  {name}: customer={doc.customer}, customer_name={doc.customer_name}, customer_email={doc.customer_email}, status={doc.status}")
+2026-03-30 18:26:19,147 INFO ipython # Check Travel Bookings
+2026-03-30 18:26:19,147 INFO ipython bookings = frappe.get_all("Travel Booking", pluck="name")
+2026-03-30 18:26:19,147 INFO ipython print(f"\nTravel Bookings: {bookings}")
+2026-03-30 18:26:19,147 INFO ipython === session end ===
+2026-03-30 19:17:37,589 INFO ipython === bench console session ===
+2026-03-30 19:17:37,589 INFO ipython import frappe
+2026-03-30 19:17:37,589 INFO ipython # Initialize the singleton Travel Agency
+2026-03-30 19:17:37,590 INFO ipython agency = frappe.get_single("Travel Agency")
+2026-03-30 19:17:37,590 INFO ipython agency.agency_name = "Test Agency Alpha"
+2026-03-30 19:17:37,590 INFO ipython agency.contact_email = "admin@agency1.test"
+2026-03-30 19:17:37,590 INFO ipython agency.status = "Active"
+2026-03-30 19:17:37,590 INFO ipython agency.max_staff = 10
+2026-03-30 19:17:37,590 INFO ipython agency.admin_user = "admin@agency1.test"
+2026-03-30 19:17:37,590 INFO ipython agency.save(ignore_permissions=True)
+2026-03-30 19:17:37,590 INFO ipython frappe.db.commit()
+2026-03-30 19:17:37,590 INFO ipython print("Agency Settings initialized:", agency.agency_name)
+2026-03-30 19:17:37,590 INFO ipython === session end ===
+2026-03-30 19:25:12,240 INFO ipython === bench console session ===
+2026-03-30 19:25:12,240 INFO ipython import frappe
+2026-03-30 19:25:12,240 INFO ipython # Clean up old agency-based records that may have the 'agency' field still populated
+2026-03-30 19:25:12,240 INFO ipython # The migration removed the column from the DocType, so existing rows may cause issues
+2026-03-30 19:25:12,240 INFO ipython # Check if Travel Agency Staff still has old records
+2026-03-30 19:25:12,240 INFO ipython old_staff = frappe.get_all("Travel Agency Staff", pluck="name")
+2026-03-30 19:25:12,240 INFO ipython print(f"Existing staff records: {old_staff}")
+2026-03-30 19:25:12,240 INFO ipython # Check existing users
+2026-03-30 19:25:12,240 INFO ipython existing_users = frappe.get_all("User", filters={"email": ["like", "%agency%"]}, pluck="email")
+2026-03-30 19:25:12,240 INFO ipython print(f"Existing test users: {existing_users}")
+2026-03-30 19:25:12,240 INFO ipython === session end ===

@@ -64,7 +64,6 @@ def submit_inquiry(
     customer_doc = frappe.get_doc("Travel Customer", customer)
 
     inquiry = frappe.new_doc("Travel Inquiry")
-    inquiry.agency = customer_doc.agency
     inquiry.customer = customer
     inquiry.customer_name = customer_doc.customer_name
     inquiry.customer_email = customer_doc.email
@@ -109,7 +108,6 @@ def submit_feedback(
     feedback = frappe.new_doc("Travel Feedback")
     feedback.booking = booking
     feedback.customer = customer
-    feedback.agency = booking_doc.agency
     feedback.rating = rating
     feedback.overall_experience = overall_experience
     feedback.comments = comments

@@ -1,22 +1,31 @@
 /**
  * Global setup — runs once before all test projects.
- * Creates test users and agencies used across the test suite.
+ * Creates test users and staff records used across the test suite.
+ *
+ * Role assignment flow:
+ *   1. Users are created with NO special roles (just basic desk access via user_type).
+ *   2. Agency singleton is configured with admin_user → triggers _ensure_admin_staff()
+ *      which creates a Travel Agency Staff record → after_insert hook assigns "Agency Admin" role.
+ *   3. Staff records are created for team lead and staff → after_insert hooks assign
+ *      "Agency Team Lead" and "Agency Staff" Frappe roles respectively.
+ *   4. Customer user gets "Agency Customer" role for portal access.
  */
 import { test as setup, expect } from "@playwright/test";
 import { USERS, login, createUser, createDoc, getCsrfToken } from "./fixtures";
 
 setup("bootstrap test data", async ({ page }) => {
-  // Login as Administrator
+  // Arrange — login as Administrator
   await login(page, USERS.admin.email, USERS.admin.password);
 
-  // ── Create Users ──────────────────────────────────────────────
-  // Users that manage agencies need "System Manager" role so they become System Users
+  // Act — create users needed for tests
+  // NOTE: Do NOT assign System Manager to non-admin users.
+  // The Travel Agency Staff after_insert hooks will assign the correct
+  // custom roles (Agency Admin, Agency Team Lead, Agency Staff).
   const usersToCreate = [
-    { email: USERS.agencyAdmin1.email, name: "Agency1 Admin", roles: ["System Manager"] },
-    { email: USERS.agencyAdmin2.email, name: "Agency2 Admin", roles: ["System Manager"] },
-    { email: USERS.teamLead1.email, name: "Agency1 Lead", roles: ["System Manager"] },
-    { email: USERS.staff1.email, name: "Agency1 Staff", roles: ["System Manager"] },
-    { email: USERS.customer1.email, name: "Agency1 Customer", roles: [] as string[] },
+    { email: USERS.agencyAdmin.email, name: "Agency Admin", roles: [] as string[] },
+    { email: USERS.teamLead.email, name: "Team Lead", roles: [] as string[] },
+    { email: USERS.staff.email, name: "Staff User", roles: [] as string[] },
+    { email: USERS.customer.email, name: "Portal Customer", roles: ["Agency Customer"] },
   ];
 
   for (const u of usersToCreate) {
@@ -29,63 +38,56 @@ setup("bootstrap test data", async ({ page }) => {
       }
       expect([200, 409]).toContain(resp.status());
     } else {
-      // Ensure existing user has the correct roles (may have been created without them)
-      if (u.roles.length > 0) {
-        const userData = await check.json();
-        const existingRoles = (userData.data.roles || []).map((r: { role: string }) => r.role);
-        const missingRoles = u.roles.filter((r) => !existingRoles.includes(r));
-        if (missingRoles.length > 0) {
-          const newRoles = [
-            ...userData.data.roles,
-            ...missingRoles.map((r) => ({ role: r })),
-          ];
-          await page.request.put(`/api/resource/User/${u.email}`, {
-            headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
-            data: { roles: newRoles },
-          });
-        }
+      // Ensure existing user has the correct roles and does NOT have System Manager
+      // (clean up from previous test runs that assigned System Manager)
+      const userData = await check.json();
+      const existingRoles: string[] = (userData.data.roles || []).map(
+        (r: { role: string }) => r.role
+      );
+
+      // Remove System Manager if user is not Administrator
+      const shouldRemoveSM =
+        u.email !== USERS.admin.email && existingRoles.includes("System Manager");
+
+      const missingRoles = u.roles.filter((r) => !existingRoles.includes(r));
+
+      if (shouldRemoveSM || missingRoles.length > 0) {
+        let newRoles = userData.data.roles.filter(
+          (r: { role: string }) =>
+            !(shouldRemoveSM && r.role === "System Manager")
+        );
+        newRoles = [...newRoles, ...missingRoles.map((r) => ({ role: r }))];
+        await page.request.put(`/api/resource/User/${u.email}`, {
+          headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
+          data: { roles: newRoles },
+        });
       }
     }
   }
 
-  // ── Create Travel Agencies ────────────────────────────────────
-  const agencies = [
-    {
-      agency_name: USERS.agencyAdmin1.agency,
-      contact_email: USERS.agencyAdmin1.email,
-      admin_user: USERS.agencyAdmin1.email,
+  // Act — configure Agency Settings singleton
+  // Setting admin_user triggers _ensure_admin_staff() which creates a staff
+  // record with role_in_agency="Agency Admin" → after_insert assigns "Agency Admin" role.
+  await page.request.put("/api/resource/Travel Agency/Travel Agency", {
+    headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
+    data: {
+      agency_name: "Test Agency Alpha",
+      contact_email: USERS.agencyAdmin.email,
+      admin_user: USERS.agencyAdmin.email,
       max_staff: 10,
       status: "Active",
     },
-    {
-      agency_name: USERS.agencyAdmin2.agency,
-      contact_email: USERS.agencyAdmin2.email,
-      admin_user: USERS.agencyAdmin2.email,
-      max_staff: 10,
-      status: "Active",
-    },
-  ];
+  });
 
-  for (const a of agencies) {
-    const check = await page.request.get(
-      `/api/resource/Travel Agency/${encodeURIComponent(a.agency_name)}`
-    );
-    if (!check.ok()) {
-      await createDoc(page, "Travel Agency", a);
-    }
-  }
-
-  // ── Create Staff for Agency 1 ────────────────────────────────
+  // Act — create staff records (triggers after_insert → assign_role for each)
   const staffRecords = [
     {
-      staff_user: USERS.teamLead1.email,
-      agency: USERS.teamLead1.agency,
+      staff_user: USERS.teamLead.email,
       role_in_agency: "Team Lead",
       is_active: 1,
     },
     {
-      staff_user: USERS.staff1.email,
-      agency: USERS.staff1.agency,
+      staff_user: USERS.staff.email,
       role_in_agency: "Staff",
       is_active: 1,
     },
@@ -99,29 +101,40 @@ setup("bootstrap test data", async ({ page }) => {
     const body = await check.json();
     if (body.data.length === 0) {
       await createDoc(page, "Travel Agency Staff", s);
-    } else {
-      // Update existing staff record if role_in_agency is wrong
-      const existing = await page.request.get(
-        `/api/resource/Travel Agency Staff/${body.data[0].name}`
+    }
+  }
+
+  // Verify roles were assigned correctly by the hooks
+  for (const [userKey, expectedRole] of [
+    ["agencyAdmin", "Agency Admin"],
+    ["teamLead", "Agency Team Lead"],
+    ["staff", "Agency Staff"],
+  ] as const) {
+    const userEmail = USERS[userKey].email;
+    const userResp = await page.request.get(`/api/resource/User/${userEmail}`);
+    if (userResp.ok()) {
+      const userData = await userResp.json();
+      const roles: string[] = (userData.data.roles || []).map(
+        (r: { role: string }) => r.role
       );
-      const existingData = await existing.json();
-      if (existingData.data.role_in_agency !== s.role_in_agency) {
-        await page.request.put(
-          `/api/resource/Travel Agency Staff/${body.data[0].name}`,
-          {
-            headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
-            data: { role_in_agency: s.role_in_agency },
-          }
+      if (!roles.includes(expectedRole)) {
+        console.warn(
+          `⚠️ User ${userEmail} missing expected role "${expectedRole}". ` +
+          `Current roles: [${roles.join(", ")}]. Adding it manually.`
         );
+        // Fallback: add the role manually if hooks didn't fire
+        await page.request.put(`/api/resource/User/${userEmail}`, {
+          headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
+          data: {
+            roles: [...userData.data.roles, { role: expectedRole }],
+          },
+        });
       }
     }
   }
 
-  // ── Create a Customer for Agency 1 ───────────────────────────
-  const custFilters = JSON.stringify({
-    email: USERS.customer1.email,
-    agency: USERS.customer1.agency,
-  });
+  // Act — create a customer record for portal tests
+  const custFilters = JSON.stringify({ email: USERS.customer.email });
   const custCheck = await page.request.get(
     `/api/resource/Travel Customer?filters=${custFilters}`
   );
@@ -129,10 +142,9 @@ setup("bootstrap test data", async ({ page }) => {
   if (custBody.data.length === 0) {
     await createDoc(page, "Travel Customer", {
       customer_name: "Test Customer One",
-      email: USERS.customer1.email,
+      email: USERS.customer.email,
       phone: "+1234567890",
-      agency: USERS.customer1.agency,
-      portal_user: USERS.customer1.email,
+      portal_user: USERS.customer.email,
     });
   }
 });

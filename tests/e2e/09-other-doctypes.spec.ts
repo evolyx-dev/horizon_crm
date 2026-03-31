@@ -1,16 +1,18 @@
 /**
- * Itinerary, Supplier & Feedback E2E Tests
- * Covers: itinerary cost calculations, supplier management, feedback workflow
+ * Itinerary, Supplier, Feedback & Team E2E Tests
+ * Covers: itinerary cost calculations, supplier management, feedback workflow, teams
  */
 import { test, expect } from "@playwright/test";
 import { USERS, login, createDoc, gotoList } from "./fixtures";
 
 test.describe("Itinerary Management", () => {
   test("Agency Admin can create an itinerary", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+    // Arrange — login
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Act — create itinerary with items
     const resp = await createDoc(page, "Travel Itinerary", {
       itinerary_name: `E2E Itinerary ${Date.now()}`,
-      agency: USERS.agencyAdmin1.agency,
       start_date: "2025-06-01",
       end_date: "2025-06-05",
       total_cost: 0,
@@ -29,41 +31,34 @@ test.describe("Itinerary Management", () => {
         },
       ],
     });
+
+    // Assert — total cost should be calculated
     expect(resp.data.name).toBeDefined();
-    // Total cost should be calculated
     expect(resp.data.total_cost).toBe(350);
   });
 
-  test("Agency2 cannot access Agency1 itineraries", async ({ page }) => {
-    await login(page, USERS.agencyAdmin2.email, USERS.agencyAdmin2.password);
-    const resp = await page.request.get(
-      `/api/resource/Travel Itinerary?filters=${JSON.stringify({
-        agency: USERS.agencyAdmin1.agency,
-      })}`
-    );
-    if (resp.ok()) {
-      const body = await resp.json();
-      expect(body.data.length).toBe(0);
-    }
-  });
-
   test("Itinerary list view loads", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+    // Arrange — login
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Act
     await gotoList(page, "Travel Itinerary");
+
+    // Assert
     await expect(page.locator(".frappe-list")).toBeVisible();
   });
 });
 
 test.describe("Supplier Management", () => {
   test("Agency Admin can create a supplier", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+    // Arrange — login
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Act — create supplier
     const resp = await createDoc(page, "Travel Supplier", {
       supplier_name: `E2E Supplier ${Date.now()}`,
-      agency: USERS.agencyAdmin1.agency,
       supplier_type: "Hotel",
       contact_email: "supplier@test.example",
-      contact_phone: "+4444444444",
-      status: "Active",
       services: [
         {
           service_name: "Deluxe Room",
@@ -72,48 +67,37 @@ test.describe("Supplier Management", () => {
         },
       ],
     });
+
+    // Assert
     expect(resp.data.name).toBeDefined();
   });
 
-  test("Agency2 cannot access Agency1 suppliers", async ({ page }) => {
-    await login(page, USERS.agencyAdmin2.email, USERS.agencyAdmin2.password);
-    const resp = await page.request.get(
-      `/api/resource/Travel Supplier?filters=${JSON.stringify({
-        agency: USERS.agencyAdmin1.agency,
-      })}`
-    );
-    if (resp.ok()) {
-      const body = await resp.json();
-      expect(body.data.length).toBe(0);
-    }
-  });
-
   test("Supplier list view loads", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+    // Arrange — login
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Act
     await gotoList(page, "Travel Supplier");
+
+    // Assert
     await expect(page.locator(".frappe-list")).toBeVisible();
   });
 });
 
 test.describe("Travel Feedback", () => {
   test("Feedback can be created for a booking", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
-
-    // Get an existing customer
+    // Arrange — login and get a customer
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
     const custResp = await page.request.get(
-      `/api/resource/Travel Customer?filters=${JSON.stringify({
-        agency: USERS.agencyAdmin1.agency,
-      })}&limit_page_length=1`
+      `/api/resource/Travel Customer?limit_page_length=1`
     );
     const custBody = await custResp.json();
     if (custBody.data.length === 0) return;
-
     const customerName = custBody.data[0].name;
 
-    // Create a booking to attach feedback to
+    // Arrange — create a completed booking
     const bookResp = await createDoc(page, "Travel Booking", {
       customer: customerName,
-      agency: USERS.agencyAdmin1.agency,
       departure_date: "2025-05-01",
       return_date: "2025-05-07",
       num_travelers: 2,
@@ -122,55 +106,55 @@ test.describe("Travel Feedback", () => {
       status: "Completed",
     });
 
-    // Create feedback
+    // Act — create feedback
     const fbResp = await createDoc(page, "Travel Feedback", {
       booking: bookResp.data.name,
       customer: customerName,
-      agency: USERS.agencyAdmin1.agency,
       rating: 0.8,
       overall_experience: "Good",
       comments: "Great trip, well organized.",
     });
+
+    // Assert
     expect(fbResp.data.name).toBeDefined();
-    // Frappe Rating field uses 0-1 scale (4/5 = 0.8)
     expect(fbResp.data.rating).toBeGreaterThan(0);
   });
 
   test("Feedback list view loads", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
-    await gotoList(page, "Travel Feedback");
-    await expect(page.locator(".frappe-list")).toBeVisible();
-  });
+    // Arrange — login
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
 
-  test("Agency2 cannot see Agency1 feedback", async ({ page }) => {
-    await login(page, USERS.agencyAdmin2.email, USERS.agencyAdmin2.password);
-    const resp = await page.request.get(
-      `/api/resource/Travel Feedback?filters=${JSON.stringify({
-        agency: USERS.agencyAdmin1.agency,
-      })}`
-    );
-    if (resp.ok()) {
-      const body = await resp.json();
-      expect(body.data.length).toBe(0);
-    }
+    // Act
+    await gotoList(page, "Travel Feedback");
+
+    // Assert
+    await expect(page.locator(".frappe-list")).toBeVisible();
   });
 });
 
 test.describe("Travel Teams", () => {
   test("Agency Admin can create a team", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+    // Arrange — login
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Act — create team
     const resp = await createDoc(page, "Travel Team", {
       team_name: `E2E Team ${Date.now()}`,
-      agency: USERS.agencyAdmin1.agency,
-      team_lead: USERS.teamLead1.email,
-      is_active: 1,
+      team_lead: USERS.teamLead.email,
     });
+
+    // Assert
     expect(resp.data.name).toBeDefined();
   });
 
   test("Team list view loads", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
+    // Arrange — login
+    await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Act
     await gotoList(page, "Travel Team");
+
+    // Assert
     await expect(page.locator(".frappe-list")).toBeVisible();
   });
 });

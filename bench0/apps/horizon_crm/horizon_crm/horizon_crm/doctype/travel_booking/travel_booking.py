@@ -4,12 +4,9 @@
 import frappe
 from frappe.model.document import Document
 
-from horizon_crm.utils import validate_agency_access
-
 
 class TravelBooking(Document):
 	def validate(self):
-		validate_agency_access(self)
 		self.update_paid_amount()
 		self.calculate_balance()
 

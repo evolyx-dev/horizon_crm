@@ -6,9 +6,26 @@
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
     "test:ui": "npx playwright test --ui",
-    "test:debug": "npx playwright test --debug"
+    "test:debug": "npx playwright test --debug",
+    "test:auth": "npx playwright test e2e/01-auth.spec.ts",
+    "test:agency": "npx playwright test e2e/02-agency.spec.ts",
+    "test:staff": "npx playwright test e2e/03-staff.spec.ts",
+    "test:inquiry": "npx playwright test e2e/04-inquiry.spec.ts",
+    "test:booking": "npx playwright test e2e/05-booking.spec.ts",
+    "test:security": "npx playwright test e2e/06-security.spec.ts",
+    "test:portal": "npx playwright test e2e/07-portal.spec.ts",
+    "test:ui-ux": "npx playwright test e2e/08-ui-ux.spec.ts",
+    "test:doctypes": "npx playwright test e2e/09-other-doctypes.spec.ts",
+    "clean": "rm -rf allure-results test-results ../reports/html ../reports/allure-report",
+    "report:html": "npx playwright show-report ../reports/html",
+    "report:allure:generate": "npx allure generate allure-results -o ../reports/allure-report --clean",
+    "report:allure:open": "npx allure open ../reports/allure-report",
+    "report:allure": "npm run report:allure:generate && npm run report:allure:open",
+    "test:report": "npm run clean && npm test && npm run report:allure:generate"
   },
   "devDependencies": {
-    "@playwright/test": "^1.42.0"
+    "@playwright/test": "^1.42.0",
+    "allure-commandline": "^2.36.0",
+    "allure-playwright": "^3.6.0"
   }
 }

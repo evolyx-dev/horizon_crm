@@ -7,10 +7,11 @@ import frappe
 
 
 def after_install():
-    """Setup roles, default travel types, and destinations after app install."""
+    """Setup roles, default travel types, destinations, and agency settings after app install."""
     create_roles()
     create_default_travel_types()
     create_default_destinations()
+    initialize_agency_settings()
     frappe.db.commit()
 
 
@@ -73,3 +74,14 @@ def create_default_destinations():
             doc.region = region
             doc.is_popular = 1
             doc.insert(ignore_permissions=True)
+
+
+def initialize_agency_settings():
+    """Initialize the Travel Agency singleton with default values."""
+    agency = frappe.get_single("Travel Agency")
+    if not agency.agency_name:
+        agency.agency_name = frappe.local.site.replace(".localhost", "").replace(".", " ").title()
+        agency.contact_email = "admin@example.com"
+        agency.status = "Active"
+        agency.max_staff = 10
+        agency.save(ignore_permissions=True)

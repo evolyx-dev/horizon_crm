@@ -5,30 +5,17 @@ from frappe import _
 
 
 @frappe.whitelist()
-def get_booking_summary(agency: str | None = None) -> dict:
-    """Get booking statistics for an agency dashboard.
-
-    Args:
-        agency: Travel Agency name. If None, uses current user's agency.
+def get_booking_summary() -> dict:
+    """Get booking statistics for the agency dashboard.
 
     Returns:
         dict with counts by status and financial summary
     """
-    from horizon_crm.utils import get_user_agency
-
-    if not agency:
-        agency = get_user_agency()
-
-    if not agency:
-        frappe.throw(_("No agency associated with the current user."))
-
-    filters = {"agency": agency}
-
-    total = frappe.db.count("Travel Booking", filters)
-    confirmed = frappe.db.count("Travel Booking", {**filters, "status": "Confirmed"})
-    in_progress = frappe.db.count("Travel Booking", {**filters, "status": "In Progress"})
-    completed = frappe.db.count("Travel Booking", {**filters, "status": "Completed"})
-    cancelled = frappe.db.count("Travel Booking", {**filters, "status": "Cancelled"})
+    total = frappe.db.count("Travel Booking")
+    confirmed = frappe.db.count("Travel Booking", {"status": "Confirmed"})
+    in_progress = frappe.db.count("Travel Booking", {"status": "In Progress"})
+    completed = frappe.db.count("Travel Booking", {"status": "Completed"})
+    cancelled = frappe.db.count("Travel Booking", {"status": "Cancelled"})
 
     total_revenue = frappe.db.sql(
         """
@@ -36,9 +23,8 @@ def get_booking_summary(agency: str | None = None) -> dict:
                COALESCE(SUM(paid_amount), 0) as paid,
                COALESCE(SUM(balance_amount), 0) as balance
         FROM `tabTravel Booking`
-        WHERE agency = %s AND status != 'Cancelled'
+        WHERE status != 'Cancelled'
         """,
-        agency,
         as_dict=True,
     )[0]
 

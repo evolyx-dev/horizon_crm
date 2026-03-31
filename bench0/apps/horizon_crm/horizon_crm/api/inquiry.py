@@ -33,7 +33,6 @@ def create_booking_from_inquiry(source_name: str) -> dict:
 
     booking = frappe.new_doc("Travel Booking")
     booking.inquiry = source_name
-    booking.agency = inquiry.agency
     booking.customer = customer
     booking.assigned_to = inquiry.assigned_to
     booking.departure_date = inquiry.departure_date
@@ -51,7 +50,7 @@ def _get_or_create_customer(inquiry) -> str:
     """Find or create a Travel Customer from inquiry details."""
     existing = frappe.db.get_value(
         "Travel Customer",
-        {"email": inquiry.customer_email, "agency": inquiry.agency},
+        {"email": inquiry.customer_email},
         "name",
     )
     if existing:
@@ -61,6 +60,5 @@ def _get_or_create_customer(inquiry) -> str:
     customer.customer_name = inquiry.customer_name
     customer.email = inquiry.customer_email
     customer.phone = inquiry.customer_phone
-    customer.agency = inquiry.agency
     customer.insert(ignore_permissions=True)
     return customer.name

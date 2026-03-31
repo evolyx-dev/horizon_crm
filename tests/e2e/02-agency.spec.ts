@@ -1,101 +1,89 @@
 /**
- * Travel Agency CRUD E2E Tests
- * Covers: create, read, update agency; status toggle; admin assignment
+ * Agency Settings E2E Tests
+ * Covers: view/update agency singleton, status toggle, role restrictions
  */
 import { test, expect } from "@playwright/test";
 import {
   USERS,
   login,
-  gotoList,
-  gotoNew,
   fillField,
   saveForm,
-  createDoc,
-  deleteDoc,
   getCsrfToken,
 } from "./fixtures";
 
-test.describe("Travel Agency CRUD", () => {
-  test.beforeEach(async ({ page }) => {
+test.describe("Agency Settings", () => {
+  test("Admin can view agency settings", async ({ page }) => {
+    // Arrange — login as admin
     await login(page, USERS.admin.email, USERS.admin.password);
-  });
 
-  test("Admin can view agency list", async ({ page }) => {
-    await gotoList(page, "Travel Agency");
-    await expect(page.locator(".list-row")).toHaveCount(
-      await page.locator(".list-row").count()
-    );
-    await expect(page.locator(".frappe-list")).toBeVisible();
-  });
+    // Act — navigate to the singleton
+    await page.goto("/app/travel-agency", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
 
-  test("Admin can create a new agency via form", async ({ page }) => {
-    const agencyName = `E2E Agency ${Date.now()}`;
-    await gotoNew(page, "Travel Agency");
-    await fillField(page, "agency_name", agencyName);
-    await fillField(page, "contact_email", "e2e@test.example");
-    await fillField(page, "max_staff", "5");
-    await saveForm(page);
-
-    // Verify saved
-    await expect(page.locator(".indicator-pill")).toBeVisible();
-    // Cleanup
-    await deleteDoc(page, "Travel Agency", agencyName);
+    // Assert — agency name field should be visible
+    await expect(page.locator('[data-fieldname="agency_name"]').first()).toBeVisible();
   });
 
   test("Admin can update agency details", async ({ page }) => {
-    // Navigate to existing test agency
-    await gotoList(page, "Travel Agency");
-    await page
-      .locator(`.list-row a:has-text("${USERS.agencyAdmin1.agency}")`)
-      .first()
-      .click();
-    await page.waitForLoadState("domcontentloaded");
+    // Arrange — login as admin and go to agency settings
+    await login(page, USERS.admin.email, USERS.admin.password);
+    await page.goto("/app/travel-agency", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
 
-    // Update phone
+    // Act — update phone field
     await fillField(page, "phone", "+9999999999");
     await saveForm(page);
     await page.waitForTimeout(500);
 
-    // Verify persisted
+    // Assert — phone should persist after reload
     await page.reload({ waitUntil: "domcontentloaded" });
     const phone = page.locator('[data-fieldname="phone"] input');
     await expect(phone).toHaveValue("+9999999999");
   });
 
-  test("Agency status can be toggled", async ({ page }) => {
+  test("Agency status can be toggled via API", async ({ page }) => {
+    // Arrange — login as admin
+    await login(page, USERS.admin.email, USERS.admin.password);
+
+    // Act — set status to Inactive then back to Active
     const resp = await page.request.put(
-      `/api/resource/Travel Agency/${encodeURIComponent(USERS.agencyAdmin1.agency)}`,
+      "/api/resource/Travel Agency/Travel Agency",
       { data: { status: "Inactive" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     expect(resp.ok()).toBeTruthy();
 
-    // Restore
     const resp2 = await page.request.put(
-      `/api/resource/Travel Agency/${encodeURIComponent(USERS.agencyAdmin1.agency)}`,
+      "/api/resource/Travel Agency/Travel Agency",
       { data: { status: "Active" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
+
+    // Assert — both operations should succeed
     expect(resp2.ok()).toBeTruthy();
   });
 
-  test("Agency Admin cannot create another agency", async ({ page }) => {
-    await login(page, USERS.agencyAdmin1.email, USERS.agencyAdmin1.password);
-    const resp = await page.request.post("/api/resource/Travel Agency", {
-      data: {
-        agency_name: "Unauthorized Agency",
-        contact_email: "hack@test.example",
-        max_staff: 5,
-      },
-      headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
-    });
-    // Should be forbidden — Agency Admin has no create rights on Travel Agency
+  test("Staff cannot modify agency settings", async ({ page }) => {
+    // Arrange — login as regular staff
+    await login(page, USERS.staff.email, USERS.staff.password);
+
+    // Act — try to update agency via API
+    const resp = await page.request.put(
+      "/api/resource/Travel Agency/Travel Agency",
+      { data: { phone: "+0000000000" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
+    );
+
+    // Assert — should be forbidden (staff has read-only)
     expect([403, 401]).toContain(resp.status());
   });
 
-  test("Agency list shows correct columns", async ({ page }) => {
-    await gotoList(page, "Travel Agency");
-    // Verify the list loaded with headers and at least one row
-    await expect(page.locator(".frappe-list")).toBeVisible();
-    const rows = page.locator(".list-row");
-    expect(await rows.count()).toBeGreaterThanOrEqual(1);
+  test("Agency settings page shows correct fields", async ({ page }) => {
+    // Arrange — login and navigate to settings
+    await login(page, USERS.admin.email, USERS.admin.password);
+    await page.goto("/app/travel-agency", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+
+    // Assert — key fields should be present
+    await expect(page.locator('[data-fieldname="agency_name"]').first()).toBeVisible();
+    await expect(page.locator('[data-fieldname="contact_email"]').first()).toBeVisible();
+    await expect(page.locator('[data-fieldname="max_staff"]').first()).toBeVisible();
   });
 });

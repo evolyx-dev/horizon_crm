@@ -4,9 +4,6 @@
 import frappe
 from frappe.model.document import Document
 
-from horizon_crm.utils import validate_agency_access
-
 
 class TravelSupplier(Document):
-	def validate(self):
-		validate_agency_access(self)
+	pass

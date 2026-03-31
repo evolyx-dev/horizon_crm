@@ -1,0 +1,9 @@
+2026-03-30 18:28:01,001 ERROR scheduler Skipped queueing frappe.search.sqlite_search.index_docs_in_queue because it was found in queue for horizon.localhost
+2026-03-30 18:28:01,004 ERROR scheduler Skipped queueing frappe.email.doctype.notification.notification.trigger_offset_alerts because it was found in queue for horizon.localhost
+2026-03-30 18:28:01,008 ERROR scheduler Skipped queueing frappe.email.queue.retry_sending_emails because it was found in queue for horizon.localhost
+2026-03-30 18:28:01,010 ERROR scheduler Skipped queueing frappe.email.queue.flush because it was found in queue for horizon.localhost
+2026-03-30 18:28:01,011 ERROR scheduler Skipped queueing frappe.monitor.flush because it was found in queue for horizon.localhost
+2026-03-31 03:52:47,210 ERROR scheduler Skipped queueing frappe.email.queue.retry_sending_emails because it was found in queue for horizon.localhost
+2026-03-31 03:52:47,228 ERROR scheduler Skipped queueing frappe.email.queue.flush because it was found in queue for horizon.localhost
+2026-03-31 03:52:47,267 ERROR scheduler Skipped queueing frappe.monitor.flush because it was found in queue for horizon.localhost
+2026-03-31 03:52:47,281 ERROR scheduler Skipped queueing frappe.integrations.doctype.google_calendar.google_calendar.sync because it was found in queue for horizon.localhost

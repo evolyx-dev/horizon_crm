@@ -4,19 +4,34 @@ const BASE_URL = process.env.FRAPPE_URL || "http://localhost:8000";
 
 export default defineConfig({
   testDir: "./e2e",
+  outputDir: "./test-results",
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   workers: 1,
-  reporter: [["html", { open: "never" }], ["list"]],
+  reporter: [
+    ["list"],
+    ["html", { open: "never", outputFolder: "../reports/html" }],
+    [
+      "allure-playwright",
+      {
+        outputFolder: "./allure-results",
+        suiteTitle: "Horizon CRM E2E",
+        environmentInfo: {
+          BASE_URL,
+          NODE_VERSION: process.version,
+        },
+      },
+    ],
+  ],
   timeout: 60_000,
   expect: { timeout: 10_000 },
 
   use: {
     baseURL: BASE_URL,
     trace: "on-first-retry",
-    screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    screenshot: "on",
+    video: "on",
     ignoreHTTPSErrors: true,
   },
 
@@ -31,6 +46,11 @@ export default defineConfig({
       name: "mobile",
       use: { ...devices["iPhone 13"] },
       dependencies: ["setup"],
+    },
+    {
+      name: "teardown",
+      testMatch: /global-teardown\.ts/,
+      dependencies: ["chromium", "mobile"],
     },
   ],
 });

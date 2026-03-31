@@ -1,137 +1,137 @@
 {
- "actions": [],
- "creation": "2026-03-30 12:00:00.000000",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "supplier_name",
-  "supplier_type",
-  "agency",
-  "column_break_1",
-  "contact_email",
-  "phone",
-  "website",
-  "section_address",
-  "address",
-  "section_notes",
-  "supplier_notes",
-  "section_services",
-  "services"
- ],
- "fields": [
-  {
-   "fieldname": "supplier_name",
-   "fieldtype": "Data",
-   "label": "Supplier Name",
-   "reqd": 1,
-   "in_list_view": 1
-  },
-  {
-   "fieldname": "supplier_type",
-   "fieldtype": "Select",
-   "label": "Supplier Type",
-   "options": "Hotel\nAirline\nTour Operator\nTransport\nOther",
-   "reqd": 1,
-   "in_list_view": 1
-  },
-  {
-   "fieldname": "agency",
-   "fieldtype": "Link",
-   "label": "Agency",
-   "options": "Travel Agency",
-   "reqd": 1,
-   "in_list_view": 1
-  },
-  {
-   "fieldname": "column_break_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "contact_email",
-   "fieldtype": "Data",
-   "label": "Contact Email",
-   "options": "Email"
-  },
-  {
-   "fieldname": "phone",
-   "fieldtype": "Data",
-   "label": "Phone",
-   "options": "Phone"
-  },
-  {
-   "fieldname": "website",
-   "fieldtype": "Data",
-   "label": "Website"
-  },
-  {
-   "fieldname": "section_address",
-   "fieldtype": "Section Break",
-   "label": "Address"
-  },
-  {
-   "fieldname": "address",
-   "fieldtype": "Small Text",
-   "label": "Address"
-  },
-  {
-   "fieldname": "section_notes",
-   "fieldtype": "Section Break",
-   "label": "Notes"
-  },
-  {
-   "fieldname": "supplier_notes",
-   "fieldtype": "Text",
-   "label": "Supplier Notes"
-  },
-  {
-   "fieldname": "section_services",
-   "fieldtype": "Section Break",
-   "label": "Services"
-  },
-  {
-   "fieldname": "services",
-   "fieldtype": "Table",
-   "label": "Services",
-   "options": "Supplier Service"
-  }
- ],
- "links": [],
- "modified": "2026-03-30 12:00:00.000000",
- "modified_by": "Administrator",
- "module": "Horizon CRM",
- "name": "Travel Supplier",
- "naming_rule": "Expression",
- "autoname": "SUP-.#####",
- "owner": "Administrator",
- "permissions": [
-  {
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "delete": 1,
-   "export": 1
-  },
-  {
-   "role": "Agency Admin",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "delete": 1
-  },
-  {
-   "role": "Agency Team Lead",
-   "read": 1
-  },
-  {
-   "role": "Agency Staff",
-   "read": 1
-  }
- ],
- "show_title_field_in_link": 1,
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": [],
- "title_field": "supplier_name",
- "track_changes": 1
+    "actions": [],
+    "creation": "2026-03-30 12:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "supplier_name",
+        "supplier_type",
+        "column_break_1",
+        "contact_email",
+        "phone",
+        "website",
+        "section_address",
+        "address",
+        "section_notes",
+        "supplier_notes",
+        "section_services",
+        "services"
+    ],
+    "fields": [
+        {
+            "fieldname": "supplier_name",
+            "fieldtype": "Data",
+            "label": "Supplier Name",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "supplier_type",
+            "fieldtype": "Select",
+            "label": "Supplier Type",
+            "options": "Hotel\nAirline\nTour Operator\nTransport\nOther",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "contact_email",
+            "fieldtype": "Data",
+            "label": "Contact Email",
+            "options": "Email"
+        },
+        {
+            "fieldname": "phone",
+            "fieldtype": "Data",
+            "label": "Phone",
+            "options": "Phone"
+        },
+        {
+            "fieldname": "website",
+            "fieldtype": "Data",
+            "label": "Website"
+        },
+        {
+            "fieldname": "section_address",
+            "fieldtype": "Section Break",
+            "label": "Address"
+        },
+        {
+            "fieldname": "address",
+            "fieldtype": "Small Text",
+            "label": "Address"
+        },
+        {
+            "fieldname": "section_notes",
+            "fieldtype": "Section Break",
+            "label": "Notes"
+        },
+        {
+            "fieldname": "supplier_notes",
+            "fieldtype": "Text",
+            "label": "Supplier Notes"
+        },
+        {
+            "fieldname": "section_services",
+            "fieldtype": "Section Break",
+            "label": "Services"
+        },
+        {
+            "fieldname": "services",
+            "fieldtype": "Table",
+            "label": "Services",
+            "options": "Supplier Service"
+        }
+    ],
+    "links": [],
+    "modified": "2026-03-30 12:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Horizon CRM",
+    "name": "Travel Supplier",
+    "naming_rule": "Expression",
+    "autoname": "SUP-.#####",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "delete": 1,
+            "read": 1,
+            "write": 1,
+            "role": "Agency Admin",
+            "export": 1
+        },
+        {
+            "create": 1,
+            "read": 1,
+            "write": 1,
+            "role": "Agency Team Lead"
+        },
+        {
+            "create": 1,
+            "read": 1,
+            "write": 1,
+            "role": "Agency Staff"
+        }
+    ],
+    "show_title_field_in_link": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "supplier_name",
+    "track_changes": 1
 }

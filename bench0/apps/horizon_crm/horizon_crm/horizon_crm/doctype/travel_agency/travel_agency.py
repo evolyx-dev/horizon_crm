@@ -6,12 +6,9 @@ from frappe.model.document import Document
 
 
 class TravelAgency(Document):
-    def autoname(self):
-        if not self.agency_code:
-            # Generate a short code from agency name
-            self.agency_code = self.agency_name[:3].upper() + "-" + frappe.generate_hash(length=4).upper()
-
     def validate(self):
+        if not self.agency_code:
+            self.agency_code = self.agency_name[:3].upper() + "-" + frappe.generate_hash(length=4).upper()
         if self.admin_user:
             self._validate_admin_user()
 
@@ -21,29 +18,22 @@ class TravelAgency(Document):
         if user_type != "System User":
             frappe.throw(f"Admin user {self.admin_user} must be a System User.")
 
-    def after_insert(self):
-        """If admin_user is set, create/update their staff record."""
-        if self.admin_user:
-            self._ensure_admin_staff()
-
     def on_update(self):
         if self.has_value_changed("admin_user") and self.admin_user:
             self._ensure_admin_staff()
 
     def _ensure_admin_staff(self):
         """Create a Travel Agency Staff record for the admin user."""
-        if frappe.db.exists("Travel Agency Staff", {"staff_user": self.admin_user, "agency": self.name}):
-            # Update role
+        if frappe.db.exists("Travel Agency Staff", {"staff_user": self.admin_user}):
             frappe.db.set_value(
                 "Travel Agency Staff",
-                {"staff_user": self.admin_user, "agency": self.name},
+                {"staff_user": self.admin_user},
                 "role_in_agency",
                 "Agency Admin",
             )
         else:
             staff = frappe.new_doc("Travel Agency Staff")
             staff.staff_user = self.admin_user
-            staff.agency = self.name
             staff.role_in_agency = "Agency Admin"
             staff.is_active = 1
             staff.insert(ignore_permissions=True)

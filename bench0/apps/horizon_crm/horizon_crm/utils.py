@@ -1,12 +1,17 @@
-"""Utility functions for Horizon CRM multi-tenancy and common operations."""
+"""Utility functions for Horizon CRM."""
 
 import frappe
 
 
-def get_user_agency(user: str | None = None) -> str | None:
-    """Get the Travel Agency linked to the current user (or specified user).
+def get_agency_settings() -> "frappe.Document":
+    """Return the singleton Agency Settings (Travel Agency) document."""
+    return frappe.get_single("Travel Agency")
 
-    Returns the agency name or None if user is System Manager without agency.
+
+def get_staff_record(user: str | None = None) -> dict | None:
+    """Get the Travel Agency Staff record for the given (or current) user.
+
+    Returns a dict with name, role_in_agency, is_active or None.
     """
     if not user:
         user = frappe.session.user
@@ -14,46 +19,9 @@ def get_user_agency(user: str | None = None) -> str | None:
     if user == "Administrator":
         return None
 
-    staff = frappe.db.get_value(
+    return frappe.db.get_value(
         "Travel Agency Staff",
         {"staff_user": user, "is_active": 1},
-        "agency",
+        ["name", "role_in_agency", "is_active"],
+        as_dict=True,
     )
-    return staff
-
-
-def validate_agency_access(doc):
-    """Validate that the document's agency matches the current user's agency.
-
-    Called from validate() hooks on all tenant-scoped DocTypes.
-    System Manager can access all agencies.
-    """
-    if frappe.session.user == "Administrator" or "System Manager" in frappe.get_roles():
-        return
-
-    user_agency = get_user_agency()
-    if not user_agency:
-        frappe.throw("You are not associated with any Travel Agency.")
-
-    if not doc.agency:
-        doc.agency = user_agency
-    elif doc.agency != user_agency:
-        frappe.throw(
-            f"You do not have permission to access data for this agency.",
-            frappe.PermissionError,
-        )
-
-
-def get_agency_filter(user: str | None = None) -> str:
-    """Return SQL condition for filtering by agency.
-
-    Used in permission_query_conditions hooks.
-    """
-    if frappe.session.user == "Administrator" or "System Manager" in frappe.get_roles():
-        return ""
-
-    agency = get_user_agency(user)
-    if not agency:
-        return "1=0"
-
-    return f"`agency` = {frappe.db.escape(agency)}"

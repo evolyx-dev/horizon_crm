@@ -7,37 +7,51 @@ import { USERS, login, createDoc, getCsrfToken } from "./fixtures";
 
 test.describe("Customer Portal", () => {
   test.beforeEach(async ({ page }) => {
-    await login(page, USERS.customer1.email, USERS.customer1.password);
+    await login(page, USERS.customer.email, USERS.customer.password);
   });
 
   test("Portal dashboard loads", async ({ page }) => {
+    // Arrange — already logged in via beforeEach
+
+    // Act — navigate to portal
     await page.goto("/portal", { waitUntil: "domcontentloaded" });
+
+    // Assert — page should render
     await expect(page.locator("body")).toBeVisible();
-    // Should contain some portal content
     const content = await page.textContent("body");
     expect(content).toBeDefined();
   });
 
   test("Portal bookings page loads", async ({ page }) => {
+    // Act
     await page.goto("/portal/bookings", { waitUntil: "domcontentloaded" });
+
+    // Assert
     await expect(page.locator("body")).toBeVisible();
   });
 
   test("Portal inquiry page loads", async ({ page }) => {
+    // Act
     await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+
+    // Assert
     await expect(page.locator("body")).toBeVisible();
   });
 
   test("Portal API: get_my_bookings returns data", async ({ page }) => {
+    // Act — call portal API
     const resp = await page.request.get(
       "/api/method/horizon_crm.api.portal.get_my_bookings"
     );
+
+    // Assert
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     expect(body.message).toBeDefined();
   });
 
   test("Portal API: submit_inquiry creates inquiry", async ({ page }) => {
+    // Act — submit inquiry via portal API
     const resp = await page.request.post(
       "/api/method/horizon_crm.api.portal.submit_inquiry",
       {
@@ -54,7 +68,8 @@ test.describe("Customer Portal", () => {
         headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
       }
     );
-    // May succeed or fail if customer not properly linked
+
+    // Assert
     if (resp.ok()) {
       const body = await resp.json();
       expect(body.message).toBeDefined();
@@ -62,30 +77,22 @@ test.describe("Customer Portal", () => {
   });
 
   test("Portal API: submit_feedback", async ({ page }) => {
-    // First, login as admin and create a completed booking for the customer
+    // Arrange — create a completed booking as admin
     const adminCtx = await page.context().browser()!.newContext();
     const adminPage = await adminCtx.newPage();
-    await login(
-      adminPage,
-      USERS.agencyAdmin1.email,
-      USERS.agencyAdmin1.password
-    );
+    await login(adminPage, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
 
-    // Get customer name
     const custResp = await adminPage.request.get(
       `/api/resource/Travel Customer?filters=${JSON.stringify({
-        email: USERS.customer1.email,
-        agency: USERS.customer1.agency,
+        email: USERS.customer.email,
       })}`
     );
     const custBody = await custResp.json();
     if (custBody.data.length > 0) {
       const customerName = custBody.data[0].name;
 
-      // Create a completed booking
       const bookResp = await createDoc(adminPage, "Travel Booking", {
         customer: customerName,
-        agency: USERS.customer1.agency,
         departure_date: "2025-04-01",
         return_date: "2025-04-07",
         num_travelers: 1,
@@ -96,7 +103,7 @@ test.describe("Customer Portal", () => {
 
       await adminCtx.close();
 
-      // Now submit feedback as customer
+      // Act — submit feedback as customer
       const fbResp = await page.request.post(
         "/api/method/horizon_crm.api.portal.submit_feedback",
         {
@@ -108,7 +115,8 @@ test.describe("Customer Portal", () => {
           headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
         }
       );
-      // Feedback may succeed or fail depending on customer linkage
+
+      // Assert
       if (fbResp.ok()) {
         const body = await fbResp.json();
         expect(body.message).toBeDefined();
@@ -118,22 +126,11 @@ test.describe("Customer Portal", () => {
     }
   });
 
-  test("Customer cannot access desk admin pages", async ({ page }) => {
-    // Customer should not be able to access Travel Agency list
-    const resp = await page.request.get("/api/resource/Travel Agency");
-    if (resp.ok()) {
-      const body = await resp.json();
-      // Should see 0 agencies (no permission)
-      expect(body.data.length).toBe(0);
-    }
-  });
+  test("Customer cannot access admin-only resources", async ({ page }) => {
+    // Act — try to list Travel Agency Staff
+    const resp = await page.request.get("/api/resource/Travel Agency Staff");
 
-  test("Customer cannot access other agencies data", async ({ page }) => {
-    const resp = await page.request.get(
-      `/api/resource/Travel Booking?filters=${JSON.stringify({
-        agency: USERS.agencyAdmin2.agency,
-      })}`
-    );
+    // Assert — should be empty or forbidden
     if (resp.ok()) {
       const body = await resp.json();
       expect(body.data.length).toBe(0);

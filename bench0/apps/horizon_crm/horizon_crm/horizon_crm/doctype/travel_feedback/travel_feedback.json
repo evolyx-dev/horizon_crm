@@ -1,109 +1,113 @@
 {
- "actions": [],
- "creation": "2026-03-30 12:00:00.000000",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "booking",
-  "customer",
-  "agency",
-  "column_break_1",
-  "rating",
-  "overall_experience",
-  "submitted_on",
-  "section_comments",
-  "comments"
- ],
- "fields": [
-  {
-   "fieldname": "booking",
-   "fieldtype": "Link",
-   "label": "Booking",
-   "options": "Travel Booking",
-   "reqd": 1,
-   "in_list_view": 1
-  },
-  {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "options": "Travel Customer",
-   "reqd": 1,
-   "in_list_view": 1
-  },
-  {
-   "fieldname": "agency",
-   "fieldtype": "Link",
-   "label": "Agency",
-   "options": "Travel Agency",
-   "reqd": 1,
-   "in_list_view": 1
-  },
-  {
-   "fieldname": "column_break_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "rating",
-   "fieldtype": "Rating",
-   "label": "Rating",
-   "reqd": 1
-  },
-  {
-   "fieldname": "overall_experience",
-   "fieldtype": "Select",
-   "label": "Overall Experience",
-   "options": "Excellent\nGood\nAverage\nPoor\nTerrible"
-  },
-  {
-   "fieldname": "submitted_on",
-   "fieldtype": "Date",
-   "label": "Submitted On",
-   "default": "Today",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_comments",
-   "fieldtype": "Section Break",
-   "label": "Comments"
-  },
-  {
-   "fieldname": "comments",
-   "fieldtype": "Text",
-   "label": "Comments"
-  }
- ],
- "links": [],
- "modified": "2026-03-30 12:00:00.000000",
- "modified_by": "Administrator",
- "module": "Horizon CRM",
- "name": "Travel Feedback",
- "naming_rule": "Expression",
- "autoname": "FB-.#####",
- "owner": "Administrator",
- "permissions": [
-  {
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "delete": 1,
-   "export": 1
-  },
-  {
-   "role": "Agency Admin",
-   "read": 1
-  },
-  {
-   "role": "Agency Customer",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "if_owner": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": [],
- "track_changes": 1
+    "actions": [],
+    "creation": "2026-03-30 12:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "booking",
+        "customer",
+        "column_break_1",
+        "rating",
+        "overall_experience",
+        "submitted_on",
+        "section_comments",
+        "comments"
+    ],
+    "fields": [
+        {
+            "fieldname": "booking",
+            "fieldtype": "Link",
+            "label": "Booking",
+            "options": "Travel Booking",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "label": "Customer",
+            "options": "Travel Customer",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "rating",
+            "fieldtype": "Rating",
+            "label": "Rating",
+            "reqd": 1
+        },
+        {
+            "fieldname": "overall_experience",
+            "fieldtype": "Select",
+            "label": "Overall Experience",
+            "options": "Excellent\nGood\nAverage\nPoor\nTerrible"
+        },
+        {
+            "fieldname": "submitted_on",
+            "fieldtype": "Date",
+            "label": "Submitted On",
+            "default": "Today",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_comments",
+            "fieldtype": "Section Break",
+            "label": "Comments"
+        },
+        {
+            "fieldname": "comments",
+            "fieldtype": "Text",
+            "label": "Comments"
+        }
+    ],
+    "links": [],
+    "modified": "2026-03-30 12:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Horizon CRM",
+    "name": "Travel Feedback",
+    "naming_rule": "Expression",
+    "autoname": "FB-.#####",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "delete": 1,
+            "read": 1,
+            "write": 1,
+            "role": "Agency Admin",
+            "export": 1
+        },
+        {
+            "create": 1,
+            "read": 1,
+            "write": 1,
+            "role": "Agency Team Lead"
+        },
+        {
+            "create": 1,
+            "read": 1,
+            "write": 1,
+            "role": "Agency Staff"
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
 }
