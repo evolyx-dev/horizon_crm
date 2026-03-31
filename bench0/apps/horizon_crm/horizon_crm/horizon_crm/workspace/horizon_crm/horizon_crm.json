@@ -22,7 +22,7 @@
    "label": "Inquiry Sources"
   }
  ],
- "content": "[{\"id\":\"nc_section\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Dashboard</b></span>\",\"col\":12}},{\"id\":\"nc_open\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Open Inquiries\",\"col\":4}},{\"id\":\"nc_won\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Won This Month\",\"col\":4}},{\"id\":\"nc_active\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Active Bookings\",\"col\":4}},{\"id\":\"nc_revenue\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Revenue\",\"col\":4}},{\"id\":\"nc_balance\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Outstanding Balance\",\"col\":4}},{\"id\":\"nc_customers\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Customer Count\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"chart_pipeline\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Inquiry Pipeline\",\"col\":6}},{\"id\":\"chart_sources\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Inquiry Sources\",\"col\":6}},{\"id\":\"chart_bookings\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Bookings\",\"col\":6}},{\"id\":\"chart_revenue\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Revenue Trend\",\"col\":6}},{\"id\":\"chart_destinations\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Destinations\",\"col\":12}},{\"id\":\"spacer2\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"sc_section\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Quick Access</b></span>\",\"col\":12}},{\"id\":\"sc_inquiry\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Travel Inquiry\",\"col\":3}},{\"id\":\"sc_booking\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Travel Booking\",\"col\":3}},{\"id\":\"sc_customer\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Travel Customer\",\"col\":3}},{\"id\":\"sc_itinerary\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Travel Itinerary\",\"col\":3}},{\"id\":\"spacer3\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"card_pipeline\",\"type\":\"card\",\"data\":{\"card_name\":\"Pipeline\",\"col\":4}},{\"id\":\"card_customers\",\"type\":\"card\",\"data\":{\"card_name\":\"Customers\",\"col\":4}},{\"id\":\"card_operations\",\"type\":\"card\",\"data\":{\"card_name\":\"Operations\",\"col\":4}},{\"id\":\"card_organization\",\"type\":\"card\",\"data\":{\"card_name\":\"Organization\",\"col\":4}},{\"id\":\"card_reference\",\"type\":\"card\",\"data\":{\"card_name\":\"Reference Data\",\"col\":4}}]",
+ "content": "[{\"id\": \"nc_section\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Dashboard</b></span>\", \"col\": 12}}, {\"id\": \"nc_open\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Inquiries\", \"col\": 4}}, {\"id\": \"nc_won\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Won This Month\", \"col\": 4}}, {\"id\": \"nc_active\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Bookings\", \"col\": 4}}, {\"id\": \"nc_revenue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Revenue\", \"col\": 4}}, {\"id\": \"nc_balance\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Outstanding Balance\", \"col\": 4}}, {\"id\": \"nc_customers\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Customer Count\", \"col\": 4}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"chart_pipeline\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Inquiry Pipeline\", \"col\": 6}}, {\"id\": \"chart_sources\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Inquiry Sources\", \"col\": 6}}, {\"id\": \"chart_bookings\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Monthly Bookings\", \"col\": 6}}, {\"id\": \"chart_revenue\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Revenue Trend\", \"col\": 6}}, {\"id\": \"chart_destinations\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Top Destinations\", \"col\": 12}}, {\"id\": \"spacer2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"sc_section\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"sc_inquiry\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Travel Inquiry\", \"col\": 3}}, {\"id\": \"sc_booking\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Travel Booking\", \"col\": 3}}, {\"id\": \"sc_customer\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Travel Customer\", \"col\": 3}}, {\"id\": \"sc_itinerary\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Travel Itinerary\", \"col\": 3}}, {\"id\": \"sc_inq_kanban\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inquiry Kanban\", \"col\": 3}}, {\"id\": \"sc_book_kanban\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Booking Kanban\", \"col\": 3}}, {\"id\": \"spacer3\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"card_pipeline\", \"type\": \"card\", \"data\": {\"card_name\": \"Pipeline\", \"col\": 4}}, {\"id\": \"card_customers\", \"type\": \"card\", \"data\": {\"card_name\": \"Customers\", \"col\": 4}}, {\"id\": \"card_operations\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}, {\"id\": \"card_organization\", \"type\": \"card\", \"data\": {\"card_name\": \"Organization\", \"col\": 4}}, {\"id\": \"card_reference\", \"type\": \"card\", \"data\": {\"card_name\": \"Reference Data\", \"col\": 4}}]",
  "creation": "2025-07-17 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -205,7 +205,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-07-17 00:00:00.000000",
+ "modified": "2025-07-17 01:00:00.000000",
  "modified_by": "Administrator",
  "module": "Horizon CRM",
  "name": "Horizon CRM",
@@ -272,6 +272,24 @@
    "doc_view": "List",
    "label": "Travel Itinerary",
    "link_to": "Travel Itinerary",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "#FF6B6B",
+   "doc_view": "Kanban",
+   "label": "Inquiry Kanban",
+   "link_to": "Travel Inquiry",
+   "kanban_board": "Inquiry Pipeline",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "#FF8E53",
+   "doc_view": "Kanban",
+   "label": "Booking Kanban",
+   "link_to": "Travel Booking",
+   "kanban_board": "Booking Tracker",
    "stats_filter": "[]",
    "type": "DocType"
   }

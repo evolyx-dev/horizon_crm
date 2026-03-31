@@ -1,7 +1,7 @@
 app_name = "horizon_crm"
 app_title = "Horizon CRM"
 app_publisher = "Horizon Dev"
-app_description = "Travel Agency CRM for Frappe"
+app_description = "Travel Agency CRM by Evolyx Lab"
 app_email = "dev@horizon.io"
 app_license = "agpl-3.0"
 app_logo_url = "/assets/horizon_crm/images/logo.svg"

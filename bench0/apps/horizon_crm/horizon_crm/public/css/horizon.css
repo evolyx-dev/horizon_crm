@@ -1,5 +1,5 @@
 /* Horizon CRM - Custom Desk Styles
- * Inspired by Frappe CRM's UI patterns
+ * Evolyx Lab — Travel Agency CRM
  */
 
 :root {
@@ -68,12 +68,74 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   WORKSPACE SIDEBAR (Frappe CRM Sidebar Inspired)
+   WORKSPACE SIDEBAR — Frappe CRM-Inspired
    ═══════════════════════════════════════════════════════════════════════ */
+
+/* Overall sidebar refinement */
+.desk-sidebar {
+    background: var(--horizon-card-bg);
+    border-right: 1px solid var(--horizon-border);
+    padding: 8px 4px;
+}
+
+/* Sidebar menu items — clean modern look */
+.desk-sidebar .sidebar-menu .standard-sidebar-item a {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin: 1px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--horizon-text);
+    transition: all 0.15s ease;
+    text-decoration: none;
+    line-height: 1.4;
+}
+
+.desk-sidebar .sidebar-menu .standard-sidebar-item a:hover {
+    background: var(--horizon-bg);
+    color: var(--horizon-text);
+}
+
+.desk-sidebar .sidebar-menu .standard-sidebar-item a.selected,
+.desk-sidebar .sidebar-menu .standard-sidebar-item a[aria-current="page"] {
+    background: rgba(255, 107, 107, 0.08);
+    color: var(--horizon-primary);
+    font-weight: 600;
+}
+
+.desk-sidebar .sidebar-menu .standard-sidebar-item a.selected::before,
+.desk-sidebar .sidebar-menu .standard-sidebar-item a[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--horizon-gradient);
+    border-radius: 0 3px 3px 0;
+}
+
+/* Sidebar item icons */
+.desk-sidebar .sidebar-menu .standard-sidebar-item a .sidebar-item-icon {
+    margin-right: 10px;
+    font-size: 16px;
+    opacity: 0.65;
+    transition: opacity 0.15s ease;
+    flex-shrink: 0;
+}
+
+.desk-sidebar .sidebar-menu .standard-sidebar-item a:hover .sidebar-item-icon,
+.desk-sidebar .sidebar-menu .standard-sidebar-item a.selected .sidebar-item-icon {
+    opacity: 1;
+}
 
 /* Highlight Horizon CRM workspace in sidebar */
 .desk-sidebar .sidebar-menu a[data-name="Horizon CRM"] {
     font-weight: 600;
+    position: relative;
 }
 
 .desk-sidebar .sidebar-menu a[data-name="Horizon CRM"]::before {
@@ -85,6 +147,33 @@
     border-radius: 2px;
     margin-right: 6px;
     vertical-align: middle;
+}
+
+/* Sidebar section headers */
+.desk-sidebar .sidebar-menu .sidebar-group-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--horizon-text-light);
+    padding: 16px 20px 4px;
+    opacity: 0.7;
+}
+
+/* Sidebar - workspace page sidebar (left nav on workspace page) */
+.layout-side-section .sidebar-menu .desk-sidebar-item {
+    border-radius: 8px;
+    margin: 2px 0;
+    transition: background 0.15s ease;
+}
+
+.layout-side-section .sidebar-menu .desk-sidebar-item:hover {
+    background: var(--horizon-bg);
+}
+
+.layout-side-section .sidebar-menu .desk-sidebar-item.selected {
+    background: rgba(255, 107, 107, 0.08);
+    border-left: 3px solid var(--horizon-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -134,7 +223,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   INQUIRY PIPELINE VISUALIZATION (Frappe CRM Deal Stages Inspired)
+   INQUIRY PIPELINE VISUALIZATION
    ═══════════════════════════════════════════════════════════════════════ */
 
 .horizon-pipeline {
@@ -217,7 +306,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   PAYMENT PROGRESS BAR (Frappe CRM Deal Value Inspired)
+   PAYMENT PROGRESS BAR
    ═══════════════════════════════════════════════════════════════════════ */
 
 .horizon-payment-progress {
@@ -271,7 +360,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   CUSTOMER ACTIVITY SIDEBAR (Frappe CRM SidePanel Inspired)
+   CUSTOMER ACTIVITY SIDEBAR
    ═══════════════════════════════════════════════════════════════════════ */
 
 .horizon-customer-sidebar {
@@ -479,4 +568,108 @@
     .pipeline-line {
         min-width: 20px;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   KANBAN BOARD ENHANCEMENTS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Kanban column header styling */
+.kanban .kanban-column .kanban-column-header {
+    padding: 10px 14px;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Kanban card styling */
+.kanban .kanban-column .kanban-card {
+    border-radius: 10px;
+    border: 1px solid var(--horizon-border);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+    margin: 6px 8px;
+    padding: 12px 14px;
+    background: var(--horizon-card-bg);
+    cursor: grab;
+}
+
+.kanban .kanban-column .kanban-card:hover {
+    box-shadow: var(--horizon-shadow);
+    transform: translateY(-1px);
+    border-color: var(--horizon-primary);
+}
+
+.kanban .kanban-column .kanban-card:active {
+    cursor: grabbing;
+}
+
+/* Kanban card title */
+.kanban .kanban-card .kanban-card-title a {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--horizon-text);
+    text-decoration: none;
+}
+
+.kanban .kanban-card .kanban-card-title a:hover {
+    color: var(--horizon-primary);
+}
+
+/* Kanban column rounded */
+.kanban .kanban-column {
+    border-radius: 10px;
+    border: 1px solid var(--horizon-border);
+    background: var(--horizon-bg);
+    margin: 0 6px;
+}
+
+/* Kanban add card button */
+.kanban .kanban-column .add-card {
+    border-radius: 8px;
+    margin: 4px 8px 8px;
+    padding: 6px 0;
+    font-size: 12px;
+    color: var(--horizon-text-light);
+    transition: color 0.15s ease;
+}
+
+.kanban .kanban-column .add-card:hover {
+    color: var(--horizon-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   WORKSPACE SHORTCUT CARDS POLISH
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Enhanced shortcut cards on workspace */
+.workspace-container .shortcut-widget-box .widget {
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    border: 1px solid var(--horizon-border);
+}
+
+.workspace-container .shortcut-widget-box .widget:hover {
+    box-shadow: var(--horizon-shadow);
+    transform: translateY(-2px);
+}
+
+/* Quick list widget styling */
+.workspace-container .quick-list-widget-box .widget {
+    border-radius: var(--horizon-radius);
+    border: 1px solid var(--horizon-border);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   NAVBAR BRAND ACCENT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.navbar .navbar-brand .app-logo {
+    transition: transform 0.2s ease;
+}
+
+.navbar .navbar-brand .app-logo:hover {
+    transform: scale(1.05);
 }

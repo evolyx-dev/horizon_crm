@@ -1,5 +1,5 @@
 /* Horizon CRM - Desk JavaScript
- * Inspired by Frappe CRM's UI patterns, adapted for Frappe Desk
+ * Evolyx Lab — Travel Agency CRM
  */
 
 frappe.provide("horizon_crm");

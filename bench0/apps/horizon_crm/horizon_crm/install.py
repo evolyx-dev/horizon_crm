@@ -13,6 +13,7 @@ def after_install():
     create_default_destinations()
     create_default_lost_reasons()
     initialize_agency_settings()
+    create_kanban_boards()
     set_branding()
     frappe.db.commit()
 
@@ -89,11 +90,57 @@ def initialize_agency_settings():
         agency.save(ignore_permissions=True)
 
 
+def create_kanban_boards():
+    """Create default Kanban boards for visual pipeline management."""
+    boards = [
+        {
+            "name": "Inquiry Pipeline",
+            "doctype_ref": "Travel Inquiry",
+            "field": "status",
+            "columns": {
+                "New": "Blue",
+                "Contacted": "Orange",
+                "Quoted": "Yellow",
+                "Won": "Green",
+                "Lost": "Red",
+            },
+        },
+        {
+            "name": "Booking Tracker",
+            "doctype_ref": "Travel Booking",
+            "field": "status",
+            "columns": {
+                "Confirmed": "Green",
+                "In Progress": "Orange",
+                "Completed": "Blue",
+                "Cancelled": "Red",
+            },
+        },
+    ]
+    for board in boards:
+        if not frappe.db.exists("Kanban Board", board["name"]):
+            kb = frappe.new_doc("Kanban Board")
+            kb.kanban_board_name = board["name"]
+            kb.reference_doctype = board["doctype_ref"]
+            kb.field_name = board["field"]
+            kb.private = 0
+            kb.show_labels = 1
+            for col_name, color in board["columns"].items():
+                kb.append("columns", {
+                    "column_name": col_name,
+                    "status": "Active",
+                    "indicator": color,
+                })
+            kb.insert(ignore_permissions=True)
+
+
 def set_branding():
     """Set white label branding to Evolyx Lab."""
     # Website Settings
     ws = frappe.get_single("Website Settings")
     ws.app_name = "Evolyx Lab"
+    ws.footer_powered = "Powered by Evolyx Lab"
+    ws.copyright = "Evolyx Lab"
     ws.save(ignore_permissions=True)
 
     # System Settings

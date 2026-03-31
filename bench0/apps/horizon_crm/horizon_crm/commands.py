@@ -4,7 +4,7 @@ Usage:
     bench --site <site> horizon-crm create-tenant --agency-name "Acme Travel" \\
         --admin-email admin@acme.com --admin-password SecurePass123
 
-These commands run within the context of an already-created Frappe site.
+These commands run within the context of an already-created site.
 To provision a full tenant from scratch, use the helper script or call:
 
     bench new-site <tenant>.localhost --db-root-password <pw> --admin-password <pw>
@@ -25,7 +25,7 @@ from frappe.commands import get_site, pass_context
 @click.option("--contact-email", default=None, help="Agency contact email (defaults to admin-email)")
 @pass_context
 def create_tenant(context, agency_name, admin_email, admin_password, max_staff, contact_email):
-    """Set up a Horizon CRM tenant on the current Frappe site.
+    """Set up a Horizon CRM tenant on the current site.
 
     This command:
     1. Configures the Travel Agency singleton with the provided details
