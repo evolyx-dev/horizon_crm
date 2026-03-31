@@ -5,31 +5,23 @@ __pycache__/
 *.egg
 dist/
 build/
+*.pyo
+*.pdb
 
 # Virtual environment
-bench0/env/
+env/
+venv/
+.venv/
 
-# Frappe runtime
-bench0/logs/
-bench0/config/pids/
-bench0/sites/*/private/
-bench0/sites/*/public/
-bench0/sites/assets/
-bench0/sites/apps.json
-bench0/sites/apps.txt
-bench0/sites/common_site_config.json
-bench0/sites/*/logs/
-bench0/sites/*/indexes/
-bench0/sites/*/touched_tables.json
-bench0/sites/*/site_config.json
-bench0/sites/*/error-snapshots/
-
-# Frappe framework (managed by bench, not our code)
-bench0/apps/frappe/
+# Frappe bench (runtime — not part of the app)
+bench0/
 
 # Node
 node_modules/
-tests/node_modules/
+yarn-error.log
+.yarn/
+
+# E2E Test artifacts
 tests/test-results/
 tests/playwright-report/
 tests/allure-results/
@@ -40,12 +32,19 @@ reports/
 # OS
 .DS_Store
 Thumbs.db
+*.swp
+*~
 
 # IDE
 .vscode/
 .idea/
+*.code-workspace
 
 # Docker volumes
 mariadb-data/
 redis-data/
-bench-data/
+
+# Miscellaneous
+logs/
+*.log
+prompt.md

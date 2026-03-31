@@ -1,0 +1,22 @@
+{
+	"name": "Horizon CRM",
+	"forwardPorts": [8000, 9000],
+	"remoteUser": "frappe",
+	"settings": {
+		"terminal.integrated.defaultProfile.linux": "bash",
+		"debug.node.autoAttach": "disabled"
+	},
+	"dockerComposeFile": "./docker-compose.yml",
+	"service": "frappe",
+	"workspaceFolder": "/workspace/frappe-bench",
+	"postCreateCommand": "bash /workspace/scripts/init.sh",
+	"shutdownAction": "stopCompose",
+	"extensions": [
+		"ms-python.python",
+		"ms-python.vscode-pylance",
+		"charliermarsh.ruff",
+		"ms-vscode.live-server",
+		"mtxr.sqltools",
+		"ms-playwright.playwright"
+	]
+}

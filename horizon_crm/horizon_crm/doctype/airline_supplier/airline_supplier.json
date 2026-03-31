@@ -1,0 +1,191 @@
+{
+    "actions": [],
+    "creation": "2026-03-31 12:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "airline_name",
+        "iata_code",
+        "is_active",
+        "column_break_header",
+        "contact_email",
+        "phone",
+        "website",
+        "section_operations",
+        "hub_airports",
+        "alliance",
+        "column_break_ops",
+        "domestic",
+        "international",
+        "charter",
+        "section_address",
+        "address",
+        "column_break_addr",
+        "city",
+        "country",
+        "section_services",
+        "services",
+        "section_notes",
+        "supplier_notes"
+    ],
+    "fields": [
+        {
+            "fieldname": "airline_name",
+            "fieldtype": "Data",
+            "label": "Airline Name",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "iata_code",
+            "fieldtype": "Data",
+            "label": "IATA Code",
+            "length": 3,
+            "in_list_view": 1,
+            "description": "Two or three letter IATA airline designator"
+        },
+        {
+            "fieldname": "is_active",
+            "fieldtype": "Check",
+            "label": "Active",
+            "default": "1",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_header",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "contact_email",
+            "fieldtype": "Data",
+            "label": "Contact Email",
+            "options": "Email"
+        },
+        {
+            "fieldname": "phone",
+            "fieldtype": "Data",
+            "label": "Phone",
+            "options": "Phone"
+        },
+        {
+            "fieldname": "website",
+            "fieldtype": "Data",
+            "label": "Website"
+        },
+        {
+            "fieldname": "section_operations",
+            "fieldtype": "Section Break",
+            "label": "Operations"
+        },
+        {
+            "fieldname": "hub_airports",
+            "fieldtype": "Small Text",
+            "label": "Hub Airports",
+            "description": "Comma-separated list of hub airport codes"
+        },
+        {
+            "fieldname": "alliance",
+            "fieldtype": "Select",
+            "label": "Alliance",
+            "options": "\nStar Alliance\nOneworld\nSkyTeam\nNone"
+        },
+        {
+            "fieldname": "column_break_ops",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "domestic",
+            "fieldtype": "Check",
+            "label": "Domestic Flights",
+            "default": "1"
+        },
+        {
+            "fieldname": "international",
+            "fieldtype": "Check",
+            "label": "International Flights",
+            "default": "1"
+        },
+        {
+            "fieldname": "charter",
+            "fieldtype": "Check",
+            "label": "Charter Available"
+        },
+        {
+            "fieldname": "section_address",
+            "fieldtype": "Section Break",
+            "label": "Address",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "address",
+            "fieldtype": "Small Text",
+            "label": "Address"
+        },
+        {
+            "fieldname": "column_break_addr",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "city",
+            "fieldtype": "Data",
+            "label": "City"
+        },
+        {
+            "fieldname": "country",
+            "fieldtype": "Data",
+            "label": "Country"
+        },
+        {
+            "fieldname": "section_services",
+            "fieldtype": "Section Break",
+            "label": "Service Catalog"
+        },
+        {
+            "fieldname": "services",
+            "fieldtype": "Table",
+            "label": "Services",
+            "options": "Supplier Service"
+        },
+        {
+            "fieldname": "section_notes",
+            "fieldtype": "Section Break",
+            "label": "Notes",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "supplier_notes",
+            "fieldtype": "Text",
+            "label": "Notes"
+        }
+    ],
+    "links": [],
+    "modified": "2026-03-31 12:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Horizon CRM",
+    "name": "Airline Supplier",
+    "naming_rule": "Expression",
+    "autoname": "AIR-.#####",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1, "delete": 1, "email": 1, "export": 1, "print": 1,
+            "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1
+        },
+        {
+            "create": 1, "delete": 1, "read": 1, "write": 1,
+            "role": "Agency Admin", "export": 1
+        },
+        {
+            "create": 1, "read": 1, "write": 1, "role": "Agency Team Lead"
+        },
+        {
+            "create": 1, "read": 1, "write": 1, "role": "Agency Staff"
+        }
+    ],
+    "show_title_field_in_link": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "airline_name",
+    "track_changes": 1
+}

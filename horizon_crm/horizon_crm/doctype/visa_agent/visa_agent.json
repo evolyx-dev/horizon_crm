@@ -1,0 +1,181 @@
+{
+    "actions": [],
+    "creation": "2026-03-31 12:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "agent_name",
+        "is_active",
+        "column_break_header",
+        "contact_email",
+        "phone",
+        "website",
+        "section_visa",
+        "countries_served",
+        "visa_types",
+        "column_break_visa",
+        "avg_processing_days",
+        "success_rate",
+        "express_available",
+        "section_address",
+        "address",
+        "column_break_addr",
+        "city",
+        "country",
+        "section_services",
+        "services",
+        "section_notes",
+        "supplier_notes"
+    ],
+    "fields": [
+        {
+            "fieldname": "agent_name",
+            "fieldtype": "Data",
+            "label": "Agent Name",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "is_active",
+            "fieldtype": "Check",
+            "label": "Active",
+            "default": "1",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_header",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "contact_email",
+            "fieldtype": "Data",
+            "label": "Contact Email",
+            "options": "Email"
+        },
+        {
+            "fieldname": "phone",
+            "fieldtype": "Data",
+            "label": "Phone",
+            "options": "Phone"
+        },
+        {
+            "fieldname": "website",
+            "fieldtype": "Data",
+            "label": "Website"
+        },
+        {
+            "fieldname": "section_visa",
+            "fieldtype": "Section Break",
+            "label": "Visa Services"
+        },
+        {
+            "fieldname": "countries_served",
+            "fieldtype": "Small Text",
+            "label": "Countries Served",
+            "description": "Comma-separated list of countries this agent handles visas for",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "visa_types",
+            "fieldtype": "Small Text",
+            "label": "Visa Types Handled",
+            "description": "e.g. Tourist, Business, Student, Work, Transit"
+        },
+        {
+            "fieldname": "column_break_visa",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "avg_processing_days",
+            "fieldtype": "Int",
+            "label": "Avg. Processing Days"
+        },
+        {
+            "fieldname": "success_rate",
+            "fieldtype": "Percent",
+            "label": "Success Rate (%)"
+        },
+        {
+            "fieldname": "express_available",
+            "fieldtype": "Check",
+            "label": "Express Processing Available"
+        },
+        {
+            "fieldname": "section_address",
+            "fieldtype": "Section Break",
+            "label": "Address",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "address",
+            "fieldtype": "Small Text",
+            "label": "Address"
+        },
+        {
+            "fieldname": "column_break_addr",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "city",
+            "fieldtype": "Data",
+            "label": "City"
+        },
+        {
+            "fieldname": "country",
+            "fieldtype": "Data",
+            "label": "Country"
+        },
+        {
+            "fieldname": "section_services",
+            "fieldtype": "Section Break",
+            "label": "Service Catalog"
+        },
+        {
+            "fieldname": "services",
+            "fieldtype": "Table",
+            "label": "Services",
+            "options": "Supplier Service"
+        },
+        {
+            "fieldname": "section_notes",
+            "fieldtype": "Section Break",
+            "label": "Notes",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "supplier_notes",
+            "fieldtype": "Text",
+            "label": "Notes"
+        }
+    ],
+    "links": [],
+    "modified": "2026-03-31 12:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Horizon CRM",
+    "name": "Visa Agent",
+    "naming_rule": "Expression",
+    "autoname": "VISA-.#####",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1, "delete": 1, "email": 1, "export": 1, "print": 1,
+            "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1
+        },
+        {
+            "create": 1, "delete": 1, "read": 1, "write": 1,
+            "role": "Agency Admin", "export": 1
+        },
+        {
+            "create": 1, "read": 1, "write": 1, "role": "Agency Team Lead"
+        },
+        {
+            "create": 1, "read": 1, "write": 1, "role": "Agency Staff"
+        }
+    ],
+    "show_title_field_in_link": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "agent_name",
+    "track_changes": 1
+}

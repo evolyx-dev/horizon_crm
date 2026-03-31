@@ -16,6 +16,8 @@
     "test:portal": "npx playwright test e2e/07-portal.spec.ts",
     "test:ui-ux": "npx playwright test e2e/08-ui-ux.spec.ts",
     "test:doctypes": "npx playwright test e2e/09-other-doctypes.spec.ts",
+    "test:multi-tenant": "npx playwright test e2e/10-multi-tenant.spec.ts",
+    "test:lead-branding": "npx playwright test e2e/11-lead-and-branding.spec.ts",
     "clean": "rm -rf allure-results test-results ../reports/html ../reports/allure-report",
     "report:html": "npx playwright show-report ../reports/html",
     "report:allure:generate": "npx allure generate allure-results -o ../reports/allure-report --clean",

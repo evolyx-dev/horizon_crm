@@ -1,0 +1,1243 @@
+/* Horizon CRM - Custom Desk Styles
+ * Horizon CRM — Travel Agency CRM
+ * Inspired by Frappe CRM's clean, modern design
+ */
+
+:root {
+    --horizon-primary: #FF6B6B;
+    --horizon-primary-dark: #E85555;
+    --horizon-primary-light: rgba(255, 107, 107, 0.08);
+    --horizon-secondary: #FF8E53;
+    --horizon-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+    --horizon-text: #1F272E;
+    --horizon-text-muted: #74808B;
+    --horizon-text-light: #A3B1BF;
+    --horizon-bg: #F4F5F6;
+    --horizon-bg-subtle: #FAFBFC;
+    --horizon-card-bg: #FFFFFF;
+    --horizon-border: #E2E6E9;
+    --horizon-border-light: #EEF0F2;
+    --horizon-success: #22C55E;
+    --horizon-warning: #F59E0B;
+    --horizon-danger: #EF4444;
+    --horizon-info: #3B82F6;
+    --horizon-purple: #8B5CF6;
+    --horizon-cyan: #06B6D4;
+    --horizon-radius: 10px;
+    --horizon-radius-sm: 6px;
+    --horizon-radius-lg: 14px;
+    --horizon-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --horizon-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --horizon-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --horizon-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --horizon-font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Oxygen, sans-serif;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STATUS INDICATORS — Refined pill design
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.indicator-pill.green,
+.indicator-pill[data-status="Active"],
+.indicator-pill[data-status="Confirmed"],
+.indicator-pill[data-status="Completed"],
+.indicator-pill[data-status="Won"],
+.indicator-pill[data-status="Approved"],
+.indicator-pill[data-status="Received"],
+.indicator-pill[data-status="Paid"],
+.indicator-pill[data-status="Converted"] {
+    --indicator-color: var(--horizon-success);
+}
+
+.indicator-pill.red,
+.indicator-pill[data-status="Inactive"],
+.indicator-pill[data-status="Cancelled"],
+.indicator-pill[data-status="Lost"],
+.indicator-pill[data-status="Refunded"],
+.indicator-pill[data-status="Do Not Contact"],
+.indicator-pill[data-status="Overdue"] {
+    --indicator-color: var(--horizon-danger);
+}
+
+.indicator-pill.orange,
+.indicator-pill[data-status="In Progress"],
+.indicator-pill[data-status="Contacted"],
+.indicator-pill[data-status="Quoted"],
+.indicator-pill[data-status="Shared"],
+.indicator-pill[data-status="Pending"],
+.indicator-pill[data-status="Sent"],
+.indicator-pill[data-status="Partially Paid"] {
+    --indicator-color: var(--horizon-secondary);
+}
+
+.indicator-pill.blue,
+.indicator-pill[data-status="New"],
+.indicator-pill[data-status="Draft"] {
+    --indicator-color: var(--horizon-info);
+}
+
+.indicator-pill[data-status="Interested"] {
+    --indicator-color: var(--horizon-warning);
+}
+
+.indicator-pill[data-status="Qualified"] {
+    --indicator-color: var(--horizon-cyan);
+}
+
+/* List view status pills — polished look */
+.list-row .level-left .list-row--col .indicator-pill {
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   WORKSPACE SIDEBAR — Frappe CRM-Inspired Clean Design
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Overall sidebar refinement */
+.desk-sidebar {
+    background: var(--horizon-card-bg);
+    border-right: 1px solid var(--horizon-border-light);
+    padding: 6px 0;
+}
+
+/* Sidebar menu items — clean, spacious, modern look */
+.desk-sidebar .sidebar-menu .standard-sidebar-item a {
+    display: flex;
+    align-items: center;
+    padding: 7px 14px;
+    margin: 1px 6px;
+    border-radius: var(--horizon-radius-sm);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--horizon-text);
+    transition: all 0.15s ease;
+    text-decoration: none;
+    line-height: 1.4;
+    position: relative;
+}
+
+.desk-sidebar .sidebar-menu .standard-sidebar-item a:hover {
+    background: var(--horizon-bg);
+    color: var(--horizon-text);
+}
+
+.desk-sidebar .sidebar-menu .standard-sidebar-item a.selected,
+.desk-sidebar .sidebar-menu .standard-sidebar-item a[aria-current="page"] {
+    background: var(--horizon-primary-light);
+    color: var(--horizon-primary);
+    font-weight: 600;
+}
+
+/* Active left accent bar */
+.desk-sidebar .sidebar-menu .standard-sidebar-item a.selected::before,
+.desk-sidebar .sidebar-menu .standard-sidebar-item a[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 18px;
+    background: var(--horizon-primary);
+    border-radius: 0 3px 3px 0;
+}
+
+/* Sidebar item icons */
+.desk-sidebar .sidebar-menu .standard-sidebar-item a .sidebar-item-icon {
+    margin-right: 10px;
+    font-size: 15px;
+    opacity: 0.55;
+    transition: opacity 0.15s ease;
+    flex-shrink: 0;
+}
+
+.desk-sidebar .sidebar-menu .standard-sidebar-item a:hover .sidebar-item-icon,
+.desk-sidebar .sidebar-menu .standard-sidebar-item a.selected .sidebar-item-icon {
+    opacity: 1;
+}
+
+/* Highlight Horizon CRM workspace in sidebar */
+.desk-sidebar .sidebar-menu a[data-name="Horizon CRM"] {
+    font-weight: 600;
+    position: relative;
+}
+
+.desk-sidebar .sidebar-menu a[data-name="Horizon CRM"]::before {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 16px;
+    background: var(--horizon-primary);
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+/* Sidebar section category headers */
+.desk-sidebar .sidebar-menu .sidebar-group-title,
+.sidebar-menu .sidebar-sub-group-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--horizon-text-light);
+    padding: 18px 20px 6px;
+    margin-top: 4px;
+}
+
+/* Workspace page sidebar (left nav within workspace) — Card Break sections */
+.workspace-sidebar-section .sidebar-label,
+.sidebar-menu .desk-sidebar-item.sidebar-section,
+.layout-side-section .sidebar-menu .sidebar-text-item {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--horizon-text-light);
+    padding: 14px 16px 4px;
+}
+
+.layout-side-section .sidebar-menu .desk-sidebar-item {
+    border-radius: var(--horizon-radius-sm);
+    margin: 1px 4px;
+    transition: background 0.15s ease;
+}
+
+.layout-side-section .sidebar-menu .desk-sidebar-item:hover {
+    background: var(--horizon-bg);
+}
+
+.layout-side-section .sidebar-menu .desk-sidebar-item.selected {
+    background: var(--horizon-primary-light);
+    border-left: 3px solid var(--horizon-primary);
+}
+
+.layout-side-section .sidebar-menu .desk-sidebar-item a {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--horizon-text);
+    padding: 7px 12px;
+    display: block;
+    text-decoration: none;
+}
+
+.layout-side-section .sidebar-menu .desk-sidebar-item.selected a {
+    color: var(--horizon-primary);
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FORM STYLES — Clean, modern form design
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Form page background */
+.page-container[data-page-doctype^="Travel"] .layout-main-section,
+.page-container[data-page-doctype="Invoice"] .layout-main-section {
+    background: var(--horizon-bg-subtle);
+}
+
+/* Form card body — clean card feel */
+[data-doctype^="Travel"] .form-layout,
+[data-doctype="Travel Invoice"] .form-layout {
+    background: var(--horizon-card-bg);
+    border-radius: var(--horizon-radius);
+    border: 1px solid var(--horizon-border-light);
+}
+
+/* Title styling */
+[data-doctype^="Travel"] .page-head .title-area .title-text {
+    font-weight: 700;
+    color: var(--horizon-text);
+}
+
+/* Section headers with clean accent */
+[data-doctype^="Travel"] .section-head,
+[data-doctype="Invoice Item"] .section-head {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--horizon-text-muted);
+    border-bottom: none;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+[data-doctype^="Travel"] .section-head::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 30px;
+    height: 2px;
+    background: var(--horizon-primary);
+    border-radius: 1px;
+}
+
+/* Lost reason section - red accent */
+[data-doctype="Travel Inquiry"] .frappe-control[data-fieldname="section_lost"] .section-head {
+    border-bottom-color: var(--horizon-danger);
+    color: var(--horizon-danger);
+}
+
+[data-doctype="Travel Inquiry"] .frappe-control[data-fieldname="section_lost"] .section-head::after {
+    background: var(--horizon-danger);
+}
+
+/* Form section spacing */
+[data-doctype^="Travel"] .form-section:not(:first-child) {
+    margin-top: 6px;
+}
+
+/* Cleaner form input fields */
+[data-doctype^="Travel"] .form-group .control-input input,
+[data-doctype^="Travel"] .form-group .control-input select,
+[data-doctype^="Travel"] .form-group .control-input .link-field .awesomplete input {
+    border-radius: var(--horizon-radius-sm);
+    border-color: var(--horizon-border);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+[data-doctype^="Travel"] .form-group .control-input input:focus,
+[data-doctype^="Travel"] .form-group .control-input select:focus {
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 3px var(--horizon-primary-light);
+}
+
+/* Control labels */
+[data-doctype^="Travel"] .frappe-control .control-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--horizon-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Form dashboard area — lighter */
+[data-doctype^="Travel"] .form-dashboard-section {
+    background: var(--horizon-bg-subtle);
+    border-bottom: 1px solid var(--horizon-border-light);
+    padding: 10px 15px;
+}
+
+/* Form dashboard indicators */
+[data-doctype^="Travel"] .form-dashboard-section .indicator-pill {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INQUIRY PIPELINE VISUALIZATION
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.horizon-pipeline {
+    display: flex;
+    align-items: center;
+    padding: 16px 0;
+    margin: 8px 0;
+}
+
+.pipeline-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.pipeline-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--horizon-border);
+    border: 3px solid var(--horizon-border);
+    transition: all 0.3s ease;
+}
+
+.pipeline-stage.completed .pipeline-dot {
+    background: var(--horizon-success);
+    border-color: var(--horizon-success);
+}
+
+.pipeline-stage.active .pipeline-dot {
+    background: var(--horizon-primary);
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+}
+
+.pipeline-stage.lost .pipeline-dot {
+    background: var(--horizon-danger);
+    border-color: var(--horizon-danger);
+    box-shadow: 0 0 0 4px rgba(214, 48, 49, 0.2);
+}
+
+.pipeline-stage.lost.active .pipeline-dot {
+    background: var(--horizon-danger);
+    border-color: var(--horizon-danger);
+}
+
+.pipeline-label {
+    font-size: 11px;
+    color: var(--horizon-text-light);
+    margin-top: 6px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.pipeline-stage.active .pipeline-label,
+.pipeline-stage.completed .pipeline-label {
+    color: var(--horizon-text);
+    font-weight: 600;
+}
+
+.pipeline-stage.lost .pipeline-label {
+    color: var(--horizon-danger);
+    font-weight: 600;
+}
+
+.pipeline-line {
+    flex: 1;
+    height: 3px;
+    background: var(--horizon-border);
+    margin: 0 4px;
+    margin-bottom: 20px;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.pipeline-line.completed {
+    background: var(--horizon-success);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAYMENT PROGRESS BAR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.horizon-payment-progress {
+    padding: 12px 0;
+    margin: 4px 0;
+}
+
+.payment-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.payment-progress-header .progress-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--horizon-text-light);
+}
+
+.payment-progress-header .progress-amount {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--horizon-text);
+}
+
+.payment-progress-bar {
+    height: 8px;
+    background: var(--horizon-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.payment-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease, background 0.3s ease;
+}
+
+.payment-progress-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.payment-progress-footer span {
+    font-size: 11px;
+    color: var(--horizon-text-light);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CUSTOMER ACTIVITY SIDEBAR — Clean stat blocks
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.horizon-customer-sidebar {
+    padding: 12px 0;
+    margin: 4px 0;
+}
+
+.horizon-customer-sidebar .sidebar-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--horizon-text-light);
+    margin-bottom: 12px;
+}
+
+.sidebar-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.sidebar-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    padding: 10px 8px;
+    background: var(--horizon-bg);
+    border-radius: var(--horizon-radius-sm);
+    border: 1px solid var(--horizon-border-light);
+}
+
+.sidebar-stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--horizon-text);
+}
+
+.sidebar-stat-label {
+    font-size: 10px;
+    color: var(--horizon-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DASHBOARD & STAT CARDS — Polished metric cards
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.horizon-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    padding: 14px 0;
+}
+
+.horizon-stat-card {
+    background: var(--horizon-card-bg);
+    border-radius: var(--horizon-radius);
+    padding: 18px 20px;
+    box-shadow: var(--horizon-shadow-xs);
+    transition: all 0.2s ease;
+    border: 1px solid var(--horizon-border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.horizon-stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--horizon-border);
+    transition: background 0.2s ease;
+}
+
+.horizon-stat-card:hover {
+    box-shadow: var(--horizon-shadow-md);
+    transform: translateY(-2px);
+}
+
+.horizon-stat-card .stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--horizon-text-light);
+    margin-bottom: 6px;
+}
+
+.horizon-stat-card .stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--horizon-text);
+    line-height: 1.1;
+    font-family: var(--horizon-font);
+}
+
+.horizon-stat-card .stat-icon {
+    float: right;
+    font-size: 22px;
+    opacity: 0.2;
+    margin-top: -4px;
+}
+
+.horizon-stat-card.primary::before { background: var(--horizon-primary); }
+.horizon-stat-card.success::before { background: var(--horizon-success); }
+.horizon-stat-card.warning::before { background: var(--horizon-warning); }
+.horizon-stat-card.info::before { background: var(--horizon-info); }
+
+.horizon-stat-card.primary { border-left: 3px solid var(--horizon-primary); }
+.horizon-stat-card.success { border-left: 3px solid var(--horizon-success); }
+.horizon-stat-card.warning { border-left: 3px solid var(--horizon-warning); }
+.horizon-stat-card.info { border-left: 3px solid var(--horizon-info); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOOKING STATUS TIMELINE — Stepped progress
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.booking-timeline {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 0;
+}
+
+.booking-timeline .step {
+    flex: 1;
+    height: 4px;
+    background: var(--horizon-border);
+    border-radius: 2px;
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+.booking-timeline .step.active {
+    background: var(--horizon-gradient);
+}
+
+.booking-timeline .step .step-label {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: var(--horizon-text-light);
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.booking-timeline .step.active .step-label {
+    color: var(--horizon-primary);
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   WORKSPACE NUMBER CARDS & CHARTS — Polished widgets
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.workspace-container .number-widget-box {
+    border-radius: var(--horizon-radius);
+    transition: all 0.2s ease;
+}
+
+.workspace-container .number-widget-box:hover {
+    box-shadow: var(--horizon-shadow-md);
+    transform: translateY(-1px);
+}
+
+.workspace-container .number-widget-box .widget-body .number-card {
+    padding: 16px 20px;
+}
+
+.workspace-container .number-widget-box .widget-body .number {
+    font-size: 28px;
+    font-weight: 800;
+    font-family: var(--horizon-font);
+}
+
+/* Chart card polish */
+.workspace-container .chart-widget-box .widget {
+    border-radius: var(--horizon-radius);
+    border: 1px solid var(--horizon-border-light);
+    box-shadow: var(--horizon-shadow-xs);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Custom button styling */
+.btn-primary-dark {
+    background: var(--horizon-gradient);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: var(--horizon-radius-sm);
+    padding: 8px 20px;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.btn-primary-dark:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--horizon-shadow-md);
+    color: white;
+    opacity: 0.92;
+}
+
+/* Rating display */
+[data-doctype="Travel Feedback"] .indicator-pill {
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
+/* Emergency contact highlight */
+.frappe-control[data-fieldname="emergency_contact_name"] .control-label,
+.frappe-control[data-fieldname="emergency_contact_phone"] .control-label {
+    color: var(--horizon-danger);
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LIST VIEW ENHANCEMENTS — Clean, modern table rows
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* List view container */
+[data-doctype^="Travel"] .frappe-list .result,
+[data-doctype="Travel Invoice"] .frappe-list .result {
+    border-radius: var(--horizon-radius);
+    overflow: hidden;
+}
+
+/* List view header row */
+[data-doctype^="Travel"] .list-row-head,
+[data-doctype="Travel Invoice"] .list-row-head {
+    background: var(--horizon-bg);
+    border-bottom: 2px solid var(--horizon-border);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--horizon-text-muted);
+}
+
+/* List view data rows */
+[data-doctype^="Travel"] .list-row,
+[data-doctype="Travel Invoice"] .list-row {
+    border-bottom: 1px solid var(--horizon-border-light);
+    transition: background 0.1s ease;
+}
+
+[data-doctype^="Travel"] .list-row:hover,
+[data-doctype="Travel Invoice"] .list-row:hover {
+    background: var(--horizon-primary-light);
+}
+
+/* List row link color */
+[data-doctype^="Travel"] .list-row .level-left .list-row--col .ellipsis a,
+[data-doctype="Travel Invoice"] .list-row .level-left .list-row--col .ellipsis a {
+    color: var(--horizon-text);
+    font-weight: 500;
+}
+
+[data-doctype^="Travel"] .list-row .level-left .list-row--col .ellipsis a:hover {
+    color: var(--horizon-primary);
+}
+
+/* List view row spacing */
+[data-doctype^="Travel"] .list-row .level-left {
+    gap: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGE HEADER & BREADCRUMB POLISH
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Page head clean look */
+[data-doctype^="Travel"] .page-head,
+[data-doctype="Travel Invoice"] .page-head {
+    border-bottom: 1px solid var(--horizon-border-light);
+}
+
+/* Primary action button in page head */
+[data-doctype^="Travel"] .page-head .page-actions .btn-primary,
+[data-doctype="Travel Invoice"] .page-head .page-actions .btn-primary {
+    background: var(--horizon-primary);
+    border-color: var(--horizon-primary);
+    border-radius: var(--horizon-radius-sm);
+    font-weight: 600;
+    padding: 6px 16px;
+    transition: all 0.15s ease;
+}
+
+[data-doctype^="Travel"] .page-head .page-actions .btn-primary:hover {
+    background: var(--horizon-primary-dark);
+    border-color: var(--horizon-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--horizon-shadow);
+}
+
+/* Secondary action buttons */
+[data-doctype^="Travel"] .page-head .page-actions .btn-default {
+    border-radius: var(--horizon-radius-sm);
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .horizon-dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .horizon-stat-card .stat-value {
+        font-size: 22px;
+    }
+    
+    .sidebar-stats {
+        flex-direction: column;
+    }
+    
+    .horizon-pipeline {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pipeline-line {
+        min-width: 20px;
+    }
+
+    .kanban .kanban-column {
+        min-width: 260px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   KANBAN BOARD ENHANCEMENTS — Frappe CRM-inspired card design
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Kanban container - horizontal scroll */
+.frappe-control[data-fieldname="kanban"] .kanban,
+.page-container .kanban {
+    padding: 8px 4px;
+}
+
+/* Kanban column */
+.kanban .kanban-column {
+    border-radius: var(--horizon-radius);
+    border: 1px solid var(--horizon-border-light);
+    background: var(--horizon-bg);
+    margin: 0 6px;
+    min-width: 280px;
+}
+
+/* Kanban column header */
+.kanban .kanban-column .kanban-column-header {
+    padding: 12px 14px;
+    border-radius: var(--horizon-radius) var(--horizon-radius) 0 0;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    background: var(--horizon-card-bg);
+    border-bottom: 1px solid var(--horizon-border-light);
+}
+
+/* Column header count badge */
+.kanban .kanban-column .kanban-column-header .column-title .kanban-badge {
+    background: var(--horizon-border);
+    color: var(--horizon-text-muted);
+    border-radius: 10px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+/* Kanban card - modern clean card */
+.kanban .kanban-column .kanban-card {
+    border-radius: var(--horizon-radius-sm);
+    border: 1px solid var(--horizon-border-light);
+    box-shadow: var(--horizon-shadow-xs);
+    transition: all 0.15s ease;
+    margin: 6px 8px;
+    padding: 12px 14px;
+    background: var(--horizon-card-bg);
+    cursor: grab;
+}
+
+.kanban .kanban-column .kanban-card:hover {
+    box-shadow: var(--horizon-shadow);
+    transform: translateY(-1px);
+    border-color: var(--horizon-primary);
+}
+
+.kanban .kanban-column .kanban-card:active {
+    cursor: grabbing;
+    box-shadow: var(--horizon-shadow-md);
+}
+
+/* Kanban card title */
+.kanban .kanban-card .kanban-card-title a {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--horizon-text);
+    text-decoration: none;
+    line-height: 1.4;
+}
+
+.kanban .kanban-card .kanban-card-title a:hover {
+    color: var(--horizon-primary);
+}
+
+/* Kanban card meta - secondary info below title */
+.kanban .kanban-card .kanban-card-meta {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.kanban .kanban-card .kanban-card-meta .text-muted {
+    font-size: 12px;
+    color: var(--horizon-text-muted);
+}
+
+/* Kanban card tags */
+.kanban .kanban-card .kanban-card-body .like-disabled-input .tag-btn {
+    border-radius: 10px;
+    font-size: 10.5px;
+    padding: 1px 8px;
+    font-weight: 500;
+}
+
+/* Kanban card assigned users - avatar row */
+.kanban .kanban-card .kanban-card-body .avatar-group {
+    margin-top: 8px;
+}
+
+.kanban .kanban-card .kanban-card-body .avatar-group .avatar {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--horizon-card-bg);
+    transition: transform 0.1s ease;
+}
+
+.kanban .kanban-card .kanban-card-body .avatar-group .avatar:hover {
+    transform: scale(1.1);
+    z-index: 1;
+}
+
+/* Kanban add card button */
+.kanban .kanban-column .add-card {
+    border-radius: var(--horizon-radius-sm);
+    margin: 4px 8px 8px;
+    padding: 8px 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--horizon-text-light);
+    transition: all 0.15s ease;
+    border: 1px dashed transparent;
+}
+
+.kanban .kanban-column .add-card:hover {
+    color: var(--horizon-primary);
+    border-color: var(--horizon-primary);
+    background: var(--horizon-primary-light);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   WORKSPACE SHORTCUT CARDS — Polished widget tiles
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Shortcut card tiles on workspace dashboard */
+.workspace-container .shortcut-widget-box .widget {
+    border-radius: var(--horizon-radius);
+    transition: all 0.2s ease;
+    border: 1px solid var(--horizon-border-light);
+    box-shadow: var(--horizon-shadow-xs);
+}
+
+.workspace-container .shortcut-widget-box .widget:hover {
+    box-shadow: var(--horizon-shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--horizon-primary);
+}
+
+/* Shortcut widget label */
+.workspace-container .shortcut-widget-box .widget .widget-label {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Quick list widget */
+.workspace-container .quick-list-widget-box .widget {
+    border-radius: var(--horizon-radius);
+    border: 1px solid var(--horizon-border-light);
+    box-shadow: var(--horizon-shadow-xs);
+}
+
+/* Section heading in workspace */
+.workspace-container .widget-group .widget-group-head .widget-group-title {
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--horizon-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SIDEBAR HEADER — Logo & branding polish
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Sidebar header icon container — make logo larger and properly sized */
+.body-sidebar-container .sidebar-header .sidebar-item-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: var(--horizon-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.body-sidebar-container .sidebar-header .sidebar-item-icon .header-logo {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.body-sidebar-container .sidebar-header .sidebar-item-icon .header-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--horizon-radius-sm);
+}
+
+/* Header title styling */
+.body-sidebar-container .sidebar-header .header-title {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.2px;
+}
+
+.body-sidebar-container .sidebar-header .header-subtitle {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   NAVBAR BRAND & GLOBAL POLISH
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.navbar .navbar-brand .app-logo {
+    transition: transform 0.2s ease;
+}
+
+.navbar .navbar-brand .app-logo:hover {
+    transform: scale(1.05);
+}
+
+/* Smooth page transitions */
+.page-container {
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Comment / Activity section polish */
+[data-doctype^="Travel"] .comment-box .reply .ql-editor {
+    border-radius: var(--horizon-radius-sm);
+    border: 1px solid var(--horizon-border);
+    transition: border-color 0.15s ease;
+}
+
+[data-doctype^="Travel"] .comment-box .reply .ql-editor:focus {
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 3px var(--horizon-primary-light);
+}
+
+/* Dialog modal polish */
+.modal-dialog .modal-content {
+    border-radius: var(--horizon-radius);
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal-dialog .modal-header {
+    border-bottom: 1px solid var(--horizon-border-light);
+    padding: 16px 20px;
+}
+
+.modal-dialog .modal-footer {
+    border-top: 1px solid var(--horizon-border-light);
+    padding: 12px 20px;
+}
+
+.modal-dialog .modal-footer .btn-primary {
+    background: var(--horizon-primary);
+    border-color: var(--horizon-primary);
+    border-radius: var(--horizon-radius-sm);
+    font-weight: 600;
+}
+
+.modal-dialog .modal-footer .btn-primary:hover {
+    background: var(--horizon-primary-dark);
+    border-color: var(--horizon-primary-dark);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK THEME — Full dark mode support
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+    --horizon-text: #E2E8F0;
+    --horizon-text-muted: #94A3B8;
+    --horizon-text-light: #64748B;
+    --horizon-bg: #1A1C2B;
+    --horizon-bg-subtle: #1E2030;
+    --horizon-card-bg: #232536;
+    --horizon-border: #2D3048;
+    --horizon-border-light: #282A3E;
+    --horizon-primary-light: rgba(255, 107, 107, 0.12);
+    --horizon-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --horizon-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --horizon-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --horizon-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode form layout */
+[data-theme="dark"] [data-doctype^="Travel"] .form-layout {
+    background: var(--horizon-card-bg);
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode sidebar stat blocks */
+[data-theme="dark"] .sidebar-stat {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode number cards */
+[data-theme="dark"] .workspace-container .number-widget-box .widget {
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode chart cards */
+[data-theme="dark"] .workspace-container .chart-widget-box .widget {
+    border-color: var(--horizon-border);
+    background: var(--horizon-card-bg);
+}
+
+/* Dark mode kanban cards */
+[data-theme="dark"] .kanban .kanban-column {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] .kanban .kanban-column .kanban-column-header {
+    background: var(--horizon-card-bg);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] .kanban .kanban-column .kanban-card {
+    background: var(--horizon-card-bg);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] .kanban .kanban-column .kanban-card:hover {
+    border-color: var(--horizon-primary);
+}
+
+/* Dark mode modals */
+[data-theme="dark"] .modal-dialog .modal-content {
+    background: var(--horizon-card-bg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .modal-dialog .modal-header,
+[data-theme="dark"] .modal-dialog .modal-footer {
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode list view */
+[data-theme="dark"] [data-doctype^="Travel"] .list-row-head {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] [data-doctype^="Travel"] .list-row {
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] [data-doctype^="Travel"] .list-row:hover {
+    background: var(--horizon-primary-light);
+}
+
+/* Dark mode shortcut cards */
+[data-theme="dark"] .workspace-container .shortcut-widget-box .widget {
+    border-color: var(--horizon-border);
+    background: var(--horizon-card-bg);
+}
+
+[data-theme="dark"] .workspace-container .shortcut-widget-box .widget:hover {
+    border-color: var(--horizon-primary);
+}
+
+/* Dark mode pipeline dots */
+[data-theme="dark"] .pipeline-dot {
+    background: var(--horizon-border);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] .pipeline-line {
+    background: var(--horizon-border);
+}
+
+/* Dark mode page header */
+[data-theme="dark"] [data-doctype^="Travel"] .page-head {
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode payment progress */
+[data-theme="dark"] .payment-progress-bar {
+    background: var(--horizon-border);
+}
+
+/* Dark mode inputs */
+[data-theme="dark"] [data-doctype^="Travel"] .form-group .control-input input,
+[data-theme="dark"] [data-doctype^="Travel"] .form-group .control-input select {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+    color: var(--horizon-text);
+}
+
+[data-theme="dark"] [data-doctype^="Travel"] .form-group .control-input input:focus,
+[data-theme="dark"] [data-doctype^="Travel"] .form-group .control-input select:focus {
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 3px var(--horizon-primary-light);
+    background: var(--horizon-card-bg);
+}
+
+/* Dark mode comment box */
+[data-theme="dark"] [data-doctype^="Travel"] .comment-box .reply .ql-editor {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+    color: var(--horizon-text);
+}
+
+/* Print format - clean */
+@media print {
+    .horizon-pipeline,
+    .booking-timeline { display: none; }
+}

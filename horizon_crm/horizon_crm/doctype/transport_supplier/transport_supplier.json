@@ -1,0 +1,190 @@
+{
+    "actions": [],
+    "creation": "2026-03-31 12:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "transport_name",
+        "transport_type",
+        "is_active",
+        "column_break_header",
+        "contact_email",
+        "phone",
+        "website",
+        "section_fleet",
+        "fleet_size",
+        "vehicle_types",
+        "column_break_fleet",
+        "max_passengers",
+        "luggage_capacity",
+        "ac_available",
+        "section_address",
+        "address",
+        "column_break_addr",
+        "city",
+        "country",
+        "section_services",
+        "services",
+        "section_notes",
+        "supplier_notes"
+    ],
+    "fields": [
+        {
+            "fieldname": "transport_name",
+            "fieldtype": "Data",
+            "label": "Company Name",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "transport_type",
+            "fieldtype": "Select",
+            "label": "Transport Type",
+            "options": "Car Rental\nBus/Coach\nTaxi/Cab\nLimousine\nBoat/Ferry\nTrain\nPrivate Transfer\nOther",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "is_active",
+            "fieldtype": "Check",
+            "label": "Active",
+            "default": "1",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_header",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "contact_email",
+            "fieldtype": "Data",
+            "label": "Contact Email",
+            "options": "Email"
+        },
+        {
+            "fieldname": "phone",
+            "fieldtype": "Data",
+            "label": "Phone",
+            "options": "Phone"
+        },
+        {
+            "fieldname": "website",
+            "fieldtype": "Data",
+            "label": "Website"
+        },
+        {
+            "fieldname": "section_fleet",
+            "fieldtype": "Section Break",
+            "label": "Fleet Details"
+        },
+        {
+            "fieldname": "fleet_size",
+            "fieldtype": "Int",
+            "label": "Fleet Size"
+        },
+        {
+            "fieldname": "vehicle_types",
+            "fieldtype": "Small Text",
+            "label": "Vehicle Types Available",
+            "description": "e.g. Sedan, SUV, Minivan, Coach"
+        },
+        {
+            "fieldname": "column_break_fleet",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "max_passengers",
+            "fieldtype": "Int",
+            "label": "Max Passengers Per Vehicle"
+        },
+        {
+            "fieldname": "luggage_capacity",
+            "fieldtype": "Select",
+            "label": "Luggage Capacity",
+            "options": "\nSmall\nMedium\nLarge\nExtra Large"
+        },
+        {
+            "fieldname": "ac_available",
+            "fieldtype": "Check",
+            "label": "AC Available",
+            "default": "1"
+        },
+        {
+            "fieldname": "section_address",
+            "fieldtype": "Section Break",
+            "label": "Address",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "address",
+            "fieldtype": "Small Text",
+            "label": "Address"
+        },
+        {
+            "fieldname": "column_break_addr",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "city",
+            "fieldtype": "Data",
+            "label": "City"
+        },
+        {
+            "fieldname": "country",
+            "fieldtype": "Data",
+            "label": "Country"
+        },
+        {
+            "fieldname": "section_services",
+            "fieldtype": "Section Break",
+            "label": "Service Catalog"
+        },
+        {
+            "fieldname": "services",
+            "fieldtype": "Table",
+            "label": "Services",
+            "options": "Supplier Service"
+        },
+        {
+            "fieldname": "section_notes",
+            "fieldtype": "Section Break",
+            "label": "Notes",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "supplier_notes",
+            "fieldtype": "Text",
+            "label": "Notes"
+        }
+    ],
+    "links": [],
+    "modified": "2026-03-31 12:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Horizon CRM",
+    "name": "Transport Supplier",
+    "naming_rule": "Expression",
+    "autoname": "TRN-.#####",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1, "delete": 1, "email": 1, "export": 1, "print": 1,
+            "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1
+        },
+        {
+            "create": 1, "delete": 1, "read": 1, "write": 1,
+            "role": "Agency Admin", "export": 1
+        },
+        {
+            "create": 1, "read": 1, "write": 1, "role": "Agency Team Lead"
+        },
+        {
+            "create": 1, "read": 1, "write": 1, "role": "Agency Staff"
+        }
+    ],
+    "show_title_field_in_link": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "transport_name",
+    "track_changes": 1
+}

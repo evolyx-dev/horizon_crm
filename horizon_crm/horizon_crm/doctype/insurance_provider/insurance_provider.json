@@ -1,0 +1,183 @@
+{
+    "actions": [],
+    "creation": "2026-03-31 12:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "provider_name",
+        "is_active",
+        "column_break_header",
+        "contact_email",
+        "phone",
+        "website",
+        "section_insurance",
+        "insurance_types",
+        "coverage_regions",
+        "column_break_ins",
+        "max_coverage_amount",
+        "currency",
+        "claim_turnaround_days",
+        "section_address",
+        "address",
+        "column_break_addr",
+        "city",
+        "country",
+        "section_services",
+        "services",
+        "section_notes",
+        "supplier_notes"
+    ],
+    "fields": [
+        {
+            "fieldname": "provider_name",
+            "fieldtype": "Data",
+            "label": "Provider Name",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "is_active",
+            "fieldtype": "Check",
+            "label": "Active",
+            "default": "1",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_header",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "contact_email",
+            "fieldtype": "Data",
+            "label": "Contact Email",
+            "options": "Email"
+        },
+        {
+            "fieldname": "phone",
+            "fieldtype": "Data",
+            "label": "Phone",
+            "options": "Phone"
+        },
+        {
+            "fieldname": "website",
+            "fieldtype": "Data",
+            "label": "Website"
+        },
+        {
+            "fieldname": "section_insurance",
+            "fieldtype": "Section Break",
+            "label": "Insurance Details"
+        },
+        {
+            "fieldname": "insurance_types",
+            "fieldtype": "Small Text",
+            "label": "Insurance Types",
+            "description": "e.g. Travel Medical, Trip Cancellation, Baggage Loss, Flight Delay",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "coverage_regions",
+            "fieldtype": "Small Text",
+            "label": "Coverage Regions",
+            "description": "e.g. Worldwide, Europe, Asia, Domestic"
+        },
+        {
+            "fieldname": "column_break_ins",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "max_coverage_amount",
+            "fieldtype": "Currency",
+            "label": "Max Coverage Amount"
+        },
+        {
+            "fieldname": "currency",
+            "fieldtype": "Link",
+            "label": "Currency",
+            "options": "Currency",
+            "default": "USD"
+        },
+        {
+            "fieldname": "claim_turnaround_days",
+            "fieldtype": "Int",
+            "label": "Claim Turnaround (Days)"
+        },
+        {
+            "fieldname": "section_address",
+            "fieldtype": "Section Break",
+            "label": "Address",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "address",
+            "fieldtype": "Small Text",
+            "label": "Address"
+        },
+        {
+            "fieldname": "column_break_addr",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "city",
+            "fieldtype": "Data",
+            "label": "City"
+        },
+        {
+            "fieldname": "country",
+            "fieldtype": "Data",
+            "label": "Country"
+        },
+        {
+            "fieldname": "section_services",
+            "fieldtype": "Section Break",
+            "label": "Plans & Rates"
+        },
+        {
+            "fieldname": "services",
+            "fieldtype": "Table",
+            "label": "Services",
+            "options": "Supplier Service"
+        },
+        {
+            "fieldname": "section_notes",
+            "fieldtype": "Section Break",
+            "label": "Notes",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "supplier_notes",
+            "fieldtype": "Text",
+            "label": "Notes"
+        }
+    ],
+    "links": [],
+    "modified": "2026-03-31 12:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Horizon CRM",
+    "name": "Insurance Provider",
+    "naming_rule": "Expression",
+    "autoname": "INS-.#####",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1, "delete": 1, "email": 1, "export": 1, "print": 1,
+            "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1
+        },
+        {
+            "create": 1, "delete": 1, "read": 1, "write": 1,
+            "role": "Agency Admin", "export": 1
+        },
+        {
+            "create": 1, "read": 1, "write": 1, "role": "Agency Team Lead"
+        },
+        {
+            "create": 1, "read": 1, "write": 1, "role": "Agency Staff"
+        }
+    ],
+    "show_title_field_in_link": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "provider_name",
+    "track_changes": 1
+}
