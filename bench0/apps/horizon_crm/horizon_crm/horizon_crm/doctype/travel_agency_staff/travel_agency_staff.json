@@ -6,16 +6,21 @@
     "field_order": [
         "staff_user",
         "role_in_agency",
+        "is_active",
+        "column_break_header",
         "team",
         "designation",
         "phone",
-        "is_active"
+        "section_details",
+        "join_date",
+        "column_break_details",
+        "department"
     ],
     "fields": [
         {
             "fieldname": "staff_user",
             "fieldtype": "Link",
-            "label": "Staff User",
+            "label": "User",
             "options": "User",
             "reqd": 1,
             "unique": 1,
@@ -31,10 +36,22 @@
             "default": "Staff"
         },
         {
+            "fieldname": "is_active",
+            "fieldtype": "Check",
+            "label": "Active",
+            "default": "1",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_header",
+            "fieldtype": "Column Break"
+        },
+        {
             "fieldname": "team",
             "fieldtype": "Link",
             "label": "Team",
-            "options": "Travel Team"
+            "options": "Travel Team",
+            "in_list_view": 1
         },
         {
             "fieldname": "designation",
@@ -48,14 +65,39 @@
             "options": "Phone"
         },
         {
-            "fieldname": "is_active",
-            "fieldtype": "Check",
-            "label": "Is Active",
-            "default": "1",
-            "in_list_view": 1
+            "fieldname": "section_details",
+            "fieldtype": "Section Break",
+            "label": "Additional Details",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "join_date",
+            "fieldtype": "Date",
+            "label": "Join Date",
+            "default": "Today"
+        },
+        {
+            "fieldname": "column_break_details",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "department",
+            "fieldtype": "Data",
+            "label": "Department"
         }
     ],
-    "links": [],
+    "links": [
+        {
+            "link_doctype": "Travel Inquiry",
+            "link_fieldname": "assigned_to",
+            "group": "Assigned Inquiries"
+        },
+        {
+            "link_doctype": "Travel Booking",
+            "link_fieldname": "assigned_to",
+            "group": "Assigned Bookings"
+        }
+    ],
     "modified": "2026-03-30 12:00:00.000000",
     "modified_by": "Administrator",
     "module": "Horizon CRM",

@@ -68,7 +68,7 @@ def submit_inquiry(
     inquiry.customer_name = customer_doc.customer_name
     inquiry.customer_email = customer_doc.email
     inquiry.customer_phone = customer_doc.phone
-    inquiry.destination_text = destination
+    inquiry.destination = destination
     inquiry.departure_date = departure_date
     inquiry.return_date = return_date
     inquiry.num_travelers = num_travelers

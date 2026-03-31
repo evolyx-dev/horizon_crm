@@ -1,0 +1,69 @@
+{
+    "actions": [],
+    "creation": "2026-03-31 12:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "reason",
+        "description"
+    ],
+    "fields": [
+        {
+            "fieldname": "reason",
+            "fieldtype": "Data",
+            "label": "Reason",
+            "reqd": 1,
+            "in_list_view": 1,
+            "unique": 1
+        },
+        {
+            "fieldname": "description",
+            "fieldtype": "Small Text",
+            "label": "Description"
+        }
+    ],
+    "links": [],
+    "modified": "2026-03-31 12:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Horizon CRM",
+    "name": "Travel Lost Reason",
+    "naming_rule": "By fieldname",
+    "autoname": "field:reason",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "delete": 1,
+            "read": 1,
+            "write": 1,
+            "role": "Agency Admin"
+        },
+        {
+            "read": 1,
+            "role": "Agency Team Lead"
+        },
+        {
+            "read": 1,
+            "role": "Agency Staff"
+        }
+    ],
+    "quick_entry": 1,
+    "show_title_field_in_link": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "reason",
+    "track_changes": 0
+}

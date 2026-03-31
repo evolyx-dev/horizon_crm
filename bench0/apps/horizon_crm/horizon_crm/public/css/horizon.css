@@ -76,7 +76,13 @@
 .frappe-control[data-fieldname="section_financial"] .section-head,
 .frappe-control[data-fieldname="section_dates"] .section-head,
 .frappe-control[data-fieldname="section_items"] .section-head,
-.frappe-control[data-fieldname="section_payments"] .section-head {
+.frappe-control[data-fieldname="section_payments"] .section-head,
+.frappe-control[data-fieldname="section_contact"] .section-head,
+.frappe-control[data-fieldname="section_subscription"] .section-head,
+.frappe-control[data-fieldname="section_lost"] .section-head,
+.frappe-control[data-fieldname="section_documents"] .section-head,
+.frappe-control[data-fieldname="section_preferences"] .section-head,
+.frappe-control[data-fieldname="section_details"] .section-head {
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
@@ -197,4 +203,33 @@
     .horizon-stat-card .stat-value {
         font-size: 22px;
     }
+}
+
+/* Lost reason section - red accent when visible */
+[data-doctype="Travel Inquiry"] .frappe-control[data-fieldname="section_lost"] .section-head {
+    border-bottom-color: var(--horizon-danger);
+    color: var(--horizon-danger);
+}
+
+/* Rating display */
+[data-doctype="Travel Feedback"] .indicator-pill {
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
+/* Form section cards */
+[data-doctype^="Travel"] .form-section:not(:first-child) {
+    margin-top: 8px;
+}
+
+/* Improved list view row styling */
+[data-doctype^="Travel"] .list-row .level-left {
+    gap: 8px;
+}
+
+/* Emergency contact highlight */
+.frappe-control[data-fieldname="emergency_contact_name"] .control-label,
+.frappe-control[data-fieldname="emergency_contact_phone"] .control-label {
+    color: var(--horizon-danger);
+    font-weight: 600;
 }

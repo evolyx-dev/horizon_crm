@@ -6,12 +6,16 @@
     "field_order": [
         "supplier_name",
         "supplier_type",
-        "column_break_1",
+        "is_active",
+        "column_break_header",
         "contact_email",
         "phone",
         "website",
         "section_address",
         "address",
+        "column_break_addr",
+        "city",
+        "country",
         "section_notes",
         "supplier_notes",
         "section_services",
@@ -29,12 +33,19 @@
             "fieldname": "supplier_type",
             "fieldtype": "Select",
             "label": "Supplier Type",
-            "options": "Hotel\nAirline\nTour Operator\nTransport\nOther",
+            "options": "Hotel\nAirline\nTour Operator\nTransport\nInsurance\nVisa Agent\nOther",
             "reqd": 1,
             "in_list_view": 1
         },
         {
-            "fieldname": "column_break_1",
+            "fieldname": "is_active",
+            "fieldtype": "Check",
+            "label": "Active",
+            "default": "1",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_header",
             "fieldtype": "Column Break"
         },
         {
@@ -57,7 +68,8 @@
         {
             "fieldname": "section_address",
             "fieldtype": "Section Break",
-            "label": "Address"
+            "label": "Address",
+            "collapsible": 1
         },
         {
             "fieldname": "address",
@@ -65,9 +77,24 @@
             "label": "Address"
         },
         {
+            "fieldname": "column_break_addr",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "city",
+            "fieldtype": "Data",
+            "label": "City"
+        },
+        {
+            "fieldname": "country",
+            "fieldtype": "Data",
+            "label": "Country"
+        },
+        {
             "fieldname": "section_notes",
             "fieldtype": "Section Break",
-            "label": "Notes"
+            "label": "Notes",
+            "collapsible": 1
         },
         {
             "fieldname": "supplier_notes",
@@ -77,7 +104,7 @@
         {
             "fieldname": "section_services",
             "fieldtype": "Section Break",
-            "label": "Services"
+            "label": "Service Catalog"
         },
         {
             "fieldname": "services",

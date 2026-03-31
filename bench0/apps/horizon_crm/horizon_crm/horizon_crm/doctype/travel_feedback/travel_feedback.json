@@ -6,10 +6,11 @@
     "field_order": [
         "booking",
         "customer",
-        "column_break_1",
+        "submitted_on",
+        "column_break_header",
         "rating",
         "overall_experience",
-        "submitted_on",
+        "would_recommend",
         "section_comments",
         "comments"
     ],
@@ -28,23 +29,9 @@
             "label": "Customer",
             "options": "Travel Customer",
             "reqd": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "column_break_1",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "rating",
-            "fieldtype": "Rating",
-            "label": "Rating",
-            "reqd": 1
-        },
-        {
-            "fieldname": "overall_experience",
-            "fieldtype": "Select",
-            "label": "Overall Experience",
-            "options": "Excellent\nGood\nAverage\nPoor\nTerrible"
+            "in_list_view": 1,
+            "fetch_from": "booking.customer",
+            "fetch_if_empty": 1
         },
         {
             "fieldname": "submitted_on",
@@ -54,13 +41,36 @@
             "read_only": 1
         },
         {
+            "fieldname": "column_break_header",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "rating",
+            "fieldtype": "Rating",
+            "label": "Rating",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "overall_experience",
+            "fieldtype": "Select",
+            "label": "Overall Experience",
+            "options": "\nExcellent\nGood\nAverage\nPoor\nTerrible",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "would_recommend",
+            "fieldtype": "Check",
+            "label": "Would Recommend"
+        },
+        {
             "fieldname": "section_comments",
             "fieldtype": "Section Break",
-            "label": "Comments"
+            "label": "Detailed Comments"
         },
         {
             "fieldname": "comments",
-            "fieldtype": "Text",
+            "fieldtype": "Text Editor",
             "label": "Comments"
         }
     ],

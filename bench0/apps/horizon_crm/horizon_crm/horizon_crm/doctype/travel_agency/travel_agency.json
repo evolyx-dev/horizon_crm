@@ -8,18 +8,23 @@
         "agency_name",
         "agency_code",
         "status",
-        "column_break_1",
+        "column_break_header",
         "logo",
         "admin_user",
         "section_contact",
         "contact_email",
         "phone",
-        "column_break_2",
+        "column_break_contact",
         "website",
         "address",
+        "city",
+        "country",
         "section_subscription",
         "subscription_plan",
-        "max_staff"
+        "max_staff",
+        "column_break_sub",
+        "established_date",
+        "timezone"
     ],
     "fields": [
         {
@@ -33,7 +38,8 @@
             "fieldname": "agency_code",
             "fieldtype": "Data",
             "in_list_view": 1,
-            "label": "Agency Code"
+            "label": "Agency Code",
+            "unique": 1
         },
         {
             "default": "Active",
@@ -41,17 +47,17 @@
             "fieldtype": "Select",
             "in_list_view": 1,
             "label": "Status",
-            "options": "Active\nInactive",
+            "options": "Active\nInactive\nSuspended",
             "reqd": 1
         },
         {
-            "fieldname": "column_break_1",
+            "fieldname": "column_break_header",
             "fieldtype": "Column Break"
         },
         {
             "fieldname": "logo",
             "fieldtype": "Attach Image",
-            "label": "Logo"
+            "label": "Agency Logo"
         },
         {
             "fieldname": "admin_user",
@@ -62,7 +68,7 @@
         {
             "fieldname": "section_contact",
             "fieldtype": "Section Break",
-            "label": "Contact Details"
+            "label": "Contact & Address"
         },
         {
             "fieldname": "contact_email",
@@ -78,7 +84,7 @@
             "options": "Phone"
         },
         {
-            "fieldname": "column_break_2",
+            "fieldname": "column_break_contact",
             "fieldtype": "Column Break"
         },
         {
@@ -92,26 +98,62 @@
             "label": "Address"
         },
         {
+            "fieldname": "city",
+            "fieldtype": "Data",
+            "label": "City"
+        },
+        {
+            "fieldname": "country",
+            "fieldtype": "Data",
+            "label": "Country"
+        },
+        {
             "fieldname": "section_subscription",
             "fieldtype": "Section Break",
-            "label": "Subscription"
+            "label": "Subscription & Settings",
+            "collapsible": 1
         },
         {
             "default": "Free",
             "fieldname": "subscription_plan",
             "fieldtype": "Select",
             "label": "Subscription Plan",
-            "options": "Free\nBasic\nPremium"
+            "options": "Free\nBasic\nPremium\nEnterprise",
+            "in_list_view": 1
         },
         {
             "default": "10",
             "fieldname": "max_staff",
             "fieldtype": "Int",
             "label": "Maximum Staff"
+        },
+        {
+            "fieldname": "column_break_sub",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "established_date",
+            "fieldtype": "Date",
+            "label": "Established Date"
+        },
+        {
+            "fieldname": "timezone",
+            "fieldtype": "Data",
+            "label": "Timezone"
         }
     ],
     "image_field": "logo",
-    "links": [],
+    "links": [
+        {
+            "link_doctype": "Travel Agency Staff",
+            "link_fieldname": "agency"
+        },
+        {
+            "link_doctype": "Travel Team",
+            "link_fieldname": "agency"
+        }
+    ],
+    "search_fields": "agency_name,agency_code,contact_email",
     "modified": "2026-03-30 12:00:00.000000",
     "modified_by": "Administrator",
     "module": "Horizon CRM",

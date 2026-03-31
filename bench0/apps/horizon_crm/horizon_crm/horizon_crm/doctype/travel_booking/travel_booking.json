@@ -6,21 +6,24 @@
     "field_order": [
         "booking_number",
         "status",
-        "column_break_1",
-        "inquiry",
+        "booking_date",
+        "column_break_header",
         "customer",
+        "inquiry",
         "assigned_to",
+        "section_travel",
+        "destination",
         "itinerary",
-        "section_dates",
+        "column_break_travel",
         "departure_date",
         "return_date",
         "num_travelers",
-        "booking_date",
         "section_financial",
         "total_amount",
+        "currency",
+        "column_break_fin",
         "paid_amount",
         "balance_amount",
-        "currency",
         "section_notes",
         "notes",
         "section_payments",
@@ -44,14 +47,15 @@
             "in_list_view": 1
         },
         {
-            "fieldname": "column_break_1",
-            "fieldtype": "Column Break"
+            "fieldname": "booking_date",
+            "fieldtype": "Date",
+            "label": "Booking Date",
+            "reqd": 1,
+            "default": "Today"
         },
         {
-            "fieldname": "inquiry",
-            "fieldtype": "Link",
-            "label": "Inquiry",
-            "options": "Travel Inquiry"
+            "fieldname": "column_break_header",
+            "fieldtype": "Column Break"
         },
         {
             "fieldname": "customer",
@@ -62,10 +66,31 @@
             "in_list_view": 1
         },
         {
+            "fieldname": "inquiry",
+            "fieldtype": "Link",
+            "label": "Source Inquiry",
+            "options": "Travel Inquiry"
+        },
+        {
             "fieldname": "assigned_to",
             "fieldtype": "Link",
             "label": "Assigned To",
-            "options": "Travel Agency Staff"
+            "options": "Travel Agency Staff",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "section_travel",
+            "fieldtype": "Section Break",
+            "label": "Travel Details"
+        },
+        {
+            "fieldname": "destination",
+            "fieldtype": "Link",
+            "label": "Destination",
+            "options": "Travel Destination",
+            "in_list_view": 1,
+            "fetch_from": "inquiry.destination",
+            "fetch_if_empty": 1
         },
         {
             "fieldname": "itinerary",
@@ -74,9 +99,8 @@
             "options": "Travel Itinerary"
         },
         {
-            "fieldname": "section_dates",
-            "fieldtype": "Section Break",
-            "label": "Travel Dates"
+            "fieldname": "column_break_travel",
+            "fieldtype": "Column Break"
         },
         {
             "fieldname": "departure_date",
@@ -98,34 +122,16 @@
             "default": "1"
         },
         {
-            "fieldname": "booking_date",
-            "fieldtype": "Date",
-            "label": "Booking Date",
-            "reqd": 1,
-            "default": "Today"
-        },
-        {
             "fieldname": "section_financial",
             "fieldtype": "Section Break",
-            "label": "Financial"
+            "label": "Financial Summary"
         },
         {
             "fieldname": "total_amount",
             "fieldtype": "Currency",
             "label": "Total Amount",
-            "reqd": 1
-        },
-        {
-            "fieldname": "paid_amount",
-            "fieldtype": "Currency",
-            "label": "Paid Amount",
-            "default": "0"
-        },
-        {
-            "fieldname": "balance_amount",
-            "fieldtype": "Currency",
-            "label": "Balance Amount",
-            "read_only": 1
+            "reqd": 1,
+            "in_list_view": 1
         },
         {
             "fieldname": "currency",
@@ -135,9 +141,27 @@
             "default": "USD"
         },
         {
+            "fieldname": "column_break_fin",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "paid_amount",
+            "fieldtype": "Currency",
+            "label": "Paid Amount",
+            "default": "0",
+            "read_only": 1
+        },
+        {
+            "fieldname": "balance_amount",
+            "fieldtype": "Currency",
+            "label": "Balance Amount",
+            "read_only": 1
+        },
+        {
             "fieldname": "section_notes",
             "fieldtype": "Section Break",
-            "label": "Notes"
+            "label": "Notes",
+            "collapsible": 1
         },
         {
             "fieldname": "notes",
@@ -156,7 +180,18 @@
             "options": "Booking Payment"
         }
     ],
-    "links": [],
+    "links": [
+        {
+            "link_doctype": "Travel Itinerary",
+            "link_fieldname": "booking",
+            "group": "Itineraries"
+        },
+        {
+            "link_doctype": "Travel Feedback",
+            "link_fieldname": "booking",
+            "group": "Feedback"
+        }
+    ],
     "modified": "2026-03-30 12:00:00.000000",
     "modified_by": "Administrator",
     "module": "Horizon CRM",
@@ -198,6 +233,7 @@
             "role": "Agency Staff"
         }
     ],
+    "search_fields": "customer,status,destination",
     "show_title_field_in_link": 1,
     "sort_field": "modified",
     "sort_order": "DESC",

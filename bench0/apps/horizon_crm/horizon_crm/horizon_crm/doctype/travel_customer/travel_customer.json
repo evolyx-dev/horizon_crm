@@ -7,22 +7,26 @@
         "customer_name",
         "email",
         "phone",
-        "column_break_1",
+        "column_break_header",
         "portal_user",
         "image",
+        "gender",
         "section_personal",
+        "date_of_birth",
         "nationality",
         "passport_number",
-        "date_of_birth",
-        "column_break_2",
+        "column_break_personal",
         "address",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+        "section_preferences",
         "preferences"
     ],
     "fields": [
         {
             "fieldname": "customer_name",
             "fieldtype": "Data",
-            "label": "Customer Name",
+            "label": "Full Name",
             "reqd": 1,
             "in_list_view": 1
         },
@@ -38,10 +42,11 @@
             "fieldname": "phone",
             "fieldtype": "Data",
             "label": "Phone",
-            "options": "Phone"
+            "options": "Phone",
+            "in_list_view": 1
         },
         {
-            "fieldname": "column_break_1",
+            "fieldname": "column_break_header",
             "fieldtype": "Column Break"
         },
         {
@@ -53,12 +58,23 @@
         {
             "fieldname": "image",
             "fieldtype": "Attach Image",
-            "label": "Image"
+            "label": "Photo"
+        },
+        {
+            "fieldname": "gender",
+            "fieldtype": "Select",
+            "label": "Gender",
+            "options": "\nMale\nFemale\nOther\nPrefer not to say"
         },
         {
             "fieldname": "section_personal",
             "fieldtype": "Section Break",
-            "label": "Personal Details"
+            "label": "Travel Documents & Address"
+        },
+        {
+            "fieldname": "date_of_birth",
+            "fieldtype": "Date",
+            "label": "Date of Birth"
         },
         {
             "fieldname": "nationality",
@@ -71,12 +87,7 @@
             "label": "Passport Number"
         },
         {
-            "fieldname": "date_of_birth",
-            "fieldtype": "Date",
-            "label": "Date of Birth"
-        },
-        {
-            "fieldname": "column_break_2",
+            "fieldname": "column_break_personal",
             "fieldtype": "Column Break"
         },
         {
@@ -85,13 +96,46 @@
             "label": "Address"
         },
         {
+            "fieldname": "emergency_contact_name",
+            "fieldtype": "Data",
+            "label": "Emergency Contact Name"
+        },
+        {
+            "fieldname": "emergency_contact_phone",
+            "fieldtype": "Data",
+            "label": "Emergency Contact Phone",
+            "options": "Phone"
+        },
+        {
+            "fieldname": "section_preferences",
+            "fieldtype": "Section Break",
+            "label": "Preferences & Notes",
+            "collapsible": 1
+        },
+        {
             "fieldname": "preferences",
             "fieldtype": "Text",
-            "label": "Preferences"
+            "label": "Travel Preferences"
         }
     ],
     "image_field": "image",
-    "links": [],
+    "links": [
+        {
+            "link_doctype": "Travel Inquiry",
+            "link_fieldname": "customer",
+            "group": "Inquiries"
+        },
+        {
+            "link_doctype": "Travel Booking",
+            "link_fieldname": "customer",
+            "group": "Bookings"
+        },
+        {
+            "link_doctype": "Travel Feedback",
+            "link_fieldname": "customer",
+            "group": "Feedback"
+        }
+    ],
     "modified": "2026-03-30 12:00:00.000000",
     "modified_by": "Administrator",
     "module": "Horizon CRM",
@@ -133,6 +177,7 @@
             "role": "Agency Staff"
         }
     ],
+    "search_fields": "customer_name,email,phone",
     "show_title_field_in_link": 1,
     "sort_field": "modified",
     "sort_order": "DESC",

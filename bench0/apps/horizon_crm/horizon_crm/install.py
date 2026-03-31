@@ -11,6 +11,7 @@ def after_install():
     create_roles()
     create_default_travel_types()
     create_default_destinations()
+    create_default_lost_reasons()
     initialize_agency_settings()
     frappe.db.commit()
 
@@ -85,3 +86,23 @@ def initialize_agency_settings():
         agency.status = "Active"
         agency.max_staff = 10
         agency.save(ignore_permissions=True)
+
+
+def create_default_lost_reasons():
+    """Create default lost reasons for tracking why inquiries are lost."""
+    reasons = [
+        ("Competitor", "Customer chose a competitor agency"),
+        ("Budget Too High", "Our pricing exceeded customer budget"),
+        ("Bad Timing", "Customer could not travel at the proposed dates"),
+        ("No Response", "Customer stopped responding"),
+        ("Changed Plans", "Customer cancelled or changed travel plans"),
+        ("Destination Change", "Customer wanted a different destination"),
+        ("Service Dissatisfaction", "Customer was unhappy with service quality"),
+        ("Other", "Other reason not listed above"),
+    ]
+    for name, desc in reasons:
+        if not frappe.db.exists("Travel Lost Reason", name):
+            doc = frappe.new_doc("Travel Lost Reason")
+            doc.reason = name
+            doc.description = desc
+            doc.insert(ignore_permissions=True)

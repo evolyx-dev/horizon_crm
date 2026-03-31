@@ -31,6 +31,9 @@ web_include_css = "/assets/horizon_crm/css/horizon_portal.css"
 
 role_home_page = {
 	"Agency Customer": "portal",
+	"Agency Staff": "travel-inquiry",
+	"Agency Team Lead": "travel-inquiry",
+	"Agency Admin": "travel-inquiry",
 }
 
 portal_menu_items = [
@@ -53,6 +56,14 @@ commands = "horizon_crm.commands.commands"
 # Standard role-based permissions are defined in DocType JSON files.
 # In site-per-tenant architecture, each site is a separate tenant
 # so no custom permission_query_conditions are needed.
+
+# Block specific pages for non-admin roles
+# Agency Staff and Team Leads should not access Setup or Module Setup pages
+block_modules = {
+	"Agency Staff": ["Setup", "Core", "Email", "Integrations", "Printing", "Website"],
+	"Agency Team Lead": ["Setup", "Core", "Email", "Integrations", "Printing"],
+	"Agency Customer": ["Setup", "Core", "Email", "Integrations", "Printing", "Website", "Horizon CRM"],
+}
 
 # Automatically update python controller files with type annotations for this app.
 export_python_type_annotations = True

@@ -84,6 +84,6 @@ test.describe("Agency Settings", () => {
     // Assert — key fields should be present
     await expect(page.locator('[data-fieldname="agency_name"]').first()).toBeVisible();
     await expect(page.locator('[data-fieldname="contact_email"]').first()).toBeVisible();
-    await expect(page.locator('[data-fieldname="max_staff"]').first()).toBeVisible();
+    await expect(page.locator('[data-fieldname="status"]').first()).toBeVisible();
   });
 });
