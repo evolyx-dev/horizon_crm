@@ -168,15 +168,15 @@ The Frappe Desk has three main areas:
 
 The Horizon CRM sidebar is organized into logical sections with icons for quick identification:
 
-| Section | Items | Icon |
-|---------|-------|------|
-| **Dashboard** | Workspace home | 📊 Layout Dashboard |
-| **CRM Pipeline** | Travel Lead, Travel Inquiry, Travel Booking | 👤 🔖 📅 |
-| **Customers** | Travel Customer, Travel Feedback | 🧑 ⭐ |
-| **Billing** | Travel Invoice | 💳 |
-| **Trip Planning** | Travel Itinerary, Travel Supplier, Travel Destination | 📍 🏢 🏛 |
-| **Team** | Travel Team, Travel Agency Staff | 👥 🧑‍💼 |
-| **Settings** | Travel Agency, Travel Type, Kanban Board | ⚙️ 📄 |
+| Section | Items | Icons |
+|---------|-------|-------|
+| **Dashboard** | Workspace home | layout-dashboard |
+| **Pipeline** | Leads, Inquiries, Bookings | user-round-plus, message-square-text, calendar-check |
+| **Customers** | Customers, Feedback | contact-round, message-circle-heart |
+| **Billing** | Invoices | receipt |
+| **Trip Planning** | Itineraries, Suppliers, Destinations | route, building-2, map-pinned |
+| **Team** | Teams, Staff | users-round, id-card |
+| **Settings** | Agency Settings, Travel Types, Kanban Boards | settings, tags, columns-3 |
 
 Each section can be collapsed/expanded by clicking the chevron arrow.
 
@@ -206,10 +206,10 @@ The Horizon CRM workspace is your command center. It contains:
 ### Shortcuts
 | Shortcut | View | Description |
 |----------|------|-------------|
-| Travel Inquiry | List | All travel inquiries |
-| Travel Booking | List | All bookings |
-| Travel Customer | List | Customer database |
-| Travel Itinerary | List | Itinerary plans |
+| Inquiries | List | All travel inquiries |
+| Bookings | List | All bookings |
+| Customers | List | Customer database |
+| Itineraries | List | Itinerary plans |
 | Inquiry Kanban | Kanban | Inquiry pipeline board |
 | Booking Kanban | Kanban | Booking status board |
 

@@ -1,0 +1,14 @@
+<svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="54" y2="54">
+    <stop offset="0%" stop-color="#FF6B6B"/>
+    <stop offset="100%" stop-color="#FF8E53"/>
+  </linearGradient>
+</defs>
+<path d="M38.5714 0H15.4286C6.90761 0 0 6.90761 0 15.4286V38.5714C0 47.0924 6.90761 54 15.4286 54H38.5714C47.0924 54 54 47.0924 54 38.5714V15.4286C54 6.90761 47.0924 0 38.5714 0Z" fill="url(#bg)"/>
+<!-- Sun arc -->
+<path d="M 15 30 A 12 12 0 0 1 39 30" fill="white"/>
+<!-- Horizon lines -->
+<rect x="11" y="32" width="32" height="3.5" rx="1.75" fill="white" opacity="0.85"/>
+<rect x="16" y="38" width="22" height="2.5" rx="1.25" fill="white" opacity="0.55"/>
+</svg>

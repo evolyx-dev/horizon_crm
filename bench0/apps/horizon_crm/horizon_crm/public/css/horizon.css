@@ -991,6 +991,49 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   SIDEBAR HEADER — Logo & branding polish
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Sidebar header icon container — make logo larger and properly sized */
+.body-sidebar-container .sidebar-header .sidebar-item-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: var(--horizon-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.body-sidebar-container .sidebar-header .sidebar-item-icon .header-logo {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.body-sidebar-container .sidebar-header .sidebar-item-icon .header-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--horizon-radius-sm);
+}
+
+/* Header title styling */
+.body-sidebar-container .sidebar-header .header-title {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.2px;
+}
+
+.body-sidebar-container .sidebar-header .header-subtitle {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    NAVBAR BRAND & GLOBAL POLISH
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -1051,6 +1094,146 @@
 .modal-dialog .modal-footer .btn-primary:hover {
     background: var(--horizon-primary-dark);
     border-color: var(--horizon-primary-dark);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK THEME — Full dark mode support
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+    --horizon-text: #E2E8F0;
+    --horizon-text-muted: #94A3B8;
+    --horizon-text-light: #64748B;
+    --horizon-bg: #1A1C2B;
+    --horizon-bg-subtle: #1E2030;
+    --horizon-card-bg: #232536;
+    --horizon-border: #2D3048;
+    --horizon-border-light: #282A3E;
+    --horizon-primary-light: rgba(255, 107, 107, 0.12);
+    --horizon-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --horizon-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --horizon-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --horizon-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode form layout */
+[data-theme="dark"] [data-doctype^="Travel"] .form-layout {
+    background: var(--horizon-card-bg);
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode sidebar stat blocks */
+[data-theme="dark"] .sidebar-stat {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode number cards */
+[data-theme="dark"] .workspace-container .number-widget-box .widget {
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode chart cards */
+[data-theme="dark"] .workspace-container .chart-widget-box .widget {
+    border-color: var(--horizon-border);
+    background: var(--horizon-card-bg);
+}
+
+/* Dark mode kanban cards */
+[data-theme="dark"] .kanban .kanban-column {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] .kanban .kanban-column .kanban-column-header {
+    background: var(--horizon-card-bg);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] .kanban .kanban-column .kanban-card {
+    background: var(--horizon-card-bg);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] .kanban .kanban-column .kanban-card:hover {
+    border-color: var(--horizon-primary);
+}
+
+/* Dark mode modals */
+[data-theme="dark"] .modal-dialog .modal-content {
+    background: var(--horizon-card-bg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .modal-dialog .modal-header,
+[data-theme="dark"] .modal-dialog .modal-footer {
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode list view */
+[data-theme="dark"] [data-doctype^="Travel"] .list-row-head {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] [data-doctype^="Travel"] .list-row {
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] [data-doctype^="Travel"] .list-row:hover {
+    background: var(--horizon-primary-light);
+}
+
+/* Dark mode shortcut cards */
+[data-theme="dark"] .workspace-container .shortcut-widget-box .widget {
+    border-color: var(--horizon-border);
+    background: var(--horizon-card-bg);
+}
+
+[data-theme="dark"] .workspace-container .shortcut-widget-box .widget:hover {
+    border-color: var(--horizon-primary);
+}
+
+/* Dark mode pipeline dots */
+[data-theme="dark"] .pipeline-dot {
+    background: var(--horizon-border);
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] .pipeline-line {
+    background: var(--horizon-border);
+}
+
+/* Dark mode page header */
+[data-theme="dark"] [data-doctype^="Travel"] .page-head {
+    border-color: var(--horizon-border);
+}
+
+/* Dark mode payment progress */
+[data-theme="dark"] .payment-progress-bar {
+    background: var(--horizon-border);
+}
+
+/* Dark mode inputs */
+[data-theme="dark"] [data-doctype^="Travel"] .form-group .control-input input,
+[data-theme="dark"] [data-doctype^="Travel"] .form-group .control-input select {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+    color: var(--horizon-text);
+}
+
+[data-theme="dark"] [data-doctype^="Travel"] .form-group .control-input input:focus,
+[data-theme="dark"] [data-doctype^="Travel"] .form-group .control-input select:focus {
+    border-color: var(--horizon-primary);
+    box-shadow: 0 0 0 3px var(--horizon-primary-light);
+    background: var(--horizon-card-bg);
+}
+
+/* Dark mode comment box */
+[data-theme="dark"] [data-doctype^="Travel"] .comment-box .reply .ql-editor {
+    background: var(--horizon-bg);
+    border-color: var(--horizon-border);
+    color: var(--horizon-text);
 }
 
 /* Print format - clean */
