@@ -30,7 +30,7 @@ This documentation is organized by user role. Choose the guide that matches your
 | [Admin Manual](ADMIN_MANUAL.md) | Comprehensive feature reference for admins and team leads |
 | [User Guide](USER_GUIDE.md) | Full platform walkthrough with CLI commands |
 | [Development Guide](DEVELOPMENT_GUIDE.md) | Developer setup, coding conventions, API reference |
-| [Docker Setup](DOCKER_SETUP.md) | Container-based deployment and development |
+| [Docker Setup](DOCKER_SETUP.md) | Container-based development and production deployment |
 | [Testing Guide](TESTING_GUIDE.md) | E2E and unit test procedures |
 
 ### Architecture & Design
@@ -47,9 +47,10 @@ This documentation is organized by user role. Choose the guide that matches your
 
 ### I'm a System Administrator
 1. Read the [System Administrator Guide](SYSTEM_ADMIN_GUIDE.md) to set up the platform
-2. Create your first agency site using `bench new-site`
-3. Install Horizon CRM on the site
-4. Set up the Agency Admin user
+2. For production: use `deploy/docker-compose.prod.yml` — see [Docker Setup](DOCKER_SETUP.md)
+3. Create your first agency site using `bench new-site`
+4. Install Horizon CRM on the site
+5. Set up the Agency Admin user
 
 ### I'm an Agency Admin
 1. Read the [Agency Admin Guide](AGENCY_ADMIN_GUIDE.md)

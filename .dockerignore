@@ -1,0 +1,50 @@
+# ─────────────────────────────────────────────────────────
+# Horizon CRM — Docker Build Exclusions
+# Context is the repo root (deploy/ Dockerfile uses context: ..)
+# ─────────────────────────────────────────────────────────
+
+# Bench (dev-only, ~2GB+)
+bench0/
+
+# Docker & config (keep deploy/entrypoint.sh — needed by Dockerfile)
+docker/
+deploy/*
+!deploy/entrypoint.sh
+.devcontainer/
+docker-compose.yml
+
+# Docs, reports, logs
+docs/
+logs/
+reports/
+scripts/
+
+# Tests & test artifacts
+horizon_crm/tests/
+horizon_crm/reports/
+
+# Git & IDE
+.git
+.gitignore
+.github/
+.vscode/
+LICENSE
+
+# Python caches
+__pycache__
+*.pyc
+*.pyo
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keep these (required for app install):
+# pyproject.toml
+# horizon_crm/
+# setup.py / setup.cfg (if any)

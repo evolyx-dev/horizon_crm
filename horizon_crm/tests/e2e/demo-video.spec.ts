@@ -1,132 +1,156 @@
-// Horizon CRM — Feature Demonstration Video (~10 min)
+// Horizon CRM — Complete Feature Demonstration Video (~20 min)
+//
+// Records an annotated walkthrough of every major feature with
+// pre-created demo data so lists and forms are fully populated.
 //
 // Run:
 //   cd horizon_crm/tests
+//   npm run demo
+//   # or:
 //   npx playwright test e2e/demo-video.spec.ts --project=chromium
 //
 // Output:
-//   horizon_crm/tests/test-results/demo-video-.../video.webm
-import { test, expect, type Page } from "@playwright/test";
-import { USERS, login, createDoc, getCsrfToken } from "./fixtures";
+//   horizon_crm/tests/test-results/demo-video-*/video.webm
+import { test, expect, type Page, type BrowserContext } from "@playwright/test";
+import {
+  USERS,
+  login,
+  logout,
+  createDoc,
+  deleteDoc,
+  getCsrfToken,
+} from "./fixtures";
 
-/* ── Annotation overlay helper ────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   HELPER FUNCTIONS
+   ═══════════════════════════════════════════════════════════════ */
 
-/** Injects a styled annotation banner at the top of the viewport. */
 async function showAnnotation(page: Page, text: string, subtext = "") {
   await page.evaluate(
     ({ text, subtext }) => {
-      // Remove any existing annotation
       document.getElementById("demo-annotation")?.remove();
-
-      const overlay = document.createElement("div");
-      overlay.id = "demo-annotation";
-      overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        color: #fff; padding: 18px 32px; font-family: system-ui, sans-serif;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.3); display: flex;
-        align-items: center; gap: 18px; border-bottom: 3px solid #ff6b6b;
-        animation: slideDown 0.4s ease-out;
+      const el = document.createElement("div");
+      el.id = "demo-annotation";
+      el.style.cssText = `
+        position:fixed;top:0;left:0;right:0;z-index:99999;
+        background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
+        color:#fff;padding:18px 32px;font-family:system-ui,sans-serif;
+        box-shadow:0 4px 24px rgba(0,0,0,.3);display:flex;
+        align-items:center;gap:18px;border-bottom:3px solid #ff6b6b;
+        animation:demoSlide .4s ease-out;
       `;
-      overlay.innerHTML = `
-        <div style="
-          background: #ff6b6b; color: #fff; font-weight: 700;
-          padding: 6px 16px; border-radius: 6px; font-size: 13px;
-          letter-spacing: 1px; white-space: nowrap;
-        ">HORIZON CRM</div>
+      el.innerHTML = `
+        <div style="background:#ff6b6b;color:#fff;font-weight:700;
+          padding:6px 16px;border-radius:6px;font-size:13px;
+          letter-spacing:1px;white-space:nowrap;">HORIZON CRM</div>
         <div>
-          <div style="font-size: 18px; font-weight: 600; line-height: 1.3;">${text}</div>
-          ${subtext ? `<div style="font-size: 13px; color: #94a3b8; margin-top: 2px;">${subtext}</div>` : ""}
-        </div>
-      `;
-
-      // Add animation keyframe
-      if (!document.getElementById("demo-annotation-style")) {
-        const style = document.createElement("style");
-        style.id = "demo-annotation-style";
-        style.textContent = `@keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }`;
-        document.head.appendChild(style);
+          <div style="font-size:18px;font-weight:600;line-height:1.3">${text}</div>
+          ${subtext ? `<div style="font-size:13px;color:#94a3b8;margin-top:2px">${subtext}</div>` : ""}
+        </div>`;
+      if (!document.getElementById("demo-ann-style")) {
+        const s = document.createElement("style");
+        s.id = "demo-ann-style";
+        s.textContent = "@keyframes demoSlide{from{transform:translateY(-100%)}to{transform:translateY(0)}}";
+        document.head.appendChild(s);
       }
-
-      document.body.appendChild(overlay);
+      document.body.appendChild(el);
     },
-    { text, subtext }
+    { text, subtext },
   );
-  // Give the viewer time to read the annotation
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(600);
 }
 
-/** Removes the annotation overlay. */
 async function hideAnnotation(page: Page) {
-  await page.evaluate(() => {
-    document.getElementById("demo-annotation")?.remove();
-  });
+  await page.evaluate(() => document.getElementById("demo-annotation")?.remove());
 }
 
-/** Show annotation, wait for reading, then optionally hide. */
-async function annotate(
-  page: Page,
-  text: string,
-  subtext = "",
-  readMs = 3000,
-  persist = false
-) {
+async function annotate(page: Page, text: string, subtext = "", readMs = 4000) {
   await showAnnotation(page, text, subtext);
   await page.waitForTimeout(readMs);
-  if (!persist) await hideAnnotation(page);
+  await hideAnnotation(page);
 }
 
-/** Pauses to let the viewer see the current screen. */
 async function pause(page: Page, ms = 2000) {
   await page.waitForTimeout(ms);
 }
 
-/** Wait for a page to be ready — tries multiple selectors */
+async function slowScroll(page: Page, distance = 400, durationMs = 2000) {
+  const steps = 25;
+  const px = distance / steps;
+  const delay = durationMs / steps;
+  for (let i = 0; i < steps; i++) {
+    await page.evaluate((d) => window.scrollBy(0, d), px);
+    await page.waitForTimeout(delay);
+  }
+}
+
+async function scrollToTop(page: Page) {
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+  await page.waitForTimeout(800);
+}
+
 async function waitForPage(page: Page, type: "list" | "form" = "list") {
-  const selector = type === "list" ? ".frappe-list" : ".form-layout, .form-page, [data-page-container]";
+  const sel = type === "list" ? ".frappe-list" : ".form-layout, .form-page";
   try {
-    await page.waitForSelector(selector, { timeout: 15000 });
+    await page.waitForSelector(sel, { timeout: 15000 });
   } catch {
-    // Page might have a different structure; just wait a bit
     await page.waitForTimeout(3000);
   }
+  await page.waitForTimeout(800);
 }
 
-/** Slowly scrolls the page down to reveal content. */
-async function slowScroll(page: Page, distance = 400, durationMs = 1500) {
-  const steps = 20;
-  const stepPx = distance / steps;
-  const stepDelay = durationMs / steps;
-  for (let i = 0; i < steps; i++) {
-    await page.evaluate((px) => window.scrollBy(0, px), stepPx);
-    await page.waitForTimeout(stepDelay);
+async function openFirstListItem(page: Page): Promise<boolean> {
+  const link = page.locator(
+    ".frappe-list .result .list-row a, .frappe-list .list-row--col a.ellipsis, .frappe-list .level-left a",
+  ).first();
+  try {
+    await link.waitFor({ state: "visible", timeout: 5000 });
+    await link.click();
+    await waitForPage(page, "form");
+    return true;
+  } catch {
+    return false;
   }
 }
 
-/** Highlights an element with a glowing border */
-async function highlight(page: Page, selector: string, durationMs = 2500) {
-  await page.evaluate(
-    ({ selector, duration }) => {
-      const el = document.querySelector(selector) as HTMLElement;
-      if (!el) return;
-      const prev = el.style.cssText;
-      el.style.cssText += `
-        outline: 3px solid #ff6b6b !important;
-        outline-offset: 4px;
-        border-radius: 8px;
-        box-shadow: 0 0 20px rgba(255,107,107,0.4);
-        transition: all 0.3s ease;
-      `;
-      setTimeout(() => {
-        el.style.cssText = prev;
-      }, duration);
-    },
-    { selector, duration: durationMs }
-  );
-  await page.waitForTimeout(durationMs + 300);
+function futureDate(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split("T")[0];
 }
 
-/* ── Test configuration ───────────────────────────────────────── */
+function todayStr(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+async function chapterTitle(page: Page, num: number, title: string, subtitle: string) {
+  await annotate(page, `Chapter ${num}: ${title}`, subtitle, 5000);
+}
+
+async function showcaseList(page: Page, route: string, title: string, sub: string) {
+  await page.goto(`/app/${route}`, { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+  await pause(page, 1000);
+  await showAnnotation(page, title, sub);
+  await pause(page, 5000);
+  await slowScroll(page, 300, 1500);
+  await pause(page, 2000);
+  await hideAnnotation(page);
+}
+
+async function refreshCsrf(page: Page): Promise<string> {
+  try {
+    await page.goto("/app", { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => (window as any).frappe?.csrf_token, null, { timeout: 10000 });
+    return await page.evaluate(() => (window as any).frappe?.csrf_token || "");
+  } catch {
+    return "";
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEST CONFIGURATION
+   ═══════════════════════════════════════════════════════════════ */
 
 test.use({
   viewport: { width: 1440, height: 900 },
@@ -134,801 +158,947 @@ test.use({
   launchOptions: { slowMo: 80 },
 });
 
-/* ── Unique identifiers for demo data ─────────────────────────── */
 const TS = Date.now();
-const DEMO_CUSTOMER = `Demo Client ${TS}`;
-const DEMO_EMAIL = `demo-client-${TS}@example.com`;
-const DEMO_LEAD = `Demo Lead ${TS}`;
 
-/* ── THE DEMO ─────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   THE DEMO
+   ═══════════════════════════════════════════════════════════════ */
 
-test("Horizon CRM — Full Feature Demo", async ({ page }) => {
-  test.setTimeout(15 * 60 * 1000); // 15 min max
+test("Horizon CRM — Complete Feature Demo", async ({ page, context }) => {
+  test.setTimeout(30 * 60 * 1000);
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 1: TITLE SCREEN & LOGIN                         ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  const created: Record<string, string[]> = {
+    customers: [], leads: [], inquiries: [], bookings: [],
+    itineraries: [], invoices: [], feedbacks: [], teams: [], suppliers: [],
+  };
+
+  // ╔═══════════════════════════════════════════════════════════════╗
+  // ║  PHASE 1 — SEED DEMO DATA                                   ║
+  // ╚═══════════════════════════════════════════════════════════════╝
+
+  await login(page, USERS.admin.email, USERS.admin.password);
+  await showAnnotation(page, "Preparing Demo Environment", "Creating sample customers, leads, bookings, suppliers, and more…");
+  await pause(page, 2000);
+
+  // ── Customers ──
+  for (const c of [
+    { customer_name: "Rajesh Sharma", email: "rajesh.sharma@horizon-demo.test", phone: "+91 98765 43210", nationality: "Indian" },
+    { customer_name: "Priya Patel", email: "priya.patel@horizon-demo.test", phone: "+91 87654 32100", loyalty_tier: "Gold", nationality: "Indian" },
+    { customer_name: "John Williams", email: "john.williams@horizon-demo.test", phone: "+1 555 019 8234", nationality: "American" },
+    { customer_name: "Aisha Khan", email: "aisha.khan@horizon-demo.test", phone: "+91 77654 32100", nationality: "Indian" },
+  ]) {
+    const r = await createDoc(page, "Travel Customer", c);
+    created.customers.push(r.data.name);
+  }
+
+  // ── Leads ──
+  for (const l of [
+    { lead_name: "Ananya Verma", email: "ananya.verma@horizon-demo.test", phone: "+91 99876 54321", status: "New", source: "Website", interested_destination: "Bali", travel_type: "Honeymoon", expected_budget: 200000, num_travelers: 2 },
+    { lead_name: "Michael Chen", email: "michael.chen@horizon-demo.test", status: "Contacted", source: "Referral", interested_destination: "Tokyo", travel_type: "Cultural", num_travelers: 3, priority: "Medium" },
+    { lead_name: "Sarah Johnson", email: "sarah.johnson@horizon-demo.test", status: "Qualified", source: "Social Media", interested_destination: "Paris", travel_type: "Luxury", expected_budget: 500000, priority: "High" },
+    { lead_name: "Amit Kumar", email: "amit.kumar@horizon-demo.test", phone: "+91 88765 43210", status: "Interested", source: "Google Ads", interested_destination: "Dubai", travel_type: "Business", priority: "High" },
+    { lead_name: "Emma Wilson", email: "emma.wilson@horizon-demo.test", status: "Converted", source: "Travel Fair", interested_destination: "Maldives", travel_type: "Honeymoon", expected_budget: 600000 },
+  ]) {
+    const r = await createDoc(page, "Travel Lead", l);
+    created.leads.push(r.data.name);
+  }
+
+  // ── Inquiries ──
+  for (const i of [
+    { customer: created.customers[0], destination: "Bali", travel_type: "Honeymoon", status: "New", departure_date: futureDate(30), return_date: futureDate(37), num_travelers: 2, budget_min: 100000, budget_max: 200000, source: "Walk-in" },
+    { customer: created.customers[1], destination: "Paris", travel_type: "Family", status: "Quoted", departure_date: futureDate(60), return_date: futureDate(70), num_travelers: 4, budget_min: 300000, budget_max: 500000, source: "Phone", priority: "High" },
+    { customer: created.customers[2], destination: "Maldives", travel_type: "Luxury", status: "Won", departure_date: futureDate(90), return_date: futureDate(97), num_travelers: 2, budget_max: 600000, source: "Email" },
+    { customer: created.customers[3], destination: "Dubai", travel_type: "Business", status: "Contacted", departure_date: futureDate(45), return_date: futureDate(50), num_travelers: 1, source: "Referral" },
+    { customer: created.customers[0], destination: "Tokyo", travel_type: "Cultural", status: "Lost", departure_date: futureDate(20), return_date: futureDate(28), num_travelers: 2, source: "Website", lost_reason: "Budget Too High" },
+  ]) {
+    const r = await createDoc(page, "Travel Inquiry", i);
+    created.inquiries.push(r.data.name);
+  }
+
+  // ── Bookings with payments ──
+  for (const b of [
+    {
+      customer: created.customers[2], destination: "Maldives",
+      departure_date: futureDate(90), return_date: futureDate(97),
+      num_travelers: 2, total_amount: 520000, status: "Confirmed",
+      inquiry: created.inquiries[2],
+      payments: [
+        { amount: 200000, payment_date: todayStr(), payment_method: "Bank Transfer", status: "Received", reference: "NEFT-78234" },
+        { amount: 120000, payment_date: todayStr(), payment_method: "Card", status: "Received", reference: "CC-4521" },
+      ],
+    },
+    {
+      customer: created.customers[1], destination: "Paris",
+      departure_date: futureDate(60), return_date: futureDate(70),
+      num_travelers: 4, total_amount: 420000, status: "In Progress",
+      payments: [
+        { amount: 200000, payment_date: todayStr(), payment_method: "Online", status: "Received", reference: "UPI-9988" },
+      ],
+    },
+    {
+      customer: created.customers[0], destination: "Dubai",
+      departure_date: futureDate(45), return_date: futureDate(50),
+      num_travelers: 1, total_amount: 155000, status: "Confirmed",
+      payments: [
+        { amount: 155000, payment_date: todayStr(), payment_method: "Bank Transfer", status: "Received", reference: "NEFT-65432" },
+      ],
+    },
+  ]) {
+    const r = await createDoc(page, "Travel Booking", b);
+    created.bookings.push(r.data.name);
+  }
+
+  // ── Itinerary ──
+  {
+    const r = await createDoc(page, "Travel Itinerary", {
+      itinerary_name: `Maldives Luxury 7D-6N (${TS})`,
+      booking: created.bookings[0],
+      start_date: futureDate(90), end_date: futureDate(97), status: "Shared",
+      items: [
+        { day_number: 1, title: "Arrival & Resort Check-in", description: "Male airport pickup, speedboat to resort, welcome cocktail & villa orientation", accommodation: "Water Villa — Paradise Island Resort", meals_included: "Full Board", estimated_cost: 35000 },
+        { day_number: 2, title: "Snorkeling & Spa Day", description: "Morning reef snorkeling with guide, afternoon couples spa with ocean view", accommodation: "Water Villa", meals_included: "Full Board", estimated_cost: 25000 },
+        { day_number: 3, title: "Island Hopping Cruise", description: "Private dhoni cruise, visit local island, sunset dolphin watching", accommodation: "Water Villa", transport: "Private Dhoni", meals_included: "Full Board", estimated_cost: 32000 },
+        { day_number: 4, title: "Scuba Diving & Beach", description: "Morning introductory scuba dive, afternoon beach relaxation, night fishing", accommodation: "Water Villa", meals_included: "Full Board", estimated_cost: 28000 },
+        { day_number: 5, title: "Cultural Tour & Cooking Class", description: "Visit Male city, local fish market, Maldivian cooking class", transport: "Speedboat", accommodation: "Water Villa", meals_included: "Half Board", estimated_cost: 22000 },
+        { day_number: 6, title: "Free Day & Farewell Dinner", description: "Free morning for leisure, overwater restaurant farewell dinner with live music", accommodation: "Water Villa", meals_included: "Full Board", estimated_cost: 38000 },
+        { day_number: 7, title: "Departure", description: "Breakfast, resort checkout, speedboat to Male airport", transport: "Speedboat + Flight", meals_included: "Breakfast", estimated_cost: 15000 },
+      ],
+    });
+    created.itineraries.push(r.data.name);
+  }
+
+  // ── Invoice with line items ──
+  {
+    const r = await createDoc(page, "Travel Invoice", {
+      customer: created.customers[2], booking: created.bookings[0],
+      invoice_date: todayStr(), due_date: futureDate(30), status: "Sent", tax_percent: 18,
+      items: [
+        { item_description: `Return Flights — Male International 2 pax (${TS})`, quantity: 2, rate: 85000 },
+        { item_description: `Water Villa — Paradise Island Resort 6 nights (${TS})`, quantity: 6, rate: 42000 },
+        { item_description: `Speedboat Airport Transfers round trip (${TS})`, quantity: 2, rate: 7500 },
+        { item_description: `Reef Snorkeling Package 2 pax (${TS})`, quantity: 2, rate: 5000 },
+        { item_description: `Couples Spa Treatment (${TS})`, quantity: 1, rate: 18000 },
+        { item_description: `Private Dhoni Cruise Half Day (${TS})`, quantity: 1, rate: 25000 },
+      ],
+    });
+    created.invoices.push(r.data.name);
+  }
+
+  // ── Feedback ──
+  {
+    const r = await createDoc(page, "Travel Feedback", {
+      booking: created.bookings[2], customer: created.customers[0],
+      rating: 1, overall_experience: "Excellent", would_recommend: 1,
+      comments: "Absolutely wonderful trip to Dubai! The hotel was luxurious, the desert safari was a once-in-a-lifetime experience, and the city tours were perfectly planned. Our travel agent went above and beyond. Highly recommend!",
+    });
+    created.feedbacks.push(r.data.name);
+  }
+
+  // ── Suppliers ──
+  const supplierDefs: { dt: string; data: Record<string, unknown> }[] = [
+    { dt: "Airline Supplier", data: { airline_name: `Air India (${TS})`, iata_code: "AI", is_active: 1, contact_email: "bookings@airindia.test", phone: "+91 124 264 8888", hub_airports: "Mumbai (BOM), Delhi (DEL), Bangalore (BLR)", alliance: "Star Alliance", domestic: 1, international: 1, country: "India", city: "New Delhi", services: [{ service_name: "Economy Class", price: 15000 }, { service_name: "Business Class", price: 65000 }] } },
+    { dt: "Airline Supplier", data: { airline_name: `Emirates (${TS})`, iata_code: "EK", is_active: 1, contact_email: "agents@emirates.test", hub_airports: "Dubai (DXB)", alliance: "None", domestic: 0, international: 1, country: "UAE", city: "Dubai", services: [{ service_name: "Economy", price: 35000 }, { service_name: "Business", price: 125000 }] } },
+    { dt: "Hotel Supplier", data: { hotel_name: `Taj Palace Mumbai (${TS})`, star_rating: "5 Star", is_active: 1, contact_email: "reservations@tajhotels.test", property_type: "Hotel", total_rooms: 285, check_in_time: "14:00", check_out_time: "12:00", pool: 1, spa: 1, gym: 1, restaurant: 1, wifi: 1, parking: 1, country: "India", city: "Mumbai", services: [{ service_name: "Deluxe Room", price: 15000 }, { service_name: "Luxury Suite", price: 45000 }] } },
+    { dt: "Hotel Supplier", data: { hotel_name: `Marriott Resort Bali (${TS})`, star_rating: "5 Star", is_active: 1, contact_email: "bali@marriott.test", property_type: "Resort", total_rooms: 400, pool: 1, spa: 1, gym: 1, restaurant: 1, wifi: 1, airport_shuttle: 1, country: "Indonesia", city: "Bali" } },
+    { dt: "Tour Operator", data: { operator_name: `Thomas Cook India (${TS})`, is_active: 1, contact_email: "groups@thomascook.test", specialization: "General", destinations_covered: "Europe, Southeast Asia, Middle East, Africa", group_size_min: 2, group_size_max: 30, languages: "English, Hindi, Marathi, Gujarati", country: "India", city: "Mumbai" } },
+    { dt: "Transport Supplier", data: { transport_name: `Ola Corporate (${TS})`, transport_type: "Car Rental", is_active: 1, contact_email: "corporate@ola.test", fleet_size: 150, vehicle_types: "Sedan, SUV, Luxury, Tempo Traveller", max_passengers: 12, ac_available: 1, country: "India", city: "Mumbai", services: [{ service_name: "Airport Transfer", price: 1500 }, { service_name: "Full-Day SUV", price: 5000 }] } },
+    { dt: "Visa Agent", data: { agent_name: `VFS Global (${TS})`, is_active: 1, contact_email: "info@vfsglobal.test", countries_served: "USA, UK, Canada, Schengen (26 countries), Australia", visa_types: "Tourist, Business, Student, Transit, Work Permit", avg_processing_days: 12, success_rate: 95, express_available: 1, country: "India", city: "Mumbai" } },
+    { dt: "Insurance Provider", data: { provider_name: `Travel Guard India (${TS})`, is_active: 1, contact_email: "claims@travelguard.test", insurance_types: "Trip Cancellation, Medical Emergency, Baggage Loss, Flight Delay", coverage_regions: "Worldwide including USA & Canada", max_coverage_amount: 5000000, claim_turnaround_days: 14, country: "India" } },
+  ];
+  for (const s of supplierDefs) {
+    const r = await createDoc(page, s.dt, s.data);
+    created.suppliers.push(`${s.dt}:::${r.data.name}`);
+  }
+
+  // ── Team ──
+  {
+    const staffResp = await page.request.get(
+      `/api/resource/Travel Agency Staff?filters=${JSON.stringify({ staff_user: USERS.teamLead.email })}&fields=["name"]`,
+    );
+    const staffBody = await staffResp.json();
+    const teamLeadStaff = staffBody.data?.[0]?.name;
+    const r = await createDoc(page, "Travel Team", {
+      team_name: `Sales Team (${TS})`, team_lead: teamLeadStaff || undefined,
+      is_active: 1, description: "Primary sales team — handles new inquiries, bookings, and VIP clients",
+    });
+    created.teams.push(r.data.name);
+  }
+
+  await hideAnnotation(page);
+  await logout(page);
+  await context.clearCookies();
+  await page.waitForTimeout(500);
+
+  // ╔═══════════════════════════════════════════════════════════════╗
+  // ║  PHASE 2 — VISUAL WALKTHROUGH                                ║
+  // ╚═══════════════════════════════════════════════════════════════╝
+
+  // ── CHAPTER 1: TITLE & LOGIN ──────────────────────────────────────
 
   await page.goto("/login", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(1000);
-  await annotate(
-    page,
-    "Horizon CRM — Feature Demonstration",
-    "A multi-tenant Travel Agency CRM built on Frappe Framework",
-    5000
-  );
+  await page.waitForTimeout(1500);
 
-  await annotate(page, "Chapter 1: Login & Authentication", "Secure role-based access for agency staff");
+  await annotate(page, "Horizon CRM — Complete Feature Demonstration", "Multi-tenant Travel Agency CRM built on Frappe Framework", 6000);
 
-  // Type credentials visibly
+  await chapterTitle(page, 1, "Login & Authentication", "Secure role-based access with Agency Admin, Team Lead, and Staff roles");
+
   const emailInput = page.getByPlaceholder("jane@example.com");
   const passwordInput = page.getByPlaceholder("•••••");
-
   await emailInput.waitFor({ timeout: 10000 });
   await emailInput.fill("");
-  await emailInput.type(USERS.agencyAdmin.email, { delay: 40 });
-  await pause(page, 500);
+  await emailInput.type(USERS.agencyAdmin.email, { delay: 45 });
+  await pause(page, 600);
   await passwordInput.fill("");
-  await passwordInput.type(USERS.agencyAdmin.password, { delay: 40 });
+  await passwordInput.type(USERS.agencyAdmin.password, { delay: 45 });
   await pause(page, 800);
 
-  await showAnnotation(page, "Logging in as Agency Admin", "admin@agency1.test — Full management access");
+  await showAnnotation(page, "Logging in as Agency Admin", `${USERS.agencyAdmin.email} — Full management access`);
   await page.getByRole("button", { name: "Login" }).click();
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(4000);
   await page.goto("/app", { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(2000);
+
+  let csrf = "";
+  try {
+    await page.waitForFunction(() => (window as any).frappe?.csrf_token, null, { timeout: 10000 });
+    csrf = await page.evaluate(() => (window as any).frappe?.csrf_token || "");
+  } catch { /* non-critical */ }
+
   await hideAnnotation(page);
+  await annotate(page, "Logged In Successfully", "Welcome to the Horizon CRM desk", 3000);
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 2: DASHBOARD & WORKSPACE                        ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // ── CHAPTER 2: DASHBOARD ──────────────────────────────────────────
 
-  await annotate(
-    page,
-    "Chapter 2: Dashboard & Workspace",
-    "KPIs, charts, and quick navigation for agency operations"
-  );
+  await chapterTitle(page, 2, "Dashboard & Workspace", "Real-time KPIs, analytics charts, and organized sidebar navigation");
 
-  // Navigate to workspace
   await page.goto("/app/horizon-crm", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(4000);
 
-  await showAnnotation(page, "Agency Dashboard", "Number cards show real-time KPIs — Inquiries, Bookings, Revenue");
-  await pause(page, 4000);
+  await showAnnotation(page, "Agency Dashboard", "Number cards: Open Inquiries, Active Bookings, Customer Count, Outstanding Balance, Total Revenue, Won This Month");
+  await pause(page, 7000);
   await hideAnnotation(page);
 
-  // Scroll to show charts
-  await showAnnotation(page, "Analytics Charts", "Inquiry pipeline funnel & monthly revenue trends", true);
-  await slowScroll(page, 500, 2000);
-  await pause(page, 3000);
+  await showAnnotation(page, "Analytics Charts", "Inquiry Pipeline funnel, Inquiry Sources, Monthly Bookings, Revenue Trend, Top Destinations");
+  await slowScroll(page, 600, 3000);
+  await pause(page, 6000);
   await hideAnnotation(page);
 
-  // Scroll back up and show sidebar
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await page.waitForTimeout(1000);
+  await scrollToTop(page);
+  await pause(page, 1000);
 
-  await showAnnotation(
-    page,
-    "Sidebar Navigation",
-    "Organized sections: Pipeline, Customers, Billing, Trip Planning, Suppliers, Team, Settings"
-  );
-  await pause(page, 4000);
+  await showAnnotation(page, "Sidebar Navigation", "Pipeline (Leads, Inquiries, Bookings) | Customers | Billing | Trip Planning | Suppliers (6 types) | Team | Settings");
+  await pause(page, 7000);
   await hideAnnotation(page);
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 3: AGENCY SETTINGS (System Admin view)          ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // ── CHAPTER 3: AGENCY SETTINGS ────────────────────────────────────
 
-  await annotate(
-    page,
-    "Chapter 3: Agency Configuration",
-    "Each tenant site has its own agency settings — logo, name, staff limits"
-  );
+  await chapterTitle(page, 3, "Agency Configuration", "Global tenant settings — name, logo, staff capacity, subscription plan");
 
-  // Agency settings requires System Manager — use API login
   await page.request.post("/api/method/login", {
     form: { usr: USERS.admin.email, pwd: USERS.admin.password },
   });
-
   await page.goto("/app/travel-agency", { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(5000);
-  await pause(page, 1500);
 
-  await showAnnotation(
-    page,
-    "Travel Agency (Singleton)",
-    "One per tenant site — agency name, admin user, staff capacity, contact info"
-  );
-  await pause(page, 4000);
-  await slowScroll(page, 300, 1500);
-  await pause(page, 2000);
+  await showAnnotation(page, "Travel Agency (Singleton)", "One per tenant site — agency name, code, status, admin user, max staff, subscription plan");
+  await pause(page, 7000);
   await hideAnnotation(page);
 
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await page.waitForTimeout(800);
+  await showAnnotation(page, "Contact & Subscription Details", "Email, phone, website, address, city, country, established date, timezone");
+  await slowScroll(page, 400, 2000);
+  await pause(page, 5000);
+  await hideAnnotation(page);
+  await scrollToTop(page);
 
-  // Switch back to Agency Admin for remaining chapters
   await page.request.post("/api/method/login", {
     form: { usr: USERS.agencyAdmin.email, pwd: USERS.agencyAdmin.password },
   });
+  csrf = await refreshCsrf(page);
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 4: STAFF & TEAM MANAGEMENT                      ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // ── CHAPTER 4: STAFF & TEAMS ──────────────────────────────────────
 
-  await annotate(
-    page,
-    "Chapter 4: Staff & Team Management",
-    "Manage agency employees, assign roles, and organize teams"
-  );
+  await chapterTitle(page, 4, "Staff & Team Management", "Add employees, assign roles (Admin / Team Lead / Staff), organize into teams");
 
-  // Staff list
   await page.goto("/app/travel-agency-staff", { waitUntil: "domcontentloaded" });
   await waitForPage(page, "list");
-  await pause(page, 1500);
 
-  await showAnnotation(
-    page,
-    "Staff Directory",
-    "Each staff member is linked to a User with role-based desk access"
-  );
-  await pause(page, 3500);
+  await showAnnotation(page, "Staff Directory", "Each staff record links to a Frappe User — role in agency, team, designation, join date, active status");
+  await pause(page, 6000);
   await hideAnnotation(page);
 
-  // Open first staff record
-  const firstStaff = page.locator(".frappe-list .list-row .level-left a").first();
-  if (await firstStaff.isVisible()) {
-    await firstStaff.click();
-    await waitForPage(page, "form");
-    await pause(page, 1500);
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Staff Profile", "Role in Agency (Admin / Team Lead / Staff), linked User account, team assignment, designation");
+    await slowScroll(page, 200, 1000);
+    await pause(page, 5000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
 
-    await showAnnotation(
-      page,
-      "Staff Profile",
-      "Role in Agency (Admin / Team Lead / Staff), linked User account, active status"
-    );
-    await pause(page, 3500);
+  await page.goto("/app/travel-team", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+
+  await showAnnotation(page, "Travel Teams", "Group staff into teams — each has a team lead, description, and active flag");
+  await pause(page, 5000);
+  await hideAnnotation(page);
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Team Detail", "Team name, designated lead, status, and description");
+    await pause(page, 4000);
     await hideAnnotation(page);
   }
 
-  // Teams
-  await page.goto("/app/travel-team", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
+  // ── CHAPTER 5: PUBLIC PORTAL ──────────────────────────────────────
 
-  await showAnnotation(page, "Teams", "Group staff into teams with designated team leads");
-  await pause(page, 3000);
-  await hideAnnotation(page);
+  await chapterTitle(page, 5, "Public Lead-Capture Portal", "Guest-accessible inquiry form — no login needed, embeddable via iframe");
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 5: PUBLIC PORTAL — LEAD CAPTURE FORM            ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  await annotate(
-    page,
-    "Chapter 5: Public Lead-Capture Portal",
-    "Guest-accessible form — no login required. Embeddable via iframe."
-  );
-
-  // Clear cookies to demonstrate guest access
-  await page.context().clearCookies();
+  await context.clearCookies();
   await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(2500);
 
-  await showAnnotation(
-    page,
-    "Public Inquiry Form",
-    "Website visitors fill this form — creates a Travel Lead with source='Website'"
-  );
-  await pause(page, 3500);
+  await showAnnotation(page, "Public Inquiry Form", "Any website visitor can submit — creates a Travel Lead with source = Website");
+  await pause(page, 6000);
   await hideAnnotation(page);
 
-  // Fill the form visually
-  await showAnnotation(page, "Filling the inquiry form…", "All fields rendered as plain HTML — works for any visitor");
+  await showAnnotation(page, "Filling the Inquiry Form", "10 fields: name, email, phone, destination, travel type, dates, travelers, budget, notes");
+  await pause(page, 2000);
 
-  await page.type("#full_name", DEMO_LEAD, { delay: 30 });
-  await pause(page, 400);
-  await page.type("#email", `demo-lead-${TS}@example.com`, { delay: 25 });
-  await pause(page, 400);
-  await page.type("#phone", "+91 98765 43210", { delay: 25 });
-  await pause(page, 400);
+  const PORTAL_LEAD_NAME = `Portal Lead ${TS}`;
+  await page.type("#full_name", PORTAL_LEAD_NAME, { delay: 35 });
+  await pause(page, 500);
+  await page.type("#email", `portal.lead.${TS}@example.com`, { delay: 28 });
+  await pause(page, 500);
+  await page.type("#phone", "+91 99887 76655", { delay: 28 });
+  await pause(page, 500);
   await page.fill("#destination", "");
-  await page.type("#destination", "Bali", { delay: 50 });
-  await pause(page, 400);
-  await page.selectOption("#travel_type", { index: 1 }); // pick first travel type
-  await pause(page, 400);
+  await page.type("#destination", "Bali", { delay: 60 });
+  await pause(page, 600);
+
+  const typeSelect = page.locator("#travel_type");
+  const typeOpts = await typeSelect.locator("option").allTextContents();
+  if (typeOpts.length > 1) await typeSelect.selectOption({ index: 1 });
+  await pause(page, 500);
+
   await page.fill("#num_travelers", "2");
   await pause(page, 400);
-  // Set dates
-  const today = new Date();
-  const dep = new Date(today);
-  dep.setDate(dep.getDate() + 30);
-  const ret = new Date(dep);
-  ret.setDate(ret.getDate() + 7);
-  await page.fill("#departure_date", dep.toISOString().split("T")[0]);
+  await page.fill("#departure_date", futureDate(35));
+  await pause(page, 400);
+  await page.fill("#return_date", futureDate(42));
+  await pause(page, 400);
+  await page.fill("#budget_min", "80000");
   await pause(page, 300);
-  await page.fill("#return_date", ret.toISOString().split("T")[0]);
-  await pause(page, 300);
-  await page.fill("#budget_max", "150000");
-  await pause(page, 300);
+  await page.fill("#budget_max", "180000");
+  await pause(page, 400);
 
   await slowScroll(page, 200, 800);
-
-  await page.type("#notes", "Honeymoon trip — need luxury resort, spa, private pool villa.", { delay: 20 });
+  await page.type("#notes", "Planning a honeymoon trip — looking for luxury reef villas with spa, private pool, and sunset dining.", { delay: 20 });
   await pause(page, 1000);
   await hideAnnotation(page);
 
-  // Submit
-  await showAnnotation(page, "Submitting the form…", "POST to /api/method/horizon_crm.api.portal.submit_lead (rate-limited: 10/hr)");
+  await showAnnotation(page, "Submitting the Inquiry", "POST to /api/method/horizon_crm.api.portal.submit_lead — rate-limited: 10/hr");
+  await pause(page, 2000);
   await page.click("#btn-submit");
-  await page.waitForURL("**/portal/thank-you**", { timeout: 15000 });
-  await page.waitForTimeout(1500);
+  try {
+    await page.waitForURL("**/portal/thank-you**", { timeout: 15000 });
+  } catch {
+    await page.waitForTimeout(3000);
+  }
+  await page.waitForTimeout(2000);
   await hideAnnotation(page);
 
-  await annotate(
-    page,
-    "Thank You Page",
-    "Visitor sees confirmation. Lead is now in the CRM for staff to follow up.",
-    4000
-  );
+  await annotate(page, "Thank You Page", "Visitor sees confirmation — the lead is now in the CRM pipeline for staff follow-up", 5000);
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 6: LEAD PIPELINE                                ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // Log back in
+  await page.request.post("/api/method/login", {
+    form: { usr: USERS.agencyAdmin.email, pwd: USERS.agencyAdmin.password },
+  });
+  await page.goto("/app", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
+  csrf = await refreshCsrf(page);
 
-  // Log back in as admin
-  await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+  // ── CHAPTER 6: LEAD PIPELINE ──────────────────────────────────────
 
-  await annotate(
-    page,
-    "Chapter 6: Lead Pipeline",
-    "Pre-qualification funnel — New → Contacted → Qualified → Converted"
-  );
+  await chapterTitle(page, 6, "Lead Pipeline", "Pre-qualification: New → Contacted → Interested → Qualified → Converted");
 
   await page.goto("/app/travel-lead", { waitUntil: "domcontentloaded" });
   await waitForPage(page, "list");
-  await pause(page, 1500);
 
-  await showAnnotation(
-    page,
-    "Travel Leads List",
-    "The lead submitted from the portal appears here with source='Website'"
-  );
-  await pause(page, 3500);
+  await showAnnotation(page, "Travel Leads", "All leads including the portal submission. Filter by status, source, priority, destination.");
+  await pause(page, 6000);
+  await slowScroll(page, 300, 1500);
+  await pause(page, 2000);
   await hideAnnotation(page);
+  await scrollToTop(page);
 
-  // Open the lead we just created (it should be at the top or we find it)
-  const portalLead = page.locator(`.frappe-list .list-row:has-text("${DEMO_LEAD}")`).first();
-  if (await portalLead.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await portalLead.locator("a").first().click();
-    await waitForPage(page, "form");
-    await pause(page, 1500);
-
-    await showAnnotation(
-      page,
-      "Website Lead Detail",
-      "All portal form data captured — name, email, destination, budget, notes"
-    );
-    await pause(page, 4000);
-    await slowScroll(page, 300, 1500);
-    await pause(page, 2000);
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Lead Detail", "Contact info, company, assignment, priority, travel interest (destination, type, budget), follow-up date");
+    await pause(page, 6000);
+    await slowScroll(page, 400, 2000);
+    await pause(page, 3000);
     await hideAnnotation(page);
 
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-    await page.waitForTimeout(800);
+    await scrollToTop(page);
+    await showAnnotation(page, "Lead Pipeline Visualizer", "Custom CSS pipeline indicator shows current stage in the funnel");
+    await pause(page, 5000);
+    await hideAnnotation(page);
   }
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 7: CUSTOMER MANAGEMENT                          ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // Filtered view
+  await page.goto("/app/travel-lead?status=New", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+  await annotate(page, "Filtered: New Leads Only", "URL param ?status=New — instantly filters the list", 4000);
 
-  await annotate(
-    page,
-    "Chapter 7: Customer Management",
-    "Customer profiles with contact info, preferences, and travel history"
-  );
+  // ── CHAPTER 7: CUSTOMERS ──────────────────────────────────────────
 
-  // Create a customer for the demo
-  await page.goto("/app/travel-customer/new", { waitUntil: "domcontentloaded" });
-  await waitForPage(page, "form");
-  await pause(page, 1000);
+  await chapterTitle(page, 7, "Customer Management", "Customer profiles with contact info, travel documents, loyalty tier, and preferences");
 
-  await showAnnotation(page, "Creating a New Customer", "Track customer details, passport info, and preferences");
+  await page.goto("/app/travel-customer", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
 
-  // Fill customer form
-  const custNameField = page.locator('[data-fieldname="customer_name"] input');
-  await custNameField.fill("");
-  await custNameField.type(DEMO_CUSTOMER, { delay: 30 });
-  await pause(page, 400);
-
-  const custEmailField = page.locator('[data-fieldname="email"] input');
-  await custEmailField.fill("");
-  await custEmailField.type(DEMO_EMAIL, { delay: 25 });
-  await pause(page, 400);
-
-  const custPhoneField = page.locator('[data-fieldname="phone"] input');
-  await custPhoneField.fill("");
-  await custPhoneField.type("+91 87654 32100", { delay: 25 });
-  await pause(page, 400);
-
+  await showAnnotation(page, "Customer Directory", "4 demo customers — name, email, phone, loyalty tier. Auto-named CUST-XXXXX.");
+  await pause(page, 5000);
   await hideAnnotation(page);
 
-  // Save
-  await showAnnotation(page, "Saving customer record…");
-  await page.keyboard.press("Control+s");
-  await page.waitForTimeout(2500);
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Customer Profile", "Full name, email, phone, mobile, gender, loyalty tier (Bronze/Silver/Gold/Platinum), portal user link");
+    await pause(page, 6000);
+    await hideAnnotation(page);
+
+    await showAnnotation(page, "Travel Documents & Address", "Date of birth, nationality, passport number, address, emergency contact");
+    await slowScroll(page, 300, 1500);
+    await pause(page, 5000);
+    await hideAnnotation(page);
+
+    await showAnnotation(page, "Customer Activity", "Custom sidebar shows inquiry/booking/feedback counts plus quick-action buttons (New Inquiry, WhatsApp)");
+    await pause(page, 5000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 8: INQUIRY WORKFLOW ───────────────────────────────────
+
+  await chapterTitle(page, 8, "Inquiry Workflow", "Sales pipeline: New → Contacted → Quoted → Won → Lost");
+
+  await page.goto("/app/travel-inquiry", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+
+  await showAnnotation(page, "Inquiry List", "5 demo inquiries across all statuses — filter by status, customer, destination, priority");
+  await pause(page, 5000);
+  await slowScroll(page, 200, 1000);
+  await pause(page, 2000);
   await hideAnnotation(page);
+  await scrollToTop(page);
 
-  await annotate(page, "Customer Saved!", "Ready to link to inquiries and bookings", 2500);
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Inquiry Detail", "Customer (auto-fills name/email/phone), destination, travel type, dates, travelers, budget range, source");
+    await pause(page, 6000);
+    await hideAnnotation(page);
+    await showAnnotation(page, "Pipeline, Follow-up & Notes", "Assigned agent, priority, follow-up date/notes, lost reason (if Lost), travelers child table, rich-text notes");
+    await slowScroll(page, 500, 2500);
+    await pause(page, 5000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 8: INQUIRY WORKFLOW                             ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  await annotate(
-    page,
-    "Chapter 8: Inquiry Workflow",
-    "Full sales pipeline — New → Contacted → Quoted → Won → Lost"
-  );
+  // Create a new inquiry visually
+  await showAnnotation(page, "Creating a New Inquiry", "Walk-through of the inquiry creation form");
+  await pause(page, 3000);
+  await hideAnnotation(page);
 
   await page.goto("/app/travel-inquiry/new", { waitUntil: "domcontentloaded" });
   await waitForPage(page, "form");
-  await pause(page, 1000);
+  await pause(page, 1500);
+  await showAnnotation(page, "New Inquiry Form", "Filling customer, destination, dates, and travel details");
 
-  await showAnnotation(page, "Creating a Travel Inquiry", "Link customer, set destination, dates, budget, and travel details");
+  // Customer link
+  const inqCust = page.locator('[data-fieldname="customer"] .control-input input');
+  await inqCust.click();
+  await inqCust.fill("");
+  await inqCust.type("Aisha", { delay: 50 });
+  await page.waitForTimeout(1200);
+  const custSugg = page.locator(".awesomplete li").first();
+  if (await custSugg.isVisible({ timeout: 3000 }).catch(() => false)) await custSugg.click();
+  await pause(page, 800);
 
-  // Fill inquiry — customer link
-  const custLinkInput = page.locator('[data-fieldname="customer"] .control-input input');
-  await custLinkInput.fill("");
-  await custLinkInput.fill(DEMO_CUSTOMER);
-  await page.waitForTimeout(800);
-  const suggestion = page.locator(".awesomplete li").first();
-  if (await suggestion.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await suggestion.click();
-  }
+  // Scroll down so destination field is not covered by the customer section header
+  await slowScroll(page, 300, 800);
+
+  // Destination link
+  const inqDest = page.locator('[data-fieldname="destination"] .control-input input');
+  await inqDest.scrollIntoViewIfNeeded();
   await pause(page, 500);
-
-  // Destination
-  const destInput = page.locator('[data-fieldname="destination"] .control-input input');
-  await destInput.fill("Bali");
-  await page.waitForTimeout(600);
-  const destSuggestion = page.locator(".awesomplete li").first();
-  if (await destSuggestion.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await destSuggestion.click();
-  }
-  await pause(page, 400);
+  await inqDest.click({ force: true });
+  await inqDest.fill("");
+  await inqDest.type("Bangkok", { delay: 50 });
+  await page.waitForTimeout(1000);
+  const dSugg = page.locator(".awesomplete li").first();
+  if (await dSugg.isVisible({ timeout: 3000 }).catch(() => false)) await dSugg.click();
+  await pause(page, 600);
+  // Dismiss any remaining awesomplete dropdown
+  await page.keyboard.press("Escape");
+  await pause(page, 300);
 
   // Travel type
-  const ttSelect = page.locator('[data-fieldname="travel_type"] .control-input select');
-  if (await ttSelect.isVisible({ timeout: 2000 }).catch(() => false)) {
-    const options = await ttSelect.locator("option").allTextContents();
-    if (options.length > 1) {
-      await ttSelect.selectOption({ index: 1 });
-    }
-  }
-  await pause(page, 400);
-
-  // Dates
-  const depField = page.locator('[data-fieldname="departure_date"] .control-input input');
-  if (await depField.isVisible({ timeout: 2000 }).catch(() => false)) {
-    const depDate = new Date();
-    depDate.setDate(depDate.getDate() + 45);
-    await depField.fill(depDate.toISOString().split("T")[0]);
-  }
+  const ttInput = page.locator('[data-fieldname="travel_type"] .control-input input');
+  await ttInput.scrollIntoViewIfNeeded();
   await pause(page, 300);
-
-  const retField = page.locator('[data-fieldname="return_date"] .control-input input');
-  if (await retField.isVisible({ timeout: 2000 }).catch(() => false)) {
-    const retDate = new Date();
-    retDate.setDate(retDate.getDate() + 52);
-    await retField.fill(retDate.toISOString().split("T")[0]);
+  if (await ttInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await ttInput.click({ force: true });
+    await ttInput.fill("");
+    await ttInput.type("Adventure", { delay: 50 });
+    await page.waitForTimeout(800);
+    const ttSugg = page.locator(".awesomplete li").first();
+    if (await ttSugg.isVisible({ timeout: 2000 }).catch(() => false)) await ttSugg.click();
+    await page.keyboard.press("Escape");
   }
+  await pause(page, 400);
+
+  // Dates & travelers — use force:true to avoid overlay issues
+  const depDate = page.locator('[data-fieldname="departure_date"] .control-input input');
+  await depDate.scrollIntoViewIfNeeded();
+  await depDate.fill(futureDate(25));
   await pause(page, 300);
-
-  await hideAnnotation(page);
-
-  // Save
-  await showAnnotation(page, "Saving inquiry…");
-  await page.keyboard.press("Control+s");
-  await page.waitForTimeout(2500);
-  await hideAnnotation(page);
-
-  // Show the pipeline bar
-  await showAnnotation(
-    page,
-    "Inquiry Pipeline Bar",
-    "Visual status indicator — drag through New → Contacted → Quoted → Won"
-  );
-  await pause(page, 4000);
-  await hideAnnotation(page);
-
-  // Show inquiry list
-  await page.goto("/app/travel-inquiry", { waitUntil: "domcontentloaded" });
-  await waitForPage(page, "list");
-  await pause(page, 1500);
-
-  await showAnnotation(page, "Inquiry List View", "Filter by status, assigned agent, destination, or date range");
-  await pause(page, 3500);
-  await hideAnnotation(page);
-
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 9: BOOKINGS & PAYMENTS                          ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  await annotate(
-    page,
-    "Chapter 9: Bookings & Payment Tracking",
-    "Convert won inquiries to bookings, track payments with visual progress bar"
-  );
-
-  await page.goto("/app/travel-booking/new", { waitUntil: "domcontentloaded" });
-  await waitForPage(page, "form");
-  await pause(page, 1000);
-
-  await showAnnotation(
-    page,
-    "Creating a Booking",
-    "Link customer, set travel details, total amount — then record payments"
-  );
-
-  // Fill booking customer
-  const bookCust = page.locator('[data-fieldname="customer"] .control-input input');
-  await bookCust.fill("");
-  await bookCust.fill(DEMO_CUSTOMER);
-  await page.waitForTimeout(800);
-  const bookSug = page.locator(".awesomplete li").first();
-  if (await bookSug.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await bookSug.click();
-  }
-  await pause(page, 500);
-
-  // Total amount
-  const amtField = page.locator('[data-fieldname="total_amount"] .control-input input');
-  if (await amtField.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await amtField.fill("150000");
-  }
+  const retDate = page.locator('[data-fieldname="return_date"] .control-input input');
+  await retDate.scrollIntoViewIfNeeded();
+  await retDate.fill(futureDate(32));
+  await pause(page, 300);
+  const numTrav = page.locator('[data-fieldname="num_travelers"] .control-input input');
+  await numTrav.scrollIntoViewIfNeeded();
+  await numTrav.fill("3");
   await pause(page, 400);
 
-  // Destination
-  const bookDest = page.locator('[data-fieldname="destination"] .control-input input');
-  if (await bookDest.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await bookDest.fill("Bali");
-    await page.waitForTimeout(600);
-    const dSug = page.locator(".awesomplete li").first();
-    if (await dSug.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await dSug.click();
-    }
+  // Source
+  const srcSelect = page.locator('[data-fieldname="source"] .control-input select');
+  if (await srcSelect.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await srcSelect.selectOption("Walk-in");
   }
   await pause(page, 400);
-
   await hideAnnotation(page);
 
-  // Save booking
-  await showAnnotation(page, "Saving booking…");
+  await showAnnotation(page, "Saving the Inquiry", "Ctrl+S — auto-generates inquiry number INQ-XXXXX");
   await page.keyboard.press("Control+s");
-  await page.waitForTimeout(2500);
+  await page.waitForTimeout(3000);
   await hideAnnotation(page);
 
-  await showAnnotation(
-    page,
-    "Booking Created!",
-    "Payment tracking starts — add payments in the child table to see the progress bar"
-  );
-  await slowScroll(page, 400, 1500);
-  await pause(page, 3500);
-  await hideAnnotation(page);
+  // Capture name for cleanup
+  const savedUrl = page.url();
+  const newInqMatch = savedUrl.match(/INQ-\d+/);
+  if (newInqMatch) created.inquiries.push(newInqMatch[0]);
 
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await page.waitForTimeout(800);
+  await annotate(page, "Inquiry Created!", "Status: New — ready for follow-up. Custom action buttons appear based on status.", 4000);
 
-  // Booking list
+  // ── CHAPTER 9: BOOKINGS & PAYMENTS ────────────────────────────────
+
+  await chapterTitle(page, 9, "Bookings & Payment Tracking", "Booking lifecycle with payment progress bar and financial summary");
+
   await page.goto("/app/travel-booking", { waitUntil: "domcontentloaded" });
   await waitForPage(page, "list");
-  await pause(page, 1500);
 
-  await showAnnotation(page, "Booking List", "Track all bookings — Confirmed, In Progress, Completed, Cancelled");
-  await pause(page, 3000);
+  await showAnnotation(page, "Booking List", "3 demo bookings: Confirmed, In Progress — customer, destination, amount, status");
+  await pause(page, 5000);
   await hideAnnotation(page);
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 10: DESTINATIONS & TRAVEL TYPES                 ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Booking Detail", "Customer, source inquiry, destination, itinerary link, dates, travelers, assigned agent");
+    await pause(page, 6000);
+    await hideAnnotation(page);
 
-  await annotate(
-    page,
-    "Chapter 10: Master Data — Destinations & Travel Types",
-    "Pre-configured lookup data used across the CRM"
-  );
+    await showAnnotation(page, "Financial Summary & Payment Progress", "Total amount, paid amount, balance — custom color-coded progress bar");
+    await slowScroll(page, 400, 2000);
+    await pause(page, 7000);
+    await hideAnnotation(page);
+
+    await showAnnotation(page, "Payment Records (Child Table)", "Each payment: date, amount, method (Bank/Card/Online), status (Pending/Received/Refunded), reference");
+    await slowScroll(page, 300, 1500);
+    await pause(page, 6000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 10: ITINERARY BUILDER ─────────────────────────────────
+
+  await chapterTitle(page, 10, "Itinerary Builder", "Day-by-day travel plans with activities, accommodation, transport, meals, and cost tracking");
+
+  await page.goto("/app/travel-itinerary", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+
+  await showAnnotation(page, "Travel Itineraries", "Linked to bookings — status: Draft, Shared, Approved, Archived. Auto-calculated total cost.");
+  await pause(page, 5000);
+  await hideAnnotation(page);
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "7-Day Maldives Itinerary", "Name, linked booking, start/end dates, auto-calculated days, total cost (sum of day items)");
+    await pause(page, 6000);
+    await hideAnnotation(page);
+
+    await showAnnotation(page, "Day-by-Day Plan (Child Table)", "Day number, title, description, accommodation, transport, meals included (None/Breakfast/Half/Full Board), cost");
+    await slowScroll(page, 600, 3000);
+    await pause(page, 7000);
+    await hideAnnotation(page);
+
+    await slowScroll(page, 400, 2000);
+    await pause(page, 3000);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 11: INVOICING ─────────────────────────────────────────
+
+  await chapterTitle(page, 11, "Invoicing & Billing", "Professional invoices with line items, tax, discounts, and payment tracking");
+
+  await page.goto("/app/travel-invoice", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+
+  await showAnnotation(page, "Travel Invoices", "Status: Draft, Sent, Paid, Partially Paid, Overdue, Cancelled");
+  await pause(page, 5000);
+  await hideAnnotation(page);
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Invoice Detail", "Customer (auto-fetches name), linked booking, invoice date, due date, status, payment method");
+    await pause(page, 6000);
+    await hideAnnotation(page);
+
+    await showAnnotation(page, "Line Items", "Description, quantity, rate — amount auto-calculated per row");
+    await slowScroll(page, 400, 2000);
+    await pause(page, 6000);
+    await hideAnnotation(page);
+
+    await showAnnotation(page, "Tax, Discount & Grand Total", "Subtotal auto-summed, tax % applied, discount deducted — grand total + outstanding amount calculated automatically");
+    await slowScroll(page, 400, 2000);
+    await pause(page, 7000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 12: FEEDBACK ──────────────────────────────────────────
+
+  await chapterTitle(page, 12, "Customer Feedback", "Post-trip star ratings, experience assessment, and comments");
+
+  await page.goto("/app/travel-feedback", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+
+  await showAnnotation(page, "Travel Feedback", "Linked to bookings & customers — rating, overall experience, would-recommend, comments");
+  await pause(page, 5000);
+  await hideAnnotation(page);
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Feedback Record", "Star rating (1-5), overall experience (Excellent/Good/Average/Poor/Terrible), Would Recommend, detailed comments");
+    await slowScroll(page, 300, 1500);
+    await pause(page, 6000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 13: DESTINATIONS & TRAVEL TYPES ───────────────────────
+
+  await chapterTitle(page, 13, "Destinations & Travel Types", "Master data powering dropdowns and filters across the CRM");
 
   await page.goto("/app/travel-destination", { waitUntil: "domcontentloaded" });
   await waitForPage(page, "list");
-  await pause(page, 1500);
 
-  await showAnnotation(
-    page,
-    "Travel Destinations",
-    "Bali, Paris, Dubai, Maldives… — mark popular ones for portal form dropdown"
-  );
-  await pause(page, 3500);
+  await showAnnotation(page, "Travel Destinations", "10 popular destinations: Paris, Bali, Maldives, New York, Tokyo, Dubai, London, Rome, Bangkok, Sydney");
+  await pause(page, 6000);
   await hideAnnotation(page);
 
-  // Open a destination
-  const firstDest = page.locator(".frappe-list .list-row .level-left a").first();
-  if (await firstDest.isVisible()) {
-    await firstDest.click();
-    await waitForPage(page, "form");
-    await pause(page, 1500);
-
-    await showAnnotation(page, "Destination Detail", "Name, country, region, image, and 'Is Popular' flag");
-    await pause(page, 3000);
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Destination Detail", "Name, country, region, description, image, 'Is Popular' flag (controls portal dropdown)");
+    await pause(page, 5000);
     await hideAnnotation(page);
   }
 
-  // Travel Types
   await page.goto("/app/travel-type", { waitUntil: "domcontentloaded" });
   await waitForPage(page, "list");
-  await pause(page, 1500);
+  await annotate(page, "Travel Types", "Adventure, Beach, Business, Cultural, Honeymoon, Family, Group, Solo, Cruise, Luxury", 5000);
 
-  await showAnnotation(page, "Travel Types", "Adventure, Beach, Business, Cultural, Honeymoon, Family, Group, Solo…");
+  await page.goto("/app/travel-lost-reason", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+  await annotate(page, "Lost Reasons", "Pre-configured: Competitor, Budget Too High, Bad Timing, No Response, and more", 4000);
+
+  // ── CHAPTER 14: AIRLINE SUPPLIERS ─────────────────────────────────
+
+  await chapterTitle(page, 14, "Supplier Management — Airlines", "Six category-specific supplier types. Starting with Airlines.");
+
+  await showcaseList(page, "airline-supplier", "Airline Suppliers", "IATA code, alliance (Star/Oneworld/SkyTeam), hub airports, domestic & international flags");
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Airline Detail", "Name, IATA code, contact info, hub airports, alliance, flight types, service catalog with pricing");
+    await slowScroll(page, 500, 2500);
+    await pause(page, 5000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 15: HOTEL SUPPLIERS ───────────────────────────────────
+
+  await chapterTitle(page, 15, "Hotels & Resorts", "Property details, amenity tracking, and room rate catalog");
+
+  await showcaseList(page, "hotel-supplier", "Hotel Suppliers", "Star rating, property type (Hotel/Resort/Villa/Boutique), rooms, amenity checkboxes, rates");
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Hotel Detail", "Star rating, property type, total rooms, check-in/out, amenities (pool, spa, gym, WiFi, parking, shuttle)");
+    await slowScroll(page, 500, 2500);
+    await pause(page, 5000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 16: TOUR OPERATORS ────────────────────────────────────
+
+  await chapterTitle(page, 16, "Tour Operators", "Specialization, destinations, group sizes, languages");
+
+  await showcaseList(page, "tour-operator", "Tour Operators", "Specialization (Adventure/Cultural/Wildlife/Cruise/Luxury), destinations, group size range, languages");
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Operator Detail", "Specialization, destination coverage, group capacity, supported languages, tour package pricing");
+    await slowScroll(page, 400, 2000);
+    await pause(page, 4000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 17: TRANSPORT SUPPLIERS ───────────────────────────────
+
+  await chapterTitle(page, 17, "Transport Suppliers", "Cars, buses, taxis, limousines, boats, private transfers");
+
+  await showcaseList(page, "transport-supplier", "Transport Suppliers", "Transport type, fleet size, vehicle types, max passengers, AC flag, service pricing");
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Transport Detail", "Company, type (Car/Bus/Taxi/Limo/Boat/Train), fleet size, vehicle types, capacity, transfers & rates");
+    await slowScroll(page, 300, 1500);
+    await pause(page, 4000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 18: VISA AGENTS ───────────────────────────────────────
+
+  await chapterTitle(page, 18, "Visa Agents", "Processing agents with success rates and turnaround times");
+
+  await showcaseList(page, "visa-agent", "Visa Agents", "Countries served, visa types, avg processing days, success rate %, express available");
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Visa Agent Detail", "Countries & visa types, processing time, 95% success rate, express availability, service catalog");
+    await slowScroll(page, 300, 1500);
+    await pause(page, 4000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 19: INSURANCE PROVIDERS ───────────────────────────────
+
+  await chapterTitle(page, 19, "Insurance Providers", "Travel insurance with coverage types, regions, and claim turnaround");
+
+  await showcaseList(page, "insurance-provider", "Insurance Providers", "Coverage types (Cancellation/Medical/Baggage/Delay), worldwide, max amount, claim days");
+
+  if (await openFirstListItem(page)) {
+    await showAnnotation(page, "Insurance Detail", "Insurance types, coverage regions, max coverage amount, claim turnaround days, plan catalog");
+    await slowScroll(page, 300, 1500);
+    await pause(page, 4000);
+    await hideAnnotation(page);
+    await scrollToTop(page);
+  }
+
+  // ── CHAPTER 20: KANBAN BOARDS ─────────────────────────────────────
+
+  await chapterTitle(page, 20, "Kanban Boards", "Visual drag-and-drop pipeline management — three pre-built boards");
+
+  await page.goto(`/app/travel-lead?view=Kanban&kanban_board=${encodeURIComponent("Lead Pipeline")}`, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(4000);
+  await showAnnotation(page, "Lead Pipeline Kanban", "Columns: New, Contacted, Interested, Qualified, Converted, Do Not Contact — drag cards to update status");
+  await pause(page, 7000);
+  await slowScroll(page, 200, 1000);
   await pause(page, 3000);
   await hideAnnotation(page);
+  await scrollToTop(page);
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 11: SUPPLIER MANAGEMENT                         ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  await annotate(
-    page,
-    "Chapter 11: Supplier Management",
-    "Six category-specific supplier DocTypes with domain-relevant fields"
-  );
-
-  // Airlines
-  await page.goto("/app/airline-supplier", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
-  await showAnnotation(page, "Airline Suppliers", "IATA code, alliance, hub airports, domestic/international flags");
-  await pause(page, 3000);
+  await page.goto(`/app/travel-inquiry?view=Kanban&kanban_board=${encodeURIComponent("Inquiry Pipeline")}`, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(4000);
+  await showAnnotation(page, "Inquiry Pipeline Kanban", "Columns: New, Contacted, Quoted, Won, Lost — visual sales pipeline");
+  await pause(page, 7000);
   await hideAnnotation(page);
 
-  // Hotels
-  await page.goto("/app/hotel-supplier", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
-  await showAnnotation(page, "Hotel Suppliers", "Star rating, property type, room count, amenities");
-  await pause(page, 3000);
+  await page.goto(`/app/travel-booking?view=Kanban&kanban_board=${encodeURIComponent("Booking Tracker")}`, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(4000);
+  await showAnnotation(page, "Booking Tracker Kanban", "Columns: Confirmed, In Progress, Completed, Cancelled — track booking lifecycle");
+  await pause(page, 7000);
   await hideAnnotation(page);
 
-  // Tour Operators
-  await page.goto("/app/tour-operator", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
-  await showAnnotation(page, "Tour Operators", "Specialization, destinations covered, group sizes, languages");
-  await pause(page, 3000);
-  await hideAnnotation(page);
+  // ── CHAPTER 21: ROLE-BASED ACCESS ─────────────────────────────────
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 12: ITINERARY PLANNING                          ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  await chapterTitle(page, 21, "Role-Based Access Control", "Three agency roles: Admin (full), Team Lead (team oversight), Staff (operational)");
 
-  await annotate(
-    page,
-    "Chapter 12: Itinerary Builder",
-    "Day-by-day travel plans attached to bookings"
-  );
-
-  await page.goto("/app/travel-itinerary", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
-
-  await showAnnotation(page, "Travel Itineraries", "Create detailed day-by-day plans with activities, accommodations, and costs");
-  await pause(page, 3500);
-  await hideAnnotation(page);
-
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 13: INVOICING                                   ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  await annotate(
-    page,
-    "Chapter 13: Invoicing & Billing",
-    "Create invoices with line items, track outstanding amounts"
-  );
-
-  await page.goto("/app/travel-invoice", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
-
-  await showAnnotation(page, "Travel Invoices", "Customer billing with grand total, due date, and outstanding amount tracking");
-  await pause(page, 3500);
-  await hideAnnotation(page);
-
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 14: FEEDBACK                                    ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  await annotate(
-    page,
-    "Chapter 14: Customer Feedback",
-    "Post-travel feedback with 1-5 star ratings"
-  );
-
-  await page.goto("/app/travel-feedback", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
-
-  await showAnnotation(page, "Travel Feedback", "Star rating, comments — linked to booking and customer for tracking");
-  await pause(page, 3000);
-  await hideAnnotation(page);
-
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 15: KANBAN BOARDS                               ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  await annotate(
-    page,
-    "Chapter 15: Kanban Boards",
-    "Visual drag-and-drop pipeline management"
-  );
-
-  // Try to show inquiry kanban
-  await page.goto("/app/travel-lead?view=Kanban&kanban_board=Lead Pipeline", {
-    waitUntil: "domcontentloaded",
-  });
-  await page.waitForTimeout(3000);
-
-  await showAnnotation(
-    page,
-    "Lead Pipeline Kanban",
-    "Drag cards between columns to update status — New, Contacted, Qualified, Converted"
-  );
-  await pause(page, 4000);
-  await hideAnnotation(page);
-
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 16: ROLE-BASED ACCESS                           ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  await annotate(
-    page,
-    "Chapter 16: Role-Based Access Control",
-    "Demonstrating different views for Staff vs Admin roles"
-  );
-
-  // Login as staff — use API login for reliability
+  // Switch to Staff
   await page.request.get("/api/method/logout");
-  await page.waitForTimeout(1000);
-
-  await showAnnotation(page, "Switching to Staff User", `${USERS.staff.email} — Limited operational access`);
-
-  await page.request.post("/api/method/login", {
-    form: { usr: USERS.staff.email, pwd: USERS.staff.password },
-  });
+  await page.waitForTimeout(800);
+  await showAnnotation(page, "Switching to Staff User", `${USERS.staff.email} — limited operational access`);
+  await page.request.post("/api/method/login", { form: { usr: USERS.staff.email, pwd: USERS.staff.password } });
   await page.goto("/app", { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(3000);
   await hideAnnotation(page);
 
-  await showAnnotation(
-    page,
-    "Staff View",
-    "Staff can see inquiries, bookings, customers — but cannot access agency settings or staff management"
-  );
-  await pause(page, 4000);
+  await showAnnotation(page, "Staff View", "Can view/manage inquiries, bookings, customers — CANNOT access Agency Settings or Staff Management");
+  await pause(page, 6000);
   await hideAnnotation(page);
 
-  // Show that staff can access inquiries
   await page.goto("/app/travel-inquiry", { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(2000);
+  await annotate(page, "Staff — Inquiry Access", "Can create and manage inquiries assigned to them", 4000);
 
-  await showAnnotation(page, "Staff — Inquiry Access", "Staff can create & manage inquiries assigned to them");
-  await pause(page, 3000);
-  await hideAnnotation(page);
-
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 17: DARK THEME                                  ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  // Switch back to admin for the finale
-  await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
-
-  await annotate(page, "Chapter 17: Dark Theme", "Built-in support for light and dark modes");
-
-  // Try to toggle dark theme via Frappe API
-  await page.evaluate(() => {
-    document.documentElement.setAttribute("data-theme", "dark");
-    document.body.classList.add("dark");
-  });
-  await page.waitForTimeout(1000);
-
-  await page.goto("/app/horizon-crm", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2500);
-
-  await showAnnotation(page, "Dark Mode Dashboard", "Full dark theme support across the entire CRM");
-  await pause(page, 4000);
-  await hideAnnotation(page);
-
-  // Switch back to light
-  await page.evaluate(() => {
-    document.documentElement.setAttribute("data-theme", "light");
-    document.body.classList.remove("dark");
-  });
-  await page.waitForTimeout(1000);
-
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CHAPTER 18: MULTI-TENANCY                               ║
-  // ╚═══════════════════════════════════════════════════════════╝
-
-  await annotate(
-    page,
-    "Chapter 18: Multi-Tenancy Architecture",
-    "Each agency runs on a separate Frappe site with its own database — complete data isolation"
-  );
-
-  await page.goto("/app/horizon-crm", { waitUntil: "domcontentloaded" });
+  await page.goto("/app/travel-booking", { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(2000);
+  await annotate(page, "Staff — Booking Access", "Can view and update booking details and payments", 4000);
 
-  await showAnnotation(
-    page,
-    "Site-Per-Tenant Model",
-    "agency1.example.com, agency2.example.com — separate databases, shared app code. Zero cross-tenant data leakage."
-  );
+  await page.goto("/app/travel-agency", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
+  await annotate(page, "Staff — Agency Settings Restricted", "System settings require System Manager role — permission denied for Staff", 4000);
+
+  // Switch to Team Lead
+  await page.request.get("/api/method/logout");
+  await page.waitForTimeout(500);
+  await showAnnotation(page, "Switching to Team Lead", `${USERS.teamLead.email} — expanded permissions`);
+  await page.request.post("/api/method/login", { form: { usr: USERS.teamLead.email, pwd: USERS.teamLead.password } });
+  await page.goto("/app", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
+  await hideAnnotation(page);
+
+  await showAnnotation(page, "Team Lead View", "Broader access: can manage team members, view all team inquiries, reassign work");
   await pause(page, 5000);
   await hideAnnotation(page);
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CLOSING                                                 ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  await page.goto("/app/travel-inquiry", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
+  await annotate(page, "Team Lead — Full Inquiry Access", "Can view all inquiries (not just assigned), reassign and update status", 4000);
+
+  // Switch back to Admin
+  await page.request.get("/api/method/logout");
+  await page.waitForTimeout(500);
+  await page.request.post("/api/method/login", { form: { usr: USERS.agencyAdmin.email, pwd: USERS.agencyAdmin.password } });
+  await page.goto("/app", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
+  csrf = await refreshCsrf(page);
+  await annotate(page, "Back to Agency Admin", "Full administrative access restored", 3000);
+
+  // ── CHAPTER 22: SEARCH & FILTERING ────────────────────────────────
+
+  await chapterTitle(page, 22, "Search & Filtering", "Find any record instantly with URL-based filters");
+
+  await page.goto("/app/travel-inquiry?status=Won", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+  await annotate(page, "Filter: Won Inquiries", "URL param ?status=Won — shows only converted inquiries", 4000);
+
+  await page.goto("/app/travel-inquiry?destination=Bali", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+  await annotate(page, "Filter: Bali Destination", "?destination=Bali — find all Bali inquiries instantly", 4000);
+
+  await page.goto("/app/travel-booking?status=Confirmed", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+  await annotate(page, "Filter: Confirmed Bookings", "Combine any field as URL params for filtered views", 4000);
+
+  await page.goto("/app/travel-customer?loyalty_tier=Gold", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+  await annotate(page, "Filter: Gold Loyalty Tier", "Filter customers by loyalty tier for targeted campaigns", 4000);
+
+  // ── CHAPTER 23: DARK THEME ────────────────────────────────────────
+
+  await chapterTitle(page, 23, "Dark Theme", "Full dark mode support across all UI elements");
+
+  await page.evaluate(async (email: string) => {
+    const f = (window as any).frappe;
+    if (f) {
+      await fetch(`/api/resource/User/${email}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-Frappe-CSRF-Token": f.csrf_token },
+        body: JSON.stringify({ desk_theme: "Dark" }),
+      });
+    }
+  }, USERS.agencyAdmin.email);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(3000);
+
+  await page.goto("/app/horizon-crm", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(3000);
+  await showAnnotation(page, "Dark Mode — Dashboard", "Complete dark theme: sidebar, number cards, charts, forms, lists");
+  await pause(page, 6000);
+  await slowScroll(page, 400, 2000);
+  await pause(page, 4000);
+  await hideAnnotation(page);
+  await scrollToTop(page);
+
+  await page.goto("/app/travel-inquiry", { waitUntil: "domcontentloaded" });
+  await waitForPage(page, "list");
+  await annotate(page, "Dark Mode — List View", "Clean contrast, readable text, styled status indicators", 4000);
+
+  if (await openFirstListItem(page)) {
+    await annotate(page, "Dark Mode — Form View", "Sections, fields, pipelines, and child tables all adapt to dark theme", 5000);
+  }
+
+  // Revert to light
+  await page.evaluate(async (email: string) => {
+    const f = (window as any).frappe;
+    if (f) {
+      await fetch(`/api/resource/User/${email}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-Frappe-CSRF-Token": f.csrf_token },
+        body: JSON.stringify({ desk_theme: "Light" }),
+      });
+    }
+  }, USERS.agencyAdmin.email);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
+
+  // ── CHAPTER 24: MULTI-TENANCY ─────────────────────────────────────
+
+  await chapterTitle(page, 24, "Multi-Tenant Architecture", "Each agency runs on a separate Frappe site — complete database isolation");
+
+  await page.goto("/app/horizon-crm", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
+
+  await showAnnotation(page, "Site-Per-Tenant Model", "agency1.example.com, agency2.example.com — separate MariaDB databases, shared app code, zero cross-tenant leakage");
+  await pause(page, 7000);
+  await hideAnnotation(page);
+
+  await showAnnotation(page, "Deployment Architecture", "bench new-site creates an isolated tenant. Each site has its own users, staff, customers, bookings, settings.");
+  await pause(page, 7000);
+  await hideAnnotation(page);
+
+  // ── CHAPTER 25: CLOSING ───────────────────────────────────────────
+
+  await page.goto("/app/horizon-crm", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
 
   await annotate(
     page,
-    "Thank You!",
-    "Horizon CRM — Multi-tenant Travel Agency CRM • Built on Frappe Framework",
-    6000
+    "Thank You for Watching!",
+    "Horizon CRM — 25 DocTypes | 6 Supplier Types | Kanban | Portal | RBAC | Dark Theme | Built on Frappe Framework",
+    8000,
   );
+  await pause(page, 3000);
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  CLEANUP — remove demo records                           ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // ╔═══════════════════════════════════════════════════════════════╗
+  // ║  PHASE 3 — CLEANUP                                          ║
+  // ╚═══════════════════════════════════════════════════════════════╝
 
   await hideAnnotation(page);
+  await login(page, USERS.admin.email, USERS.admin.password);
 
-  // Cleanup demo data via API
-  const csrf = getCsrfToken();
-
-  // Delete demo customer bookings/inquiries first
-  const inquiriesResp = await page.request.get(
-    `/api/resource/Travel Inquiry?filters=${JSON.stringify({ customer_name: DEMO_CUSTOMER })}&limit_page_length=100`
-  );
-  if (inquiriesResp.ok()) {
-    const inquiries = (await inquiriesResp.json()).data || [];
-    for (const inq of inquiries) {
-      await page.request.delete(`/api/resource/Travel Inquiry/${inq.name}`, {
-        headers: { "X-Frappe-CSRF-Token": csrf },
-      });
-    }
+  // Delete in reverse dependency order
+  for (const n of created.feedbacks) await deleteDoc(page, "Travel Feedback", n).catch(() => {});
+  for (const n of created.invoices) await deleteDoc(page, "Travel Invoice", n).catch(() => {});
+  for (const n of created.itineraries) await deleteDoc(page, "Travel Itinerary", n).catch(() => {});
+  for (const n of created.bookings) await deleteDoc(page, "Travel Booking", n).catch(() => {});
+  for (const n of created.inquiries) await deleteDoc(page, "Travel Inquiry", n).catch(() => {});
+  for (const n of created.leads) await deleteDoc(page, "Travel Lead", n).catch(() => {});
+  for (const n of created.customers) await deleteDoc(page, "Travel Customer", n).catch(() => {});
+  for (const n of created.teams) await deleteDoc(page, "Travel Team", n).catch(() => {});
+  for (const entry of created.suppliers) {
+    const [dt, name] = entry.split(":::");
+    await deleteDoc(page, dt, name).catch(() => {});
   }
 
-  const bookingsResp = await page.request.get(
-    `/api/resource/Travel Booking?filters=${JSON.stringify({ customer: DEMO_CUSTOMER })}&limit_page_length=100`
+  // Clean up portal-submitted lead
+  const portalResp = await page.request.get(
+    `/api/resource/Travel Lead?filters=${JSON.stringify({ lead_name: ["like", `%${TS}%`] })}&limit_page_length=100`,
   );
-  if (bookingsResp.ok()) {
-    const bookings = (await bookingsResp.json()).data || [];
-    for (const b of bookings) {
-      await page.request.delete(`/api/resource/Travel Booking/${b.name}`, {
-        headers: { "X-Frappe-CSRF-Token": csrf },
-      });
-    }
-  }
-
-  // Delete demo customer
-  await page.request.delete(
-    `/api/resource/Travel Customer/${encodeURIComponent(DEMO_CUSTOMER)}`,
-    { headers: { "X-Frappe-CSRF-Token": csrf } }
-  );
-
-  // Delete demo lead(s)
-  const leadsResp = await page.request.get(
-    `/api/resource/Travel Lead?filters=${JSON.stringify({ lead_name: ["like", `%${TS}%`] })}&limit_page_length=100`
-  );
-  if (leadsResp.ok()) {
-    const leads = (await leadsResp.json()).data || [];
-    for (const l of leads) {
-      await page.request.delete(`/api/resource/Travel Lead/${l.name}`, {
-        headers: { "X-Frappe-CSRF-Token": csrf },
-      });
-    }
+  if (portalResp.ok()) {
+    const pLeads = (await portalResp.json()).data || [];
+    for (const l of pLeads) await deleteDoc(page, "Travel Lead", l.name).catch(() => {});
   }
 });

@@ -29,7 +29,39 @@ Horizon CRM is a purpose-built CRM for travel agencies, running on the Frappe Fr
 
 ## Getting Started (Production)
 
-### Self Hosting
+### Docker Compose (Recommended)
+
+The `deploy/` directory contains a production-grade Docker stack with Nginx, Gunicorn, background workers, and scheduler.
+
+```bash
+git clone <repo-url> horizon_crm
+cd horizon_crm
+
+# 1. Configure environment
+cp deploy/.env.template deploy/.env
+# Edit deploy/.env — set DB_HOST, DB_ROOT_PASSWORD, ADMIN_PASSWORD, FRAPPE_SITE_NAME
+
+# 2. Build the production image
+docker compose -f deploy/docker-compose.prod.yml build
+
+# 3. Start with local database (testing / demos)
+docker compose -f deploy/docker-compose.prod.yml --profile with-db up -d
+
+# 4. Access: http://localhost — Login: Administrator / <your ADMIN_PASSWORD>
+```
+
+For external database (Oracle MySQL HeatWave, managed MariaDB, etc.):
+
+```bash
+# Set DB_HOST=<your-db-host> in deploy/.env, then:
+docker compose -f deploy/docker-compose.prod.yml up -d
+```
+
+**Production services:** Nginx (port 80), Gunicorn, Socketio, Worker, Scheduler, Redis Cache, Redis Queue.
+
+See [Docker Setup Guide](docs/how-to/DOCKER_SETUP.md) for deployment to Oracle Cloud, GitHub Codespaces, and full configuration reference.
+
+### Self Hosting (Frappe Easy Install)
 
 Follow these steps to set up Horizon CRM in production:
 

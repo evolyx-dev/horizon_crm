@@ -338,6 +338,57 @@ services:
 The `.devcontainer/` folder provides a one-click VS Code Dev Container experience:
 
 - **docker-compose.extend.yml**: Extends the root `docker-compose.yml`, mounts the workspace, and sets `FRAPPE_DEVELOPER_MODE=1`
+
+## 7. Production Docker Stack
+
+The `deploy/` directory contains a production-grade deployment with separate service containers:
+
+```
+deploy/
+├── Dockerfile              # Multi-stage: bench init → app install → lean runtime
+├── docker-compose.prod.yml # 7 services + optional MariaDB
+├── entrypoint.sh           # Universal entrypoint (web/socketio/worker/scheduler)
+├── nginx.conf              # Reverse proxy with rate limiting & security headers
+├── .env.template           # Environment variable template
+└── .env                    # Local config (gitignored)
+```
+
+### Production Architecture
+
+```
+                    ┌─────────────────────────────┐
+                    │      Nginx (:80)             │
+                    │  Static assets, rate limits  │
+                    └──────┬──────────────┬────────┘
+                           │              │
+              HTTP         │              │  WebSocket
+                           │              │
+               ┌───────────▼──┐    ┌──────▼──────────┐
+               │ frappe-web   │    │ frappe-socketio  │
+               │ Gunicorn     │    │ Node.js          │
+               │ (:8000)      │    │ (:9000)          │
+               └──────────────┘    └─────────────────┘
+                     │
+        ┌────────────┼────────────┐
+        │            │            │
+  ┌─────▼─────┐ ┌───▼──────┐ ┌──▼──────────┐
+  │  Worker   │ │ Scheduler│ │ External DB  │
+  │ (bg jobs) │ │ (cron)   │ │ (MySQL/      │
+  └───────────┘ └──────────┘ │  MariaDB)    │
+                              └──────────────┘
+  ┌──────────────┐  ┌──────────────┐
+  │ Redis Cache  │  │ Redis Queue  │
+  │ (LRU 128MB)  │  │ (AOF persist)│
+  └──────────────┘  └──────────────┘
+```
+
+### Key Design Decisions
+
+- **External DB by default** — `DB_HOST` env var points to managed MySQL (e.g. Oracle MySQL HeatWave) or a separate MariaDB server. Use `--profile with-db` for a containerized MariaDB during testing.
+- **Gunicorn with gthread** — Production-grade WSGI server with thread-based workers, capped at 4 for small instances.
+- **Single Docker image** — All Frappe services (web, socketio, worker, scheduler) share one image; the `entrypoint.sh` selects the role via CMD argument.
+- **Multi-stage build** — Builder stage compiles the app; production stage is lean (~1.5GB vs ~3GB).
+- **ARM64 + AMD64** — Supports both architectures (Oracle A1.Flex ARM, Apple Silicon, standard x86).
 - **devcontainer.json**: Configures Python interpreter path, recommended extensions (Ruff, Pylance, Playwright, Prettier), and a `postCreateCommand` to install bench and setup the environment
 - **`.vscode/tasks.json`**: Predefined tasks for `bench start`, `bench build`, `bench migrate`, and running E2E tests
 

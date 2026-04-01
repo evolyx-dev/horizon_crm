@@ -109,30 +109,53 @@ frappe-bench/                     # Inside Docker: /workspace/frappe-bench
 | Redis | 7+ | Cache and queue |
 | Docker | 24+ | Container deployment (recommended) |
 
-### Docker Setup (Recommended)
+### Development Setup (Docker)
 
 ```bash
-# 1. Clone the repository
+git clone <repo-url> horizon_crm
+cd horizon_crm
+docker compose up
+# First run bootstraps automatically. Access http://localhost:8000
+```
+
+### Production Deployment (Docker)
+
+The `deploy/` directory contains a production-grade Docker Compose stack with Nginx, Gunicorn, background workers, and scheduler.
+
+```bash
 git clone <repo-url> horizon_crm
 cd horizon_crm
 
-# 2. Start all services (MariaDB + Redis + Frappe bench)
-docker compose up
+# 1. Configure environment
+cp deploy/.env.template deploy/.env
+# Edit deploy/.env — set DB_HOST, DB_ROOT_PASSWORD, ADMIN_PASSWORD, FRAPPE_SITE_NAME
 
-# First run bootstraps automatically: creates bench, installs app, creates site.
-# Watch the logs for "bench start" — then access http://localhost:8000
+# 2. Build the production image
+docker compose -f deploy/docker-compose.prod.yml build
+
+# 3a. Start with local database (testing / demos)
+docker compose -f deploy/docker-compose.prod.yml --profile with-db up -d
+
+# 3b. Start with external database (production — e.g. Oracle MySQL HeatWave)
+docker compose -f deploy/docker-compose.prod.yml up -d
+
+# Access: http://localhost (port 80 via nginx)
 ```
+
+**Production services:** Nginx (reverse proxy), Gunicorn web server, Node.js socketio, background worker, scheduler, Redis cache, Redis queue. Database is external by default (set `DB_HOST` in `.env`), or use `--profile with-db` for a containerized MariaDB.
+
+See [Docker Setup Guide](DOCKER_SETUP.md) for full production deployment details including Oracle Cloud and Codespaces instructions.
 
 ### Verify Installation
 
 ```bash
-# Enter the container
+# Development
 docker compose exec frappe bash
-cd /workspace/frappe-bench
+cd /workspace/frappe-bench && bench version
 
-# Check installed apps
-bench version
-# Output: frappe x.y.z, horizon_crm x.y.z
+# Production
+docker compose -f deploy/docker-compose.prod.yml exec frappe-web bash
+cd /home/frappe/frappe-bench && bench version
 ```
 
 ---

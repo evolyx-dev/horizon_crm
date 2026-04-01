@@ -8,12 +8,19 @@ The repository root **is** the Frappe app (same pattern as [frappe/crm](https://
 horizon_crm/                     # ← Repo root = Frappe app
 ├── pyproject.toml               # Python package metadata
 ├── docker-compose.yml           # Docker-first dev stack (MariaDB, Redis, Bench)
+├── deploy/                      # Production Docker deployment
+│   ├── Dockerfile               # Multi-stage build (bench init → app install → runtime)
+│   ├── docker-compose.prod.yml  # 7 services: nginx, web, socketio, worker, scheduler, redis×2
+│   ├── entrypoint.sh            # Universal entrypoint (web/socketio/worker/scheduler)
+│   ├── nginx.conf               # Reverse proxy with rate limiting & security headers
+│   └── .env.template            # Environment variable template
 ├── docker/
 │   ├── init.sh                  # First-run bootstrap inside the container
 │   └── docker-compose.yml       # Lightweight self-hosting compose
 ├── scripts/
 │   └── init.sh                  # GitHub Codespaces / Dev Container init
 ├── .devcontainer/               # VS Code Dev Container support
+├── .dockerignore                # Build context exclusions for production image
 │
 ├── horizon_crm/                 # Python module
 │   ├── hooks.py                 # App hooks & configuration
