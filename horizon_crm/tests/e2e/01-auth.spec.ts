@@ -38,12 +38,19 @@ test.describe("Authentication", () => {
     await expect(page).toHaveURL(/\/(app|desk)/);
   });
 
-  test("Customer is redirected to portal", async ({ page }) => {
-    // Arrange — no special setup needed
-
+  test("Customer sees restricted desk with no admin access", async ({ page }) => {
     // Act — login as customer and navigate to desk
-    await login(page, USERS.customer.email, USERS.customer.password);
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await page.fill("#login_email", USERS.customer.email);
+    await page.fill("#login_password", USERS.customer.password);
+    await page.locator(".btn-login").click();
+    await page.waitForURL((url) => url.pathname !== "/login", {
+      timeout: 15_000,
+    });
+
+    // Navigate to desk to show the restricted view in the video
     await page.goto("/app", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(2000);
 
     // Assert — customer should not see admin sidebar items
     const sidebar = page.locator(".desk-sidebar");
@@ -52,6 +59,10 @@ test.describe("Authentication", () => {
         sidebar.locator('a[href*="travel-agency"]')
       ).not.toBeVisible();
     }
+
+    // Assert — customer cannot access admin resources
+    const resp = await page.request.get("/api/resource/Travel Agency");
+    expect([403, 404]).toContain(resp.status());
   });
 
   test("Invalid credentials show error", async ({ page }) => {
