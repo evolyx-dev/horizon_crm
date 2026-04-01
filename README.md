@@ -4,6 +4,8 @@ Multi-tenant Travel Agency CRM built on the Frappe Framework.
 
 ![Horizon CRM Dashboard](.github/screenshots/01_dashboard.png)
 
+> **Demo Video:** [Watch the full feature walkthrough](https://github.com/evolyx-dev/horizon_crm/releases/download/v1.0.1/horizon-crm-demo.webm) (~20 min, all features covered)
+
 ## Horizon CRM
 
 Horizon CRM is a purpose-built CRM for travel agencies, running on the Frappe Framework. It supports multi-tenant operation (site-per-tenant), a complete sales pipeline from Lead → Inquiry → Booking, six specialized supplier categories, and a customer portal for self-service booking management.
