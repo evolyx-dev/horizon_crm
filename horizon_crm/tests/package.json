@@ -18,6 +18,8 @@
     "test:doctypes": "npx playwright test e2e/09-other-doctypes.spec.ts",
     "test:multi-tenant": "npx playwright test e2e/10-multi-tenant.spec.ts",
     "test:lead-branding": "npx playwright test e2e/11-lead-and-branding.spec.ts",
+    "test:invoice-master": "npx playwright test e2e/12-invoice-customer-masterdata.spec.ts",
+    "test:validation": "npx playwright test e2e/13-validation-negative.spec.ts",
     "clean": "rm -rf allure-results test-results ../reports/html ../reports/allure-report",
     "report:html": "npx playwright show-report ../reports/html",
     "report:allure:generate": "npx allure generate allure-results -o ../reports/allure-report --clean",

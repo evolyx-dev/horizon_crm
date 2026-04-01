@@ -97,6 +97,13 @@ teardown("cleanup test data", async ({ page }) => {
   // Clean up test itineraries
   await cleanupByPattern(page, "Travel Itinerary", "itinerary_name", "E2E Itinerary");
 
+  // Clean up validation test bookings & data
+  await cleanupByPattern(page, "Travel Feedback", "comments", "First feedback");
+  await cleanupByPattern(page, "Travel Feedback", "comments", "Should not work");
+  await cleanupByPattern(page, "Travel Booking", "customer_name", "Other Customer");
+  await cleanupByPattern(page, "Travel Booking", "notes", "PermTest");
+  await cleanupByPattern(page, "Travel Lead", "last_name", "Lead-");
+
   // Clean up test customers (except the portal customer used by fixtures)
   await cleanupDocs(page, "Travel Customer", "email", [
     "inquiry-test@test.example",
@@ -104,4 +111,5 @@ teardown("cleanup test data", async ({ page }) => {
     "invoice-test@test.example",
   ]);
   await cleanupByPattern(page, "Travel Customer", "customer_name", "E2E Full Customer");
+  await cleanupByPattern(page, "Travel Customer", "customer_name", "Other Customer");
 });

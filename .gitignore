@@ -29,6 +29,7 @@ horizon_crm/tests/node_modules/
 
 # Test reports (regenerated on each run)
 reports/
+horizon_crm/reports/
 
 # OS
 .DS_Store
