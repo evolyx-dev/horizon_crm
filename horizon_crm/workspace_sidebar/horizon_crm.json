@@ -1,6 +1,6 @@
 {
  "app": "horizon_crm",
- "creation": "2026-03-31 16:11:53.516074",
+ "creation": "2026-04-01 08:04:25.794526",
  "docstatus": 0,
  "doctype": "Workspace Sidebar",
  "header_icon": "globe",
@@ -344,7 +344,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-03-31 18:00:00.000000",
+ "modified": "2026-04-01 08:04:25.794526",
  "modified_by": "Administrator",
  "module": "Horizon CRM",
  "name": "Horizon CRM",

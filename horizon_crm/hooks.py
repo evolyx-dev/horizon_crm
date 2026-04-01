@@ -87,6 +87,10 @@ fixtures = [
 		"filters": [["module", "=", "Horizon CRM"]],
 	},
 	{
+		"dt": "Workspace Sidebar",
+		"filters": [["module", "=", "Horizon CRM"]],
+	},
+	{
 		"dt": "Number Card",
 		"filters": [["module", "=", "Horizon CRM"]],
 	},

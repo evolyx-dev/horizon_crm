@@ -12,13 +12,13 @@ import frappe
 
 
 def execute():
-    # Delete any remaining Travel Supplier records first
-    if frappe.db.table_exists("tabTravel Supplier"):
-        frappe.db.sql("DELETE FROM `tabSupplier Service` WHERE parenttype = 'Travel Supplier'")
-        frappe.db.sql("DELETE FROM `tabTravel Supplier`")
-        frappe.db.commit()
+	# Delete any remaining Travel Supplier records first
+	if frappe.db.table_exists("tabTravel Supplier"):
+		frappe.db.sql("DELETE FROM `tabSupplier Service` WHERE parenttype = 'Travel Supplier'")
+		frappe.db.sql("DELETE FROM `tabTravel Supplier`")
+		frappe.db.commit()
 
-    # Remove the DocType itself
-    if frappe.db.exists("DocType", "Travel Supplier"):
-        frappe.delete_doc("DocType", "Travel Supplier", force=True, ignore_permissions=True)
-        frappe.db.commit()
+	# Remove the DocType itself
+	if frappe.db.exists("DocType", "Travel Supplier"):
+		frappe.delete_doc("DocType", "Travel Supplier", force=True, ignore_permissions=True)
+		frappe.db.commit()
