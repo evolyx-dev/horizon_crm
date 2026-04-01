@@ -26,9 +26,6 @@ app_include_js = "/assets/horizon_crm/js/horizon.js"
 
 web_include_css = "/assets/horizon_crm/css/horizon_portal.css"
 
-# Override default favicon
-override_whitelisted_methods = {}
-
 website_context = {
 	"favicon": "/assets/horizon_crm/images/favicon.svg",
 }
@@ -37,16 +34,10 @@ website_context = {
 # ----------
 
 role_home_page = {
-	"Agency Customer": "portal",
 	"Agency Staff": "travel-inquiry",
 	"Agency Team Lead": "travel-inquiry",
 	"Agency Admin": "travel-inquiry",
 }
-
-portal_menu_items = [
-	{"title": "My Bookings", "route": "/portal/bookings", "role": "Agency Customer"},
-	{"title": "New Inquiry", "route": "/portal/inquiry", "role": "Agency Customer"},
-]
 
 # Installation
 # ------------
@@ -65,11 +56,17 @@ commands = "horizon_crm.commands.commands"
 # so no custom permission_query_conditions are needed.
 
 # Block specific pages for non-admin roles
-# Agency Staff and Team Leads should not access Setup or Module Setup pages
+# Only Horizon CRM and Desk modules are allowed for agency roles.
+# All system/framework modules are blocked.
+_system_modules = [
+	"Setup", "Core", "Custom", "Automation", "Workflow",
+	"Email", "Contacts", "Geo", "Integrations", "Printing", "Website",
+]
+
 block_modules = {
-	"Agency Staff": ["Setup", "Core", "Email", "Integrations", "Printing", "Website"],
-	"Agency Team Lead": ["Setup", "Core", "Email", "Integrations", "Printing"],
-	"Agency Customer": ["Setup", "Core", "Email", "Integrations", "Printing", "Website", "Horizon CRM"],
+	"Agency Staff": _system_modules,
+	"Agency Team Lead": _system_modules,
+	"Agency Admin": _system_modules,
 }
 
 # Automatically update python controller files with type annotations for this app.

@@ -131,16 +131,12 @@ horizon_crm/                        # ← Repo root IS the Frappe app
 │   │       ├── 01-auth.spec.ts … 12-invoice-customer-masterdata.spec.ts
 │   │       └── global-teardown.ts
 │   │
-│   └── www/                        # Portal pages
+│   └── www/                        # Portal pages (guest-accessible)
 │       └── portal/
-│           ├── index.html
-│           ├── index.py
-│           ├── dashboard.html
-│           ├── dashboard.py
-│           ├── bookings.html
-│           ├── bookings.py
-│           ├── inquiry.html
-│           └── inquiry.py
+│           ├── inquiry.html          # Public lead-capture form
+│           ├── inquiry.py            # Context: destinations, travel types
+│           ├── thank-you.html        # Post-submission confirmation
+│           └── thank-you.py
 │
 ├── .devcontainer/                  # VS Code Dev Container support
 │   ├── devcontainer.json
@@ -213,7 +209,7 @@ Layer 3: Role-Based Permissions (App-Level)
 ├── Within each site, roles control access to features
 ├── Agency Admin → full agency management
 ├── Team Lead / Staff → scoped operational access
-└── Customer → portal-only access to own bookings
+└── Portal → guest-accessible lead form (no login role needed)
 ```
 
 ### 3.3 Tenant Provisioning
@@ -237,7 +233,7 @@ bench --site agency1.localhost horizon-crm create-tenant \
 ```
 
 The `install.py` hook automatically:
-1. Creates custom roles (Agency Admin, Team Lead, Staff, Customer)
+1. Creates custom roles (Agency Admin, Team Lead, Staff)
 2. Seeds default Travel Types and Destinations
 3. Initializes the Travel Agency singleton using the site domain name
 
@@ -254,27 +250,29 @@ Since each tenant is its own site, there is no need for an `agency` Link field o
 
 ## 4. Permission Matrix
 
-| DocType | System Manager | Agency Admin | Team Lead | Staff | Customer |
-|---------|---------------|-------------|-----------|-------|----------|
-| Travel Agency | RWCDE | R | - | - | - |
-| Travel Agency Staff | RWCDE | RWC | R | R(self) | - |
-| Travel Team | RWCDE | RWCD | R | R | - |
-| Travel Lead | RWCDE | RWCD | RWCD | RWC | - |
-| Travel Inquiry | RWCDE | RWCD | RWCD | RWC | R(own) |
-| Travel Itinerary | RWCDE | RWCD | RWCD | RWC | R(own) |
-| Travel Booking | RWCDE | RWCD | RWCD | RWC | R(own) |
-| Travel Customer | RWCDE | RWCD | RWC | RWC | R(own) |
-| Airline Supplier | RWCDE | RWCDE | RWCD | RWCD | - |
-| Hotel Supplier | RWCDE | RWCDE | RWCD | RWCD | - |
-| Visa Agent | RWCDE | RWCDE | RWCD | RWCD | - |
-| Transport Supplier | RWCDE | RWCDE | RWCD | RWCD | - |
-| Tour Operator | RWCDE | RWCDE | RWCD | RWCD | - |
-| Insurance Provider | RWCDE | RWCDE | RWCD | RWCD | - |
-| Travel Destination | RWCDE | R | R | R | R |
-| Travel Type | RWCDE | R | R | R | R |
-| Travel Feedback | RWCDE | R | R | R | RWC(own) |
+| DocType | System Manager | Agency Admin | Team Lead | Staff |
+|---------|---------------|-------------|-----------|-------|
+| Travel Agency | RWCDE | R | - | - |
+| Travel Agency Staff | RWCDE | RWC | R | R(self) |
+| Travel Team | RWCDE | RWCD | R | R |
+| Travel Lead | RWCDE | RWCD | RWCD | RWC |
+| Travel Inquiry | RWCDE | RWCD | RWCD | RWC |
+| Travel Itinerary | RWCDE | RWCD | RWCD | RWC |
+| Travel Booking | RWCDE | RWCD | RWCD | RWC |
+| Travel Customer | RWCDE | RWCD | RWC | RWC |
+| Airline Supplier | RWCDE | RWCDE | RWCD | RWCD |
+| Hotel Supplier | RWCDE | RWCDE | RWCD | RWCD |
+| Visa Agent | RWCDE | RWCDE | RWCD | RWCD |
+| Transport Supplier | RWCDE | RWCDE | RWCD | RWCD |
+| Tour Operator | RWCDE | RWCDE | RWCD | RWCD |
+| Insurance Provider | RWCDE | RWCDE | RWCD | RWCD |
+| Travel Destination | RWCDE | R | R | R |
+| Travel Type | RWCDE | R | R | R |
+| Travel Feedback | RWCDE | R | R | R |
 
 R=Read, W=Write, C=Create, D=Delete, E=Export
+
+> **Note**: The `Agency Customer` role is no longer used for portal access. The portal is now guest-accessible.
 
 ---
 
@@ -282,21 +280,35 @@ R=Read, W=Write, C=Create, D=Delete, E=Export
 
 ### Request Flow
 ```
-Customer Browser → Frappe Web Server
+Website Visitor → Frappe Web Server
                   → Host header → site resolution (tenant isolation)
-                  → www/ route matching
-                  → get_context() loads data
-                  → Permission check (user + customer link)
+                  → www/ route matching (/portal/inquiry)
+                  → get_context() loads destinations & travel types
                   → Jinja template rendering
-                  → HTML response
+                  → HTML response (public, no auth required)
+
+Form Submission → POST /api/method/horizon_crm.api.portal.submit_lead
+                  → allow_guest=True (no auth check)
+                  → @rate_limit (10/hour/IP)
+                  → Input validation + HTML escaping
+                  → Creates Travel Lead (source="Website")
+                  → JSON response
 ```
 
+### Portal Pages
+| URL | Purpose | Auth Required |
+|-----|---------|---------------|
+| `/portal/inquiry` | Lead-capture form | No |
+| `/portal/thank-you` | Post-submission confirmation | No |
+
 ### Portal Security
-- All portal pages check `frappe.session.user`
-- Customer data filtered by customer record linked to portal user
+- Guest-accessible (no login required)
 - CSRF protection via Frappe's built-in token system
-- Rate limiting on inquiry submission
-- Site-per-tenant ensures customers only see their own agency's data
+- Rate limiting: 10 submissions per IP per hour
+- All inputs HTML-escaped via `frappe.utils.escape_html()`
+- Email validated server-side via `validate_email_address()`
+- Site-per-tenant ensures leads go to the correct agency's database
+- No access to any other data or desk APIs
 
 ---
 

@@ -8,7 +8,6 @@
  *      which creates a Travel Agency Staff record → after_insert hook assigns "Agency Admin" role.
  *   3. Staff records are created for team lead and staff → after_insert hooks assign
  *      "Agency Team Lead" and "Agency Staff" Frappe roles respectively.
- *   4. Customer user gets "Agency Customer" role for portal access.
  */
 import { test as setup, expect } from "@playwright/test";
 import { USERS, login, createUser, createDoc, getCsrfToken } from "./fixtures";
@@ -25,7 +24,6 @@ setup("bootstrap test data", async ({ page }) => {
     { email: USERS.agencyAdmin.email, name: "Agency Admin", roles: [] as string[] },
     { email: USERS.teamLead.email, name: "Team Lead", roles: [] as string[] },
     { email: USERS.staff.email, name: "Staff User", roles: [] as string[] },
-    { email: USERS.customer.email, name: "Portal Customer", roles: ["Agency Customer"] },
   ];
 
   for (const u of usersToCreate) {
@@ -39,7 +37,6 @@ setup("bootstrap test data", async ({ page }) => {
       expect([200, 409]).toContain(resp.status());
     } else {
       // Ensure existing user has the correct roles and does NOT have System Manager
-      // (clean up from previous test runs that assigned System Manager)
       const userData = await check.json();
       const existingRoles: string[] = (userData.data.roles || []).map(
         (r: { role: string }) => r.role
@@ -131,20 +128,5 @@ setup("bootstrap test data", async ({ page }) => {
         });
       }
     }
-  }
-
-  // Act — create a customer record for portal tests
-  const custFilters = JSON.stringify({ email: USERS.customer.email });
-  const custCheck = await page.request.get(
-    `/api/resource/Travel Customer?filters=${custFilters}`
-  );
-  const custBody = await custCheck.json();
-  if (custBody.data.length === 0) {
-    await createDoc(page, "Travel Customer", {
-      customer_name: "Test Customer One",
-      email: USERS.customer.email,
-      phone: "+1234567890",
-      portal_user: USERS.customer.email,
-    });
   }
 });

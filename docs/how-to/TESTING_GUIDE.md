@@ -144,14 +144,14 @@ horizon_crm/tests/
 | Staff | `03-staff` | Staff CRUD, role assignment, max limit |
 | Inquiry | `04-inquiry` | Status workflow, inquiry → booking conversion |
 | Booking | `05-booking` | Lifecycle, payment tracking, balance calc, summary API |
-| Security | `06-security` | Cross-role access, SQL injection, XSS, CSRF |
-| Portal | `07-portal` | Dashboard, bookings, inquiry submission, feedback |
+| Security | `06-security` | Cross-role access, SQL injection, XSS, CSRF, guest restrictions |
+| Portal | `07-portal` | Public lead-capture form, guest API submission, field rendering, thank-you page |
 | UI/UX | `08-ui-ux` | Desktop/mobile layout, CSS/JS loading, responsive |
 | Others | `09-other-doctypes` | Itinerary, suppliers (6 types), feedback, teams |
 | Multi-Tenant | `10-multi-tenant` | Site isolation, tenant data boundary |
 | Leads & Branding | `11-lead-and-branding` | Lead pipeline, favicon, logo, CSS/JS assets |
 | Invoice, Customer & Master Data | `12-invoice-customer-masterdata` | Invoice lifecycle & calculations, customer CRUD, destinations, travel types, lost reasons |
-| Validation & Negative Cases | `13-validation-negative` | Controller validation, calculation edge cases, RBAC denials, portal errors, auth failures |
+| Validation & Negative Cases | `13-validation-negative` | Controller validation, calculation edge cases, RBAC denials, lead API errors, auth failures |
 
 **Playwright projects:** Tests run across `chromium` (desktop), `mobile` (iPhone 13), and `multi-tenant` (API-only with two sites).
 

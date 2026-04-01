@@ -10,147 +10,175 @@
     </div>
 
     <div class="portal-form">
-        <div id="inquiry-form">
+        <form id="lead-form" novalidate>
             <div class="row">
-                <div class="col-md-6">
-                    <div id="field-destination"></div>
+                <div class="col-md-6 mb-3">
+                    <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="full_name" name="full_name"
+                           placeholder="Your full name" required>
+                    <div class="invalid-feedback">Please enter your name.</div>
                 </div>
-                <div class="col-md-6">
-                    <div id="field-travel_type"></div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" id="email" name="email"
+                           placeholder="you@example.com" required>
+                    <div class="invalid-feedback">Please enter a valid email.</div>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-md-4">
-                    <div id="field-departure_date"></div>
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="tel" class="form-control" id="phone" name="phone"
+                           placeholder="+91 98765 43210">
                 </div>
-                <div class="col-md-4">
-                    <div id="field-return_date"></div>
-                </div>
-                <div class="col-md-4">
-                    <div id="field-num_travelers"></div>
+                <div class="col-md-6 mb-3">
+                    <label for="destination" class="form-label">Where do you want to go? <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="destination" name="destination"
+                           list="destination-list" placeholder="e.g., Bali, Paris, Maldives..." required>
+                    <datalist id="destination-list">
+                        {% for d in destinations %}
+                        <option value="{{ d.destination_name }}">
+                        {% endfor %}
+                    </datalist>
+                    <div class="invalid-feedback">Please enter a destination.</div>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-md-6">
-                    <div id="field-budget_min"></div>
+                <div class="col-md-6 mb-3">
+                    <label for="travel_type" class="form-label">Type of Travel</label>
+                    <select class="form-control" id="travel_type" name="travel_type">
+                        <option value="">-- Select --</option>
+                        {% for tt in travel_types %}
+                        <option value="{{ tt.type_name }}">{{ tt.type_name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <div class="col-md-6">
-                    <div id="field-budget_max"></div>
+                <div class="col-md-6 mb-3">
+                    <label for="num_travelers" class="form-label">Number of Travelers</label>
+                    <input type="number" class="form-control" id="num_travelers" name="num_travelers"
+                           value="1" min="1" max="100">
                 </div>
             </div>
 
-            <div id="field-notes"></div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="departure_date" class="form-label">Departure Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="departure_date" name="departure_date" required>
+                    <div class="invalid-feedback">Please select a departure date.</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="return_date" class="form-label">Return Date</label>
+                    <input type="date" class="form-control" id="return_date" name="return_date">
+                </div>
+            </div>
 
-            <button id="btn-submit" class="btn btn-primary btn-md mt-3">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="budget_min" class="form-label">Minimum Budget</label>
+                    <input type="number" class="form-control" id="budget_min" name="budget_min"
+                           placeholder="0" min="0" step="100">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="budget_max" class="form-label">Maximum Budget</label>
+                    <input type="number" class="form-control" id="budget_max" name="budget_max"
+                           placeholder="0" min="0" step="100">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="notes" class="form-label">Additional Details</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3"
+                          placeholder="Tell us about any special requirements, preferences, or activities you'd like..."></textarea>
+            </div>
+
+            <div id="form-message" class="alert d-none mb-3" role="alert"></div>
+
+            <button type="submit" id="btn-submit" class="btn btn-primary btn-md">
                 Submit Inquiry
             </button>
-        </div>
+        </form>
     </div>
 </div>
 
 <script>
-frappe.ready(function() {
-    // Build travel type options from Jinja context
-    var type_options = "\n{% for tt in travel_types %}{{ tt.type_name }}\n{% endfor %}";
+(function() {
+    var form = document.getElementById('lead-form');
+    var btn = document.getElementById('btn-submit');
+    var msg = document.getElementById('form-message');
 
-    var fields = {};
+    function showMessage(text, type) {
+        msg.className = 'alert alert-' + type + ' mb-3';
+        msg.textContent = text;
+        msg.classList.remove('d-none');
+    }
 
-    var field_defs = [
-        { parent: '#field-destination', df: {
-            fieldtype: 'Data', fieldname: 'destination', label: 'Where do you want to go?',
-            reqd: 1, placeholder: 'e.g., Bali, Paris, Maldives...'
-        }},
-        { parent: '#field-travel_type', df: {
-            fieldtype: 'Select', fieldname: 'travel_type', label: 'Type of Travel',
-            options: type_options
-        }},
-        { parent: '#field-departure_date', df: {
-            fieldtype: 'Date', fieldname: 'departure_date', label: 'Departure Date', reqd: 1
-        }},
-        { parent: '#field-return_date', df: {
-            fieldtype: 'Date', fieldname: 'return_date', label: 'Return Date', reqd: 1
-        }},
-        { parent: '#field-num_travelers', df: {
-            fieldtype: 'Int', fieldname: 'num_travelers', label: 'Number of Travelers', default: 1
-        }},
-        { parent: '#field-budget_min', df: {
-            fieldtype: 'Currency', fieldname: 'budget_min', label: 'Minimum Budget'
-        }},
-        { parent: '#field-budget_max', df: {
-            fieldtype: 'Currency', fieldname: 'budget_max', label: 'Maximum Budget'
-        }},
-        { parent: '#field-notes', df: {
-            fieldtype: 'Small Text', fieldname: 'notes', label: 'Additional Details',
-            placeholder: 'Tell us about any special requirements, preferences, or activities you\'d like...'
-        }}
-    ];
+    function hideMessage() {
+        msg.classList.add('d-none');
+    }
 
-    field_defs.forEach(function(def) {
-        var ctrl = frappe.ui.form.make_control({
-            df: def.df,
-            parent: $(def.parent),
-            render_input: true
-        });
-        ctrl.refresh();
-        if (def.df.default) {
-            ctrl.set_value(def.df.default);
-        }
-        fields[def.df.fieldname] = ctrl;
-    });
+    // Get CSRF token from cookie
+    function getCsrfToken() {
+        var match = document.cookie.match(/csrf_token=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
 
-    // Submit handler
-    $('#btn-submit').on('click', function() {
-        var btn = $(this);
-        var dest = fields.destination.get_value();
-        var dep = fields.departure_date.get_value();
-        var ret = fields.return_date.get_value();
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        hideMessage();
 
-        if (!dest) {
-            frappe.msgprint({ title: 'Missing Field', message: 'Please enter a destination.', indicator: 'orange' });
-            return;
-        }
-        if (!dep) {
-            frappe.msgprint({ title: 'Missing Field', message: 'Please select a departure date.', indicator: 'orange' });
-            return;
-        }
-        if (!ret) {
-            frappe.msgprint({ title: 'Missing Field', message: 'Please select a return date.', indicator: 'orange' });
+        // HTML5 validation
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
             return;
         }
 
-        btn.prop('disabled', true).text('Submitting...');
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
 
-        frappe.call({
-            method: 'horizon_crm.api.portal.submit_inquiry',
-            args: {
-                destination: dest,
-                departure_date: dep,
-                return_date: ret,
-                num_travelers: parseInt(fields.num_travelers.get_value()) || 1,
-                travel_type: fields.travel_type.get_value() || null,
-                budget_min: parseFloat(fields.budget_min.get_value()) || 0,
-                budget_max: parseFloat(fields.budget_max.get_value()) || 0,
-                notes: fields.notes.get_value() || ''
+        var data = {
+            full_name: document.getElementById('full_name').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            destination: document.getElementById('destination').value.trim(),
+            travel_type: document.getElementById('travel_type').value,
+            departure_date: document.getElementById('departure_date').value,
+            return_date: document.getElementById('return_date').value,
+            num_travelers: parseInt(document.getElementById('num_travelers').value) || 1,
+            budget_min: parseFloat(document.getElementById('budget_min').value) || 0,
+            budget_max: parseFloat(document.getElementById('budget_max').value) || 0,
+            notes: document.getElementById('notes').value.trim()
+        };
+
+        fetch('/api/method/horizon_crm.api.portal.submit_lead', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Frappe-CSRF-Token': getCsrfToken()
             },
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint({
-                        title: 'Inquiry Submitted!',
-                        message: 'Your travel inquiry has been submitted successfully. Our team will contact you soon.',
-                        indicator: 'green'
-                    });
-                    setTimeout(function() {
-                        window.location.href = '/portal';
-                    }, 2000);
-                }
-            },
-            error: function() {
-                btn.prop('disabled', false).text('Submit Inquiry');
+            body: JSON.stringify(data)
+        })
+        .then(function(resp) {
+            if (!resp.ok) {
+                return resp.json().then(function(err) {
+                    throw new Error(err._server_messages
+                        ? JSON.parse(JSON.parse(err._server_messages)[0]).message
+                        : 'Submission failed. Please try again.');
+                });
             }
+            return resp.json();
+        })
+        .then(function(result) {
+            window.location.href = '/portal/thank-you';
+        })
+        .catch(function(err) {
+            showMessage(err.message || 'Something went wrong. Please try again.', 'danger');
+            btn.disabled = false;
+            btn.textContent = 'Submit Inquiry';
         });
     });
-});
+})();
 </script>
 {% endblock %}

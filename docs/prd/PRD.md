@@ -57,10 +57,10 @@
 - Manages bookings, communicates with customers
 - Updates booking status and follow-ups
 
-### 3.5 Customer (Portal User)
-- Submits travel inquiries via portal
-- Views booking status and itinerary details
-- Provides feedback after travel
+### 3.5 Website Visitor
+- Submits travel inquiries via public portal form (no login required)
+- Becomes a Travel Lead with source "Website"
+- No desk access — purely a passive data contributor
 
 ---
 
@@ -110,12 +110,12 @@
 - **FR-061**: Supplier contact details and services
 - **FR-062**: Supplier service catalog
 
-### 4.8 Customer Portal
-- **FR-070**: Customer login and dashboard
-- **FR-071**: View active bookings and itineraries
-- **FR-072**: Submit new travel inquiry
-- **FR-073**: View booking payment status
-- **FR-074**: Provide post-travel feedback
+### 4.8 Public Lead-Capture Portal
+- **FR-070**: Public form at `/portal/inquiry` — no authentication required
+- **FR-071**: Form creates a Travel Lead with `source = "Website"`
+- **FR-072**: Rate-limited to 10 submissions per IP per hour
+- **FR-073**: Embeddable via iframe in agency websites
+- **FR-074**: Thank-you confirmation page after submission
 
 ### 4.9 Agency Dashboard
 - **FR-080**: Agency-wide booking overview
@@ -220,7 +220,7 @@ Travel Feedback
 | Agency Admin | Site | Manages agency settings, staff, all data |
 | Agency Team Lead | Site | Manages team, views team data |
 | Agency Staff | Site | Handles inquiries, bookings |
-| Agency Customer | Site | Portal user, view own bookings |
+| Agency Customer | Site | Portal user, view own bookings (deprecated — no active login) |
 
 ### 6.3 Data Isolation Strategy
 - **Database-level isolation**: Each site has its own database — no `agency` field needed
@@ -245,16 +245,18 @@ Travel Feedback:      Agency Admin (R), Customer (RWC, if_owner)
 
 ## 7. Portal Design
 
-### 7.1 Customer Portal Pages
-- `/portal/dashboard` — Booking overview
-- `/portal/bookings` — List of bookings
-- `/portal/bookings/<name>` — Booking detail with itinerary
-- `/portal/inquiries/new` — Submit new inquiry
-- `/portal/feedback/<booking>` — Submit feedback
+### 7.1 Public Lead-Capture Form
+- `/portal/inquiry` — Guest-accessible HTML form
+- `/portal/thank-you` — Post-submission confirmation
+- No authentication required
+- Form fields: name, email, phone, destination, travel type, dates, budget, notes
+- Submissions create a `Travel Lead` with `source = "Website"`
 
-### 7.2 Portal Authentication
-- Customers are created as Website Users with limited role
-- Portal access tied to their agency
+### 7.2 Portal Security
+- CSRF token required (from cookie)
+- Rate-limited: 10 submissions per IP per hour
+- All inputs HTML-escaped and validated server-side
+- No access to any other data or API endpoints
 
 ---
 

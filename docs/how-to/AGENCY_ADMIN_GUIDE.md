@@ -455,6 +455,15 @@ Navigate to **Customers → Feedback** to review post-travel feedback.
 | **Team Lead** | Access to team data, can assign inquiries |
 | **Staff** | Access to own assigned records |
 
+> **Note**: There is no customer login role. Website visitors submit leads via the public portal form (see Section 16).
+
+### Module Lockdown
+
+All agency roles (Admin, Team Lead, Staff) are blocked from system modules:
+Setup, Core, Custom, Automation, Workflow, Email, Contacts, Geo, Integrations, Printing, Website.
+
+Only the `Horizon CRM` module is accessible.
+
 ### Creating User Accounts
 
 1. Navigate to **User** (use Ctrl+K search bar, type "User")
@@ -496,7 +505,40 @@ The sidebar sections and links are pre-configured for the optimal workflow. If y
 
 ---
 
-## 15. Best Practices
+## 15. Managing Website Leads & Embedding the Portal
+
+### Website Leads
+
+Leads submitted through the public portal form (`/portal/inquiry`) appear automatically in **Pipeline → Leads** with `source = "Website"`.
+
+**Recommended workflow:**
+1. Monitor new leads daily — filter by `Source = Website`
+2. Assign website leads to staff within 24 hours
+3. Move through the pipeline: New → Contacted → Qualified → Converted
+4. Convert qualified leads into formal Travel Inquiries
+
+### Embedding the Lead Form
+
+Embed your agency's lead-capture form in your own website:
+
+```html
+<iframe
+  src="https://your-crm-site.example.com/portal/inquiry"
+  width="100%" height="700" frameborder="0"
+  style="border:none; border-radius:12px;"
+  title="Travel Inquiry Form">
+</iframe>
+```
+
+Replace `your-crm-site.example.com` with your Horizon CRM site URL. Each tenant site has its own portal endpoint, so leads are captured in the correct agency database.
+
+### Rate Limiting
+
+The portal API is rate-limited to **10 submissions per IP per hour** to prevent spam.
+
+---
+
+## 16. Best Practices
 
 ### For New Agencies
 

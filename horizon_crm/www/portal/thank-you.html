@@ -1,0 +1,24 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Thank You{% endblock %}
+
+{% block page_content %}
+<div class="portal-container" style="text-align: center; padding: 60px 16px;">
+    <div class="portal-header">
+        <h2>Thank You!</h2>
+        <p>Your travel inquiry has been submitted successfully</p>
+    </div>
+
+    <div style="max-width: 600px; margin: 0 auto; padding: 32px 24px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">✈️</div>
+        <h3 style="margin-bottom: 12px;">We've received your request</h3>
+        <p style="color: #636E72; font-size: 15px; line-height: 1.6;">
+            Our travel team will review your inquiry and get back to you shortly.
+            Please check your email for a confirmation.
+        </p>
+        <a href="/portal/inquiry" class="btn btn-primary btn-md" style="margin-top: 20px;">
+            Submit Another Inquiry
+        </a>
+    </div>
+</div>
+{% endblock %}

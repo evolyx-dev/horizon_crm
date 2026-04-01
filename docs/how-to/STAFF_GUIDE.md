@@ -86,7 +86,16 @@ The left sidebar is your main navigation tool. Here's what each section contains
 
 Leads are potential customers who haven't made a formal inquiry yet.
 
-### Creating a Lead
+### Website Leads (from Portal)
+
+Website visitors can submit travel inquiries through the public portal form at `/portal/inquiry` — no login required. These leads arrive in the system with:
+- **Source**: "Website"
+- **Status**: "New"
+- **Fields filled**: name, email, phone, destination, travel type, dates, budget, notes
+
+Check for new website leads daily by filtering: **Source = Website**.
+
+### Creating a Lead Manually
 
 1. Navigate to **Pipeline → Leads** in the sidebar
 2. Click **+ Add Travel Lead**

@@ -97,14 +97,19 @@ teardown("cleanup test data", async ({ page }) => {
   // Clean up test itineraries
   await cleanupByPattern(page, "Travel Itinerary", "itinerary_name", "E2E Itinerary");
 
+  // Clean up portal lead form test leads
+  await cleanupByPattern(page, "Travel Lead", "email", "portal-e2e-");
+  await cleanupByPattern(page, "Travel Lead", "email", "verify-lead-");
+  await cleanupByPattern(page, "Travel Lead", "lead_name", "E2E Portal Lead");
+  await cleanupByPattern(page, "Travel Lead", "lead_name", "Verify Lead");
+
   // Clean up validation test bookings & data
   await cleanupByPattern(page, "Travel Feedback", "comments", "First feedback");
-  await cleanupByPattern(page, "Travel Feedback", "comments", "Should not work");
   await cleanupByPattern(page, "Travel Booking", "customer_name", "Other Customer");
   await cleanupByPattern(page, "Travel Booking", "notes", "PermTest");
-  await cleanupByPattern(page, "Travel Lead", "last_name", "Lead-");
+  await cleanupByPattern(page, "Travel Lead", "lead_name", "Lead-");
 
-  // Clean up test customers (except the portal customer used by fixtures)
+  // Clean up test customers
   await cleanupDocs(page, "Travel Customer", "email", [
     "inquiry-test@test.example",
     "booking-test@test.example",

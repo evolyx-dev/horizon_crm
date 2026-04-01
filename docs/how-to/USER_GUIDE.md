@@ -332,9 +332,6 @@ On the customer form, a sidebar panel shows activity stats:
 - **Bookings** — Number of bookings
 - **Revenue** — Total revenue from this customer
 
-### Link Customer to Portal
-A Travel Customer can be linked to a portal user (Agency Customer role) for self-service access. See [Customer Portal](#12-customer-portal).
-
 ![Travel Customer List](../../images/06_customer_list.png)
 
 ![Travel Customer Form](../../images/10_customer_form.png)
@@ -418,28 +415,40 @@ Agency Staff are managed via the **Travel Agency Staff** DocType:
 
 ---
 
-## 12. Customer Portal
+## 12. Public Lead-Capture Portal
 
-Customers with the **Agency Customer** role can access a self-service portal.
+The portal is a **public, guest-accessible** lead-capture form. No customer login is required.
 
-### Portal Features
-- **Dashboard** (`/portal`): Overview of their bookings and inquiries
-- **My Bookings** (`/portal/bookings`): List of all their travel bookings
-- **New Inquiry** (`/portal/inquiry`): Submit a new travel inquiry
+### How It Works
+1. A visitor navigates to `/portal/inquiry` on any agency tenant site
+2. Fills in their name, email, and travel preferences
+3. Clicks **Submit Inquiry**
+4. A `Travel Lead` is created (source = "Website", status = "New")
+5. Staff see the lead in the desk immediately and can follow up
 
-### Portal Access Setup
-1. Create a **Travel Customer** record
-2. The customer must have a Frappe **User** account with the `Agency Customer` role
-3. The customer logs in at `http://site-url:8000/login`
-4. After login, they are redirected to the portal homepage
+### Portal Pages
 
-### Portal API Endpoints
-For integration or mobile app development:
+| URL | Purpose | Auth Required |
+|-----|---------|---------------|
+| `/portal/inquiry` | Lead-capture form | No |
+| `/portal/thank-you` | Post-submission confirmation | No |
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/method/horizon_crm.www.portal.bookings.get_bookings` | GET | Fetch customer bookings |
-| `/api/method/horizon_crm.www.portal.inquiry.submit_inquiry` | POST | Submit a new inquiry |
+### Embedding in an External Website
+
+The form can be embedded in any website using an iframe:
+
+```html
+<iframe src="https://your-site.example.com/portal/inquiry"
+  width="100%" height="700" frameborder="0"
+  style="border:none; border-radius:12px;"
+  title="Travel Inquiry Form"></iframe>
+```
+
+### Portal API Endpoint
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/method/horizon_crm.api.portal.submit_lead` | POST | Guest | Submit a new travel lead (rate-limited: 10/hour/IP) |
 
 ---
 
@@ -452,16 +461,17 @@ For integration or mobile app development:
 | **Agency Admin** | ✅ | Full access to all CRM features, settings, staff management |
 | **Agency Team Lead** | ✅ | Manage inquiries, bookings, customers; view team reports |
 | **Agency Staff** | ✅ | Create/edit inquiries and bookings assigned to them |
-| **Agency Customer** | ❌ | Portal-only access to their own bookings and inquiries |
+
+> **Note**: There is no customer login. The public portal form creates leads without authentication.
 
 ### Module Access Control
 
-| Module | Admin | Team Lead | Staff | Customer |
-|--------|-------|-----------|-------|----------|
-| Horizon CRM | ✅ | ✅ | ✅ | ❌ |
-| Setup | ✅ | ❌ | ❌ | ❌ |
-| Website | ✅ | ✅ | ❌ | ❌ |
-| Core | ✅ | ❌ | ❌ | ❌ |
+Agency roles are blocked from system modules (Setup, Core, Automation, Workflow, Email, Contacts, Geo, Integrations, Printing, Website, Custom).
+
+| Module | Admin | Team Lead | Staff |
+|--------|-------|-----------|-------|
+| Horizon CRM | ✅ | ✅ | ✅ |
+| All system modules | ❌ | ❌ | ❌ |
 
 ### Permission Model
 - **Site-per-tenant**: Each tenant has a separate database — no cross-tenant data leakage
@@ -635,7 +645,7 @@ bench --site <site> console
 | Email Integration | ✅ Email | ✅ Frappe Email | Via Frappe built-in |
 | Dashboard | ✅ Vue Dashboard | ✅ Workspace | Number cards + charts |
 | Sidebar | ✅ Custom Vue | ✅ Workspace Sidebar | Organized sections: CRM Pipeline, Customers, Billing, Trip Planning, Team, Settings |
-| Customer Portal | ❌ | ✅ | Self-service booking portal |
+| Public Lead Form | ❌ | ✅ | Guest-accessible lead-capture (no login) |
 | Multi-tenancy | ❌ | ✅ | Site-per-tenant isolation |
 | Itinerary Planning | ❌ | ✅ | Day-by-day travel plans |
 | Supplier Management | ❌ | ✅ | Travel vendor tracking |

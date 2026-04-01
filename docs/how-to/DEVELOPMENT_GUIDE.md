@@ -27,7 +27,7 @@ horizon_crm/                     # ← Repo root = Frappe app
 │   ├── horizon_crm/
 │   │   └── doctype/             # 26 DocTypes
 │   ├── public/                  # Static assets (CSS, JS, images)
-│   ├── www/portal/              # Customer portal pages
+│   ├── www/portal/              # Public lead-capture form (guest-accessible)
 │   ├── patches/                 # Data migration patches
 │   └── tests/                   # ALL tests (unit + E2E)
 │       ├── test_doctypes.py     # Server-side unit/integration tests
@@ -257,7 +257,7 @@ Call via: `POST /api/method/horizon_crm.api.module.my_api_method`
 - [ ] `has_permission` registered in hooks
 - [ ] Controller `validate()` calls `validate_agency_access()`
 - [ ] API methods use `frappe.only_for()` for role checks
-- [ ] Portal API methods verify customer ownership
+- [ ] Portal API methods use `allow_guest=True` + rate limiting for public endpoints
 
 ### Testing
 - Unit tests: `bench --site horizon.localhost run-tests --app horizon_crm`

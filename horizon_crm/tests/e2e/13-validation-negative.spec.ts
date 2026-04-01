@@ -458,8 +458,10 @@ test.describe("Permission — RBAC negative cases", () => {
     expect([400, 403, 404, 409]).toContain(delResp.status());
   });
 
-  test("Customer portal user cannot create booking via API", async ({ page }) => {
-    await login(page, USERS.customer.email, USERS.customer.password);
+  test("Guest cannot create booking via API", async ({ page }) => {
+    // Navigate as guest (no login)
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+
     const resp = await page.request.post("/api/resource/Travel Booking", {
       data: {
         customer: "Hacker",
@@ -470,12 +472,11 @@ test.describe("Permission — RBAC negative cases", () => {
         total_amount: 0,
         status: "Confirmed",
       },
-      headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
     });
     expect([400, 401, 403]).toContain(resp.status());
   });
 
-  test("Customer cannot write to inquiry", async ({ page }) => {
+  test("Guest cannot write to inquiry", async ({ page }) => {
     await login(page, USERS.admin.email, USERS.admin.password);
     const custResp = await page.request.get(
       `/api/resource/Travel Customer?limit_page_length=1`
@@ -495,7 +496,10 @@ test.describe("Permission — RBAC negative cases", () => {
       source: "Website",
     });
 
-    await login(page, USERS.customer.email, USERS.customer.password);
+    // Clear session to become guest
+    await page.context().clearCookies();
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+
     const resp = await page.request.put(
       `/api/resource/Travel Inquiry/${inq.data.name}`,
       {
@@ -507,80 +511,58 @@ test.describe("Permission — RBAC negative cases", () => {
   });
 });
 
-// ─── Portal API — negative cases ─────────────────────────────────
+// ─── Lead API — negative cases ───────────────────────────────────
 
-test.describe("Portal API — negative cases", () => {
-  test("Unauthenticated access to portal API is denied", async ({ page }) => {
-    await page.context().clearCookies();
-    const resp = await page.request.get(
-      "/api/method/horizon_crm.api.portal.get_my_bookings"
-    );
-    expect(resp.ok()).toBeFalsy();
-    expect([403, 401]).toContain(resp.status());
-  });
-
-  test("get_booking_detail for another customer is denied", async ({ page }) => {
-    await login(page, USERS.admin.email, USERS.admin.password);
-
-    const cust = await createDoc(page, "Travel Customer", {
-      customer_name: `Other Customer ${ts}`,
-      email: `other-${ts}@test.example`,
-      phone: "+3333333333",
-    });
-    const booking = await createDoc(page, "Travel Booking", {
-      customer: cust.data.name,
-      departure_date: "2025-12-01",
-      return_date: "2025-12-10",
-      num_travelers: 1,
-      booking_date: "2025-11-15",
-      total_amount: 2000,
-      status: "Confirmed",
-    });
-
-    await login(page, USERS.customer.email, USERS.customer.password);
+test.describe("Lead API — negative cases", () => {
+  test("Submit lead without name is rejected", async ({ page }) => {
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
     const resp = await page.request.post(
-      "/api/method/horizon_crm.api.portal.get_booking_detail",
-      {
-        data: { booking_name: booking.data.name },
-        headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
-      }
-    );
-    expect(resp.ok()).toBeFalsy();
-  });
-
-  test("submit_feedback for non-completed booking is rejected", async ({ page }) => {
-    await login(page, USERS.admin.email, USERS.admin.password);
-
-    const custResp = await page.request.get(
-      `/api/resource/Travel Customer?filters=${JSON.stringify({ portal_user: USERS.customer.email })}`
-    );
-    const custBody = await custResp.json();
-    test.skip(custBody.data.length === 0, "No portal customer found");
-
-    const customerName = custBody.data[0].name;
-    const booking = await createDoc(page, "Travel Booking", {
-      customer: customerName,
-      departure_date: "2025-12-15",
-      return_date: "2025-12-25",
-      num_travelers: 1,
-      booking_date: "2025-12-01",
-      total_amount: 3000,
-      status: "Confirmed",
-    });
-
-    await login(page, USERS.customer.email, USERS.customer.password);
-    const resp = await page.request.post(
-      "/api/method/horizon_crm.api.portal.submit_feedback",
+      "/api/method/horizon_crm.api.portal.submit_lead",
       {
         data: {
-          booking: booking.data.name,
-          rating: 5,
-          comments: "Should not work",
+          full_name: "",
+          email: "noname@test.example",
+          destination: "Tokyo",
         },
-        headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
       }
     );
     expect(resp.ok()).toBeFalsy();
+    const body = await resp.text();
+    expect(body.toLowerCase()).toContain("name");
+  });
+
+  test("Submit lead without email is rejected", async ({ page }) => {
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+    const resp = await page.request.post(
+      "/api/method/horizon_crm.api.portal.submit_lead",
+      {
+        data: {
+          full_name: "No Email Person",
+          email: "",
+          destination: "Dubai",
+        },
+      }
+    );
+    expect(resp.ok()).toBeFalsy();
+    const body = await resp.text();
+    expect(body.toLowerCase()).toContain("email");
+  });
+
+  test("Submit lead with invalid email is rejected", async ({ page }) => {
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+    const resp = await page.request.post(
+      "/api/method/horizon_crm.api.portal.submit_lead",
+      {
+        data: {
+          full_name: "Bad Email Person",
+          email: "not-valid-email",
+          destination: "Rome",
+        },
+      }
+    );
+    expect(resp.ok()).toBeFalsy();
+    const body = await resp.text();
+    expect(body.toLowerCase()).toContain("email");
   });
 });
 

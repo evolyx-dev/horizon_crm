@@ -23,10 +23,6 @@ export const USERS = {
     email: "staff@agency1.test",
     password: "Test@1234",
   },
-  customer: {
-    email: "customer@agency1.test",
-    password: "Test@1234",
-  },
 };
 
 /** Log in to Frappe desk via API */

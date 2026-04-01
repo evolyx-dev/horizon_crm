@@ -78,10 +78,6 @@
   {
    "role": "Agency Staff",
    "read": 1
-  },
-  {
-   "role": "Agency Customer",
-   "read": 1
   }
  ],
  "sort_field": "modified",

@@ -137,15 +137,12 @@ test.describe("UI/UX — Mobile", () => {
   });
 
   test("Portal renders correctly on mobile", async ({ page }) => {
-    // Arrange
-    await login(page, USERS.customer.email, USERS.customer.password);
-
-    // Act
-    await page.goto("/portal", { waitUntil: "domcontentloaded" });
+    // Act — portal inquiry form is now public, no login needed
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
 
-    // Assert
+    // Assert — no horizontal overflow
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 5);
   });
 });

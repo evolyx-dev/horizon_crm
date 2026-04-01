@@ -1,151 +1,231 @@
 /**
- * Customer Portal E2E Tests
- * Covers: portal dashboard, booking list, inquiry submission, feedback
+ * Public Portal & Lead Form E2E Tests
+ * Covers: guest-accessible inquiry form, lead creation API, form validation, thank-you page
  */
 import { test, expect } from "@playwright/test";
-import { USERS, login, createDoc, getCsrfToken } from "./fixtures";
+import { USERS, login, getCsrfToken } from "./fixtures";
 
-test.describe("Customer Portal", () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, USERS.customer.email, USERS.customer.password);
+test.describe("Public Lead-Capture Portal", () => {
+  test("Portal inquiry form loads without authentication", async ({ page }) => {
+    // Act — navigate to portal as guest (no login)
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+
+    // Assert — form should be visible with key fields
+    await expect(page.locator("#lead-form")).toBeVisible();
+    await expect(page.locator("#full_name")).toBeVisible();
+    await expect(page.locator("#email")).toBeVisible();
+    await expect(page.locator("#destination")).toBeVisible();
+    await expect(page.locator("#departure_date")).toBeVisible();
+    await expect(page.locator("#btn-submit")).toBeVisible();
   });
 
-  test("Portal dashboard loads", async ({ page }) => {
-    // Arrange — already logged in via beforeEach
-
-    // Act — navigate to portal
-    await page.goto("/portal", { waitUntil: "domcontentloaded" });
-
-    // Assert — page should render
-    await expect(page.locator("body")).toBeVisible();
-    const content = await page.textContent("body");
-    expect(content).toBeDefined();
-  });
-
-  test("Portal bookings page loads", async ({ page }) => {
-    // Act
-    await page.goto("/portal/bookings", { waitUntil: "domcontentloaded" });
-
-    // Assert
-    await expect(page.locator("body")).toBeVisible();
-  });
-
-  test("Portal inquiry page loads", async ({ page }) => {
+  test("Form renders all expected fields", async ({ page }) => {
     // Act
     await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
 
-    // Assert
-    await expect(page.locator("body")).toBeVisible();
+    // Assert — all form fields present
+    const expectedFields = [
+      "full_name", "email", "phone", "destination",
+      "travel_type", "num_travelers", "departure_date",
+      "return_date", "budget_min", "budget_max", "notes",
+    ];
+    for (const field of expectedFields) {
+      await expect(page.locator(`#${field}`)).toBeVisible();
+    }
   });
 
-  test("Portal API: get_my_bookings returns data", async ({ page }) => {
-    // Navigate to portal bookings page to show in video
-    await page.goto("/portal/bookings", { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(1500);
+  test("Travel type select has options from database", async ({ page }) => {
+    // Act
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
 
-    // Act — call portal API
-    const resp = await page.request.get(
-      "/api/method/horizon_crm.api.portal.get_my_bookings"
+    // Assert — select should have travel type options
+    const options = page.locator("#travel_type option");
+    const count = await options.count();
+    expect(count).toBeGreaterThan(1); // At least "-- Select --" + one type
+  });
+
+  test("Guest can submit lead via API", async ({ page }) => {
+    // Arrange — get CSRF token from portal page (cookie-based)
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1000);
+
+    // Act — submit lead via API
+    const resp = await page.request.post(
+      "/api/method/horizon_crm.api.portal.submit_lead",
+      {
+        data: {
+          full_name: "E2E Portal Lead",
+          email: `portal-e2e-${Date.now()}@test.example`,
+          phone: "+9876543210",
+          destination: "Bali",
+          travel_type: "Honeymoon",
+          departure_date: "2026-09-01",
+          return_date: "2026-09-10",
+          num_travelers: 2,
+          budget_min: 5000,
+          budget_max: 8000,
+          notes: "E2E test lead submission",
+        },
+      }
     );
 
     // Assert
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
-    expect(body.message).toBeDefined();
+    expect(body.message.name).toMatch(/^LEAD-/);
+    expect(body.message.message).toContain("submitted");
   });
 
-  test("Portal API: submit_inquiry creates inquiry", async ({ page }) => {
-    // Navigate to portal inquiry page to show in video
-    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(1500);
+  test("Lead created with correct data and source=Website", async ({ page }) => {
+    // Arrange — login as admin to verify lead data
+    await login(page, USERS.admin.email, USERS.admin.password);
 
-    // Act — submit inquiry via portal API
-    const resp = await page.request.post(
-      "/api/method/horizon_crm.api.portal.submit_inquiry",
+    const ts = Date.now();
+    const email = `verify-lead-${ts}@test.example`;
+
+    // Act — submit lead via API (as guest context)
+    const guestCtx = await page.context().browser()!.newContext();
+    const guestPage = await guestCtx.newPage();
+    await guestPage.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+    await guestPage.waitForTimeout(500);
+
+    const resp = await guestPage.request.post(
+      "/api/method/horizon_crm.api.portal.submit_lead",
       {
         data: {
-          travel_type: "Honeymoon",
-          destination: "Maldives",
-          departure_date: "2025-09-01",
-          return_date: "2025-09-10",
-          num_travelers: 2,
-          budget_min: 5000,
-          budget_max: 8000,
-          notes: "E2E portal test inquiry",
+          full_name: `Verify Lead ${ts}`,
+          email: email,
+          destination: "Paris",
+          departure_date: "2026-10-01",
+          num_travelers: 3,
         },
-        headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
+      }
+    );
+    expect(resp.ok()).toBeTruthy();
+    const leadName = (await resp.json()).message.name;
+    await guestCtx.close();
+
+    // Assert — verify lead data via admin API
+    const leadResp = await page.request.get(`/api/resource/Travel Lead/${leadName}`);
+    expect(leadResp.ok()).toBeTruthy();
+    const lead = (await leadResp.json()).data;
+    expect(lead.lead_name).toContain(`Verify Lead ${ts}`);
+    expect(lead.email).toBe(email);
+    expect(lead.source).toBe("Website");
+    expect(lead.status).toBe("New");
+    expect(lead.interested_destination).toBe("Paris");
+    expect(lead.num_travelers).toBe(3);
+
+    // Cleanup — navigate to the lead form to show it in video
+    await page.goto(`/app/travel-lead/${leadName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+  });
+
+  test("Required field: missing name returns error", async ({ page }) => {
+    // Arrange
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(500);
+
+    // Act — submit without name
+    const resp = await page.request.post(
+      "/api/method/horizon_crm.api.portal.submit_lead",
+      {
+        data: {
+          full_name: "",
+          email: "missing-name@test.example",
+          destination: "Tokyo",
+          departure_date: "2026-07-01",
+        },
       }
     );
 
     // Assert
-    if (resp.ok()) {
-      const body = await resp.json();
-      expect(body.message).toBeDefined();
-    }
+    expect(resp.ok()).toBeFalsy();
+    const body = await resp.text();
+    expect(body.toLowerCase()).toContain("name");
   });
 
-  test("Portal API: submit_feedback", async ({ page }) => {
-    // Arrange — create a completed booking as admin
-    const adminCtx = await page.context().browser()!.newContext();
-    const adminPage = await adminCtx.newPage();
-    await login(adminPage, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+  test("Required field: missing email returns error", async ({ page }) => {
+    // Arrange
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(500);
 
-    const custResp = await adminPage.request.get(
-      `/api/resource/Travel Customer?filters=${JSON.stringify({
-        email: USERS.customer.email,
-      })}`
-    );
-    const custBody = await custResp.json();
-    if (custBody.data.length > 0) {
-      const customerName = custBody.data[0].name;
-
-      const bookResp = await createDoc(adminPage, "Travel Booking", {
-        customer: customerName,
-        departure_date: "2025-04-01",
-        return_date: "2025-04-07",
-        num_travelers: 1,
-        booking_date: "2025-03-15",
-        total_amount: 3000,
-        status: "Completed",
-      });
-
-      await adminCtx.close();
-
-      // Act — submit feedback as customer
-      const fbResp = await page.request.post(
-        "/api/method/horizon_crm.api.portal.submit_feedback",
-        {
-          data: {
-            booking: bookResp.data.name,
-            rating: 5,
-            comments: "Excellent trip! E2E test feedback.",
-          },
-          headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
-        }
-      );
-
-      // Assert
-      if (fbResp.ok()) {
-        const body = await fbResp.json();
-        expect(body.message).toBeDefined();
+    // Act — submit without email
+    const resp = await page.request.post(
+      "/api/method/horizon_crm.api.portal.submit_lead",
+      {
+        data: {
+          full_name: "Missing Email Lead",
+          email: "",
+          destination: "Dubai",
+          departure_date: "2026-08-01",
+        },
       }
-    } else {
-      await adminCtx.close();
-    }
+    );
+
+    // Assert
+    expect(resp.ok()).toBeFalsy();
+    const body = await resp.text();
+    expect(body.toLowerCase()).toContain("email");
   });
 
-  test("Customer cannot access admin-only resources", async ({ page }) => {
-    // Navigate to admin area to show it's restricted in video
-    await page.goto("/app/travel-agency-staff", { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(2000);
+  test("Invalid email format returns error", async ({ page }) => {
+    // Arrange
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(500);
 
-    // Act — try to list Travel Agency Staff
-    const resp = await page.request.get("/api/resource/Travel Agency Staff");
+    // Act — submit with invalid email
+    const resp = await page.request.post(
+      "/api/method/horizon_crm.api.portal.submit_lead",
+      {
+        data: {
+          full_name: "Bad Email Lead",
+          email: "not-an-email",
+          destination: "Rome",
+          departure_date: "2026-07-01",
+        },
+      }
+    );
 
-    // Assert — should be empty or forbidden
-    if (resp.ok()) {
-      const body = await resp.json();
-      expect(body.data.length).toBe(0);
-    }
+    // Assert
+    expect(resp.ok()).toBeFalsy();
+    const body = await resp.text();
+    expect(body.toLowerCase()).toContain("email");
+  });
+
+  test("Thank-you page loads", async ({ page }) => {
+    // Act
+    await page.goto("/portal/thank-you", { waitUntil: "domcontentloaded" });
+
+    // Assert
+    await expect(page.locator("body")).toContainText("Thank You");
+    await expect(page.locator("body")).toContainText("submitted");
+  });
+
+  test("Guest cannot access admin API resources", async ({ page }) => {
+    // Act — try to access admin-only API without login
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+
+    const resp = await page.request.get("/api/resource/Travel Agency/Travel Agency");
+
+    // Assert — should be forbidden
+    expect(resp.ok()).toBeFalsy();
+    expect([401, 403, 404]).toContain(resp.status());
+  });
+
+  test("Guest cannot create staff records", async ({ page }) => {
+    // Act — try to create staff record without login
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+
+    const resp = await page.request.post("/api/resource/Travel Agency Staff", {
+      data: {
+        staff_user: "hack@test.example",
+        role_in_agency: "Staff",
+        is_active: 1,
+      },
+    });
+
+    // Assert — should be forbidden
+    expect([401, 403]).toContain(resp.status());
   });
 });
