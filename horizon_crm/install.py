@@ -163,6 +163,11 @@ def set_branding():
 	# System Settings
 	ss = frappe.get_single("System Settings")
 	ss.app_name = "Horizon CRM"
+	# Ensure mandatory fields are set (required on fresh sites)
+	if not ss.language:
+		ss.language = "en"
+	if not ss.time_zone:
+		ss.time_zone = "Asia/Kolkata"
 	ss.save(ignore_permissions=True)
 
 	# Navbar Settings - set custom logo
