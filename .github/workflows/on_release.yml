@@ -10,17 +10,19 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Entire Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 18
 
       - name: Setup dependencies
         run: npm install @semantic-release/git @semantic-release/exec --no-save

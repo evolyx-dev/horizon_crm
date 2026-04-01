@@ -24,15 +24,15 @@ horizon_crm/                     # ← Repo root = Frappe app
 │
 ├── horizon_crm/                 # Python module
 │   ├── hooks.py                 # App hooks & configuration
-│   ├── utils.py                 # Multi-tenancy utilities
+│   ├── utils.py                 # Utility helpers
 │   ├── install.py               # Post-install seed data
-│   ├── permissions.py           # Row-level security
+│   ├── commands.py              # Bench CLI commands
 │   ├── api/                     # Whitelisted API endpoints
 │   │   ├── inquiry.py
 │   │   ├── booking.py
 │   │   └── portal.py
 │   ├── horizon_crm/
-│   │   └── doctype/             # 26 DocTypes
+│   │   └── doctype/             # 23 DocTypes (18 standalone + 5 child tables)
 │   ├── public/                  # Static assets (CSS, JS, images)
 │   ├── www/portal/              # Public lead-capture form (guest-accessible)
 │   ├── patches/                 # Data migration patches
@@ -136,7 +136,7 @@ docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench build --
 If you prefer running bench natively:
 
 ```bash
-# 1. Install prerequisites: Python 3.11+, Node 18+, MariaDB 10.6+, Redis 7+
+# 1. Install prerequisites: Python 3.11+, Node 18, MariaDB 10.6+, Redis 7+
 
 # 2. Create a bench
 bench init bench0 --frappe-branch version-15
@@ -194,11 +194,11 @@ Jinja templates in `horizon_crm/www/portal/` are auto-reloaded.
    ```python
    import frappe
    from frappe.model.document import Document
-   from horizon_crm.utils import validate_agency_access
 
    class MyNewDoctype(Document):
        def validate(self):
-           validate_agency_access(self)
+           # Add your validation logic here
+           pass
    ```
 
 4. Create `__init__.py` (empty)
@@ -208,28 +208,21 @@ Jinja templates in `horizon_crm/www/portal/` are auto-reloaded.
    bench --site horizon.localhost migrate
    ```
 
-### Adding Multi-Tenancy to a New DocType
+### Multi-Tenancy Architecture
 
-If your DocType has an `agency` field:
+Horizon CRM uses Frappe's **site-per-tenant** model. Each agency is a separate Frappe site with its own database. This means:
 
-1. Add to `horizon_crm/permissions.py`:
-   ```python
-   def my_new_doctype_query(user):
-       return _agency_query_condition("My New Doctype", user)
+- **No `agency` Link field** is needed on DocTypes — all data within a site belongs to one agency
+- **No custom `permission_query_conditions`** — isolation is handled at the database level
+- **Standard role-based permissions** defined in DocType JSON files control access within each site
 
-   def my_new_doctype_permission(doc, ptype, user):
-       return _agency_has_permission(doc, ptype, user)
-   ```
+To add a new DocType:
 
-2. Register in `horizon_crm/hooks.py`:
-   ```python
-   permission_query_conditions = {
-       "My New Doctype": "horizon_crm.permissions.my_new_doctype_query",
-   }
-   has_permission = {
-       "My New Doctype": "horizon_crm.permissions.my_new_doctype_permission",
-   }
-   ```
+1. Create the directory and JSON definition
+2. Set `module = "Horizon CRM"` in the JSON
+3. Add permission entries for: System Manager, Agency Admin, Agency Team Lead, Agency Staff
+4. Create the Python controller
+5. Run `bench --site horizon.localhost migrate`
 
 ---
 
@@ -253,17 +246,15 @@ Call via: `POST /api/method/horizon_crm.api.module.my_api_method`
 
 ## Key Conventions
 
-### Multi-Tenancy Rules
-- **Every tenant DocType** must have an `agency` Link field
-- **Every controller** must call `validate_agency_access(self)` in `validate()`
-- **hooks.py** must register both `permission_query_conditions` and `has_permission`
-- **Never** trust client-side agency filtering alone
+### Multi-Tenancy
+- Horizon CRM uses **site-per-tenant** isolation — each agency has its own Frappe site and database
+- No `agency` Link field is needed on DocTypes — all data in a site belongs to one agency
+- Standard role-based permissions (in DocType JSON) control access within each site
+- New tenants are created via `bench new-site` + `bench install-app horizon_crm`
 
 ### Security Checklist
-- [ ] `agency` field is set server-side
-- [ ] `permission_query_conditions` registered in hooks
-- [ ] `has_permission` registered in hooks
-- [ ] Controller `validate()` calls `validate_agency_access()`
+- [ ] DocType JSON has correct role permissions
+- [ ] Controller `validate()` has necessary business logic
 - [ ] API methods use `frappe.only_for()` for role checks
 - [ ] Portal API methods use `allow_guest=True` + rate limiting for public endpoints
 

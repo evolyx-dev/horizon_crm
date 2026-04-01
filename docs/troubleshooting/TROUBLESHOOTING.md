@@ -90,18 +90,15 @@ bench --site horizon.localhost console
 >>> frappe.db.commit()
 ```
 
-### Agency Admin can see data from other agencies
+### Data visible across agencies
+
+Horizon CRM uses **site-per-tenant** architecture (separate databases per agency). If you see cross-agency data:
 
 **Diagnosis Checklist**:
-1. Check `User Permission` exists for the user:
-   ```python
-   frappe.get_all("User Permission",
-       filters={"user": "admin@agency1.test", "allow": "Travel Agency"})
-   ```
-2. Check `permission_query_conditions` in hooks.py includes the DocType.
-3. Check `has_permission` in hooks.py includes the DocType.
-4. Verify the DocType has an `agency` Link field.
-5. Check the controller calls `validate_agency_access()`.
+1. Verify each agency is on a **separate Frappe site** (separate database)
+2. Check that users are not Administrator (bypasses all permissions)
+3. Verify the site's `common_site_config.json` points to the correct database
+4. Run `bench --site <site> show-config` to verify isolation
 
 ### "Permission denied" for Agency Admin on their own records
 

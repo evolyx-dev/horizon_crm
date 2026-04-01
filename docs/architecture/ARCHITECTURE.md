@@ -1,7 +1,7 @@
 # Horizon CRM — System Architecture Document
 
-**Version:** 3.0  
-**Date:** 2025-07-13  
+**Version:** 3.1  
+**Date:** 2026-04-01  
 
 ---
 
@@ -19,7 +19,7 @@
 │  └──────┬───────┘  └──────┬───────┘  └────────┬──────────┘     │
 │         │                 │                    │                │
 │  ┌──────┴─────────────────┴────────────────────┴──────────┐    │
-│  │              Frappe Framework v17                        │    │
+│  │              Frappe Framework v15                        │    │
 │  │  ┌──────────────────────────────────────────────────┐   │    │
 │  │  │  horizon_crm App                                  │   │    │
 │  │  │                                                    │   │    │
@@ -56,6 +56,8 @@ horizon_crm/                        # ← Repo root IS the Frappe app
 │   ├── modules.txt                 # Module definitions
 │   ├── patches.txt                 # Database migration patches
 │   ├── install.py                  # Post-install setup (roles, defaults, branding)
+│   ├── utils.py                    # Utility helpers (agency settings, staff record)
+│   ├── commands.py                 # Bench CLI commands (create-tenant, tenant-info)
 │   │
 │   ├── horizon_crm/               # Main module
 │   │   ├── __init__.py
@@ -151,8 +153,10 @@ horizon_crm/                        # ← Repo root IS the Frappe app
 ├── LICENSE
 └── .github/
     └── workflows/
-        ├── ci.yml                  # CI: MariaDB 11.8, Python 3.14, Node 24
-        └── linter.yml              # Semgrep + pip-audit
+        ├── ci.yml                  # CI: MariaDB 10.6, Python 3.12, Node 18
+        ├── builds.yml              # Docker image build & push to GHCR
+        ├── linter.yml              # Semgrep + pip-audit
+        └── on_release.yml          # Semantic versioning
 ```
 
 ---
@@ -252,23 +256,25 @@ Since each tenant is its own site, there is no need for an `agency` Link field o
 
 | DocType | System Manager | Agency Admin | Team Lead | Staff |
 |---------|---------------|-------------|-----------|-------|
-| Travel Agency | RWCDE | R | - | - |
-| Travel Agency Staff | RWCDE | RWC | R | R(self) |
-| Travel Team | RWCDE | RWCD | R | R |
-| Travel Lead | RWCDE | RWCD | RWCD | RWC |
-| Travel Inquiry | RWCDE | RWCD | RWCD | RWC |
-| Travel Itinerary | RWCDE | RWCD | RWCD | RWC |
-| Travel Booking | RWCDE | RWCD | RWCD | RWC |
-| Travel Customer | RWCDE | RWCD | RWC | RWC |
-| Airline Supplier | RWCDE | RWCDE | RWCD | RWCD |
-| Hotel Supplier | RWCDE | RWCDE | RWCD | RWCD |
-| Visa Agent | RWCDE | RWCDE | RWCD | RWCD |
-| Transport Supplier | RWCDE | RWCDE | RWCD | RWCD |
-| Tour Operator | RWCDE | RWCDE | RWCD | RWCD |
-| Insurance Provider | RWCDE | RWCDE | RWCD | RWCD |
+| Travel Agency | RWCDE | RW | R | R |
+| Travel Agency Staff | RWCDE | RWCD | R | R |
+| Travel Team | RWCDE | RWCDE | RWC | RWC |
+| Travel Lead | RWCDE | RWCDE | RWC | RWC |
+| Travel Inquiry | RWCDE | RWCDE | RWC | RWC |
+| Travel Itinerary | RWCDE | RWCDE | RWC | RWC |
+| Travel Booking | RWCDE | RWCDE | RWC | RWC |
+| Travel Customer | RWCDE | RWCDE | RWC | RWC |
+| Travel Invoice | RWCDE | RWCDE | RWC | RWC |
+| Airline Supplier | RWCDE | RWCDE | RWC | RWC |
+| Hotel Supplier | RWCDE | RWCDE | RWC | RWC |
+| Visa Agent | RWCDE | RWCDE | RWC | RWC |
+| Transport Supplier | RWCDE | RWCDE | RWC | RWC |
+| Tour Operator | RWCDE | RWCDE | RWC | RWC |
+| Insurance Provider | RWCDE | RWCDE | RWC | RWC |
 | Travel Destination | RWCDE | R | R | R |
 | Travel Type | RWCDE | R | R | R |
-| Travel Feedback | RWCDE | R | R | R |
+| Travel Lost Reason | RWCDE | RWCD | R | R |
+| Travel Feedback | RWCDE | RWCDE | RWC | RWC |
 
 R=Read, W=Write, C=Create, D=Delete, E=Export
 
@@ -409,7 +415,7 @@ deploy/
 | Testing — Unit | pytest (frappe.tests.utils) |
 | Linting | Ruff (py311 target, line-length 110) |
 | Containerization | Docker + Docker Compose, Dev Containers |
-| CI/CD | GitHub Actions (ci.yml, linter.yml) |
+| CI/CD | GitHub Actions (ci.yml, builds.yml, linter.yml, on_release.yml) |
 | Build System | Flit (pyproject.toml) |
 | Branding | Horizon CRM (custom favicon, logo, CSS) |
 
@@ -446,12 +452,12 @@ In v2.0, all suppliers were stored in a single `Travel Supplier` DocType with a 
 ```
 
 **Travel Lead** (pre-qualification):
-- Stages: New → Contacted → Qualified → Proposal Sent → Negotiation → Converted/Lost
+- Stages: New → Contacted → Interested → Qualified → Converted → Do Not Contact
 - No customer required; single budget estimate
-- Tracks source (Website/Referral/Walk-in/Social Media/Advertisement/Other)
+- Tracks source (Website/Phone/Email/Walk-in/Referral/Social Media/Facebook/Instagram/Google Ads/Travel Fair/Partner Agency/Other)
 
 **Travel Inquiry** (formal request):
-- Stages: New → In Progress → Quotation Sent → Won → Lost
+- Stages: New → Contacted → Quoted → Won → Lost
 - Customer required; budget range (min/max)
 - Lost-reason tracking, traveler details (child table)
 - Can be created from scratch or converted from a Lead

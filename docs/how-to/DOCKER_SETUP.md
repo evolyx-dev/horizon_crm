@@ -304,8 +304,15 @@ bench --site agency2.example.com migrate
 
 The `deploy/Dockerfile` uses a multi-stage build:
 
-1. **Builder stage**: `frappe/bench:latest` → `bench init` → `bench get-app` → `bench build`
+1. **Builder stage**: `frappe/bench:latest` → `bench init --frappe-branch version-15` → `bench get-app file:///tmp/horizon_crm` → `bench build --app horizon_crm`
 2. **Production stage**: Copies the built bench, adds `entrypoint.sh`, runs Gunicorn
+
+The key step is installing the app from local source:
+```dockerfile
+COPY --chown=frappe:frappe . /tmp/horizon_crm
+RUN cd /tmp/horizon_crm && git init && git add -A && git commit -m "build"
+RUN bench get-app file:///tmp/horizon_crm && bench build --app horizon_crm
+```
 
 The `deploy/entrypoint.sh` is a single entrypoint that handles all service roles:
 - `web` — Gunicorn (gthread, capped at 4 workers)
@@ -314,6 +321,26 @@ The `deploy/entrypoint.sh` is a single entrypoint that handles all service roles
 - `scheduler` — Periodic task runner
 - `migrate` — One-off migration
 - `new-site` — One-off site creation
+
+### Using the Pre-Built GHCR Image
+
+Instead of building locally, you can pull the image from GitHub Container Registry:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/evolyx-dev/horizon_crm:latest
+
+# Or a specific version
+docker pull ghcr.io/evolyx-dev/horizon_crm:v1.0.0
+```
+
+To use the GHCR image in `docker-compose.prod.yml`, replace the `build:` directive with `image:`:
+
+```yaml
+x-frappe-common: &frappe-common
+  image: ghcr.io/evolyx-dev/horizon_crm:latest
+  # Remove or comment out the build: section
+```
 
 ### Production Nginx
 
@@ -359,3 +386,49 @@ The stack also works in GitHub Codespaces (120 free hours/month on 2-core/8GB):
 | Site not found | Enter container and run `bench use horizon.localhost` |
 | Assets 404 | `docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench build"` |
 | First start is slow | bench init downloads frappe + node deps. Subsequent starts are fast. |
+
+---
+
+## Part 3 — CI/CD Pipeline
+
+The project uses GitHub Actions for continuous integration and image publishing.
+
+### Workflows
+
+| Workflow | File | Trigger | Purpose |
+|----------|------|---------|---------|
+| CI | `.github/workflows/ci.yml` | Push to `main`, PRs | Server-side tests (Python 3.12, Node 18, MariaDB 10.6) |
+| Build | `.github/workflows/builds.yml` | Push to `main`, tags | Build & push Docker image to GHCR (amd64 + arm64) |
+| Linters | `.github/workflows/linter.yml` | PRs | Pre-commit hooks + Semgrep security rules |
+| Release | `.github/workflows/on_release.yml` | Push to `main` | Semantic versioning via conventional commits |
+
+### CI Pipeline Details
+
+The CI workflow:
+1. Spins up MariaDB 10.6 and Redis as service containers
+2. Installs Python 3.12 and Node 18 (matching Frappe v15 requirements)
+3. Initializes a bench with `--frappe-branch version-15`
+4. Installs `horizon_crm` from the checked-out workspace
+5. Creates a test site and runs `bench --site test_site run-tests --app horizon_crm`
+
+### Docker Image Build
+
+The build workflow:
+1. Checks out the repo
+2. Builds the production image using `deploy/Dockerfile`
+3. Pushes to `ghcr.io/evolyx-dev/horizon_crm` with these tags:
+   - `latest` — always points to the latest `main` build
+   - `main` — same as latest (branch name tag)
+   - `v1.2.3` — when a git tag is pushed
+   - `stable` — when a version tag (e.g. `v1.0.0`) is pushed
+4. Builds for both `linux/amd64` and `linux/arm64` platforms
+5. Uses GitHub Actions build cache for faster rebuilds
+
+### Runtime Compatibility
+
+| Component | Version | Notes |
+|-----------|---------|-------|
+| Python | 3.12 | Frappe v15 requirement (pyproject.toml: `>=3.11`) |
+| Node.js | 18 | Frappe v15 standard |
+| MariaDB | 10.6 | Matches production docker-compose |
+| Redis | 7 | Alpine variant |

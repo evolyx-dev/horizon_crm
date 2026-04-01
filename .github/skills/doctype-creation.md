@@ -29,15 +29,15 @@ Create a new Frappe DocType for the Horizon CRM app following established patter
 }
 ```
 
-### Controller Pattern (tenant-scoped)
+### Controller Pattern
 ```python
 import frappe
 from frappe.model.document import Document
-from horizon_crm.utils import get_user_agency, validate_agency_access
 
 class TravelXxx(Document):
     def validate(self):
-        validate_agency_access(self)
+        # Add business logic validations here
+        pass
 ```
 
 ### Client Script Pattern

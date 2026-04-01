@@ -63,6 +63,21 @@ docker compose -f deploy/docker-compose.prod.yml up -d
 
 See [Docker Setup Guide](docs/how-to/DOCKER_SETUP.md) for deployment to Oracle Cloud, GitHub Codespaces, and full configuration reference.
 
+### Using Pre-Built Image (GHCR)
+
+A pre-built multi-arch Docker image (amd64 + arm64) is published to GitHub Container Registry on every push to `main`:
+
+```bash
+docker pull ghcr.io/evolyx-dev/horizon_crm:latest
+```
+
+To use the pre-built image instead of building locally, edit `deploy/docker-compose.prod.yml` and replace the `build:` directive in `x-frappe-common` with:
+
+```yaml
+x-frappe-common: &frappe-common
+  image: ghcr.io/evolyx-dev/horizon_crm:latest
+```
+
 ### Self Hosting (Frappe Easy Install)
 
 Follow these steps to set up Horizon CRM in production:
@@ -80,7 +95,7 @@ python3 ./easy-install.py deploy \
     --project=horizon_crm_setup \
     --email=your@email.com \
     --image=ghcr.io/evolyx-dev/horizon_crm \
-    --version=stable \
+    --version=latest \
     --app=horizon_crm \
     --sitename subdomain.domain.tld
 ```

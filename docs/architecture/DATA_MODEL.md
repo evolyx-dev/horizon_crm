@@ -1,7 +1,7 @@
 # Horizon CRM — Data Model Reference
 
-**Version:** 3.0  
-**Date:** 2026-03-31  
+**Version:** 3.1  
+**Date:** 2026-04-01  
 
 ---
 
@@ -14,7 +14,7 @@ erDiagram
     TRAVEL_TEAM ||--o| TRAVEL_AGENCY_STAFF : led_by
 
     TRAVEL_LEAD ||--o{ TRAVEL_INQUIRY : converts_to
-    TRAVEL_LEAD ||--o{ TRAVEL_CUSTOMER : becomes
+    TRAVEL_LEAD }o--o| TRAVEL_CUSTOMER : becomes
 
     TRAVEL_CUSTOMER ||--o{ TRAVEL_INQUIRY : raises
     TRAVEL_CUSTOMER ||--o{ TRAVEL_BOOKING : has
@@ -71,7 +71,12 @@ erDiagram
         string status
         string email
         string phone
+        string mobile_no
         string source
+        string assigned_to FK
+        string lead_owner FK
+        string priority
+        date next_follow_up
         string interested_destination FK
         string travel_type FK
         date expected_travel_date
@@ -82,8 +87,10 @@ erDiagram
     TRAVEL_INQUIRY {
         string name PK
         string status
+        string priority
         string customer FK
         string lead FK
+        string assigned_to FK
         string customer_name
         string customer_email
         string destination FK
@@ -94,6 +101,7 @@ erDiagram
         currency budget_min
         currency budget_max
         string lost_reason FK
+        date follow_up_date
     }
 
     TRAVEL_INQUIRY_TRAVELER {
@@ -105,9 +113,12 @@ erDiagram
     TRAVEL_BOOKING {
         string name PK
         string status
+        date booking_date
         string customer FK
         string inquiry FK
+        string assigned_to FK
         string itinerary FK
+        string destination FK
         date departure_date
         date return_date
         int num_travelers
@@ -128,14 +139,21 @@ erDiagram
         string customer_name
         string email UK
         string phone
+        string mobile_no
         string lead FK
         string loyalty_tier
         string portal_user FK
+        string gender
+        date date_of_birth
+        string nationality
+        string passport_number
     }
 
     TRAVEL_ITINERARY {
         string itinerary_name PK
         string status
+        string inquiry FK
+        string booking FK
         date start_date
         date end_date
         int num_days
@@ -144,7 +162,11 @@ erDiagram
 
     ITINERARY_DAY_ITEM {
         int day_number
+        date date
         string title
+        string accommodation
+        string transport
+        string meals_included
         currency estimated_cost
     }
 
@@ -155,8 +177,14 @@ erDiagram
         string status
         date invoice_date
         date due_date
+        currency subtotal
+        float tax_percent
+        currency tax_amount
+        currency discount
         currency grand_total
+        currency paid_amount
         currency outstanding_amount
+        string payment_method
     }
 
     INVOICE_ITEM {
@@ -209,7 +237,9 @@ erDiagram
         string name PK
         string provider_name
         string insurance_types
+        string coverage_regions
         currency max_coverage_amount
+        int claim_turnaround_days
     }
 
     SUPPLIER_SERVICE {
@@ -277,7 +307,7 @@ The generic `Travel Supplier` has been replaced with six category-specific docty
 | Visa Agent | VISA- | countries_served, visa_types, avg_processing_days, success_rate, express |
 | Transport Supplier | TRN- | transport_type, fleet_size, vehicle_types, max_passengers |
 | Tour Operator | TOUR- | specialization, destinations_covered, group_size, languages |
-| Insurance Provider | INS- | insurance_types, coverage_regions, max_coverage_amount, claim_turnaround |
+| Insurance Provider | INS- | insurance_types, coverage_regions, max_coverage_amount, claim_turnaround_days |
 
 All share: contact info, address, notes, and a `services` child table (`Supplier Service`).
 
