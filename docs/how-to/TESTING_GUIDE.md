@@ -127,8 +127,10 @@ horizon_crm/tests/
 │   ├── 09-other-doctypes.spec.ts # Itinerary, suppliers, feedback, teams
 │   ├── 10-multi-tenant.spec.ts   # Multi-site isolation
 │   ├── 11-lead-and-branding.spec.ts # Lead pipeline, branding
-│   └── 12-invoice-customer-masterdata.spec.ts # Invoice, customer CRUD, master data
+│   ├── 12-invoice-customer-masterdata.spec.ts # Invoice, customer CRUD, master data
+│   └── 13-validation-negative.spec.ts # Validation & negative/edge-case scenarios
 ├── test-results/             # Playwright artifacts (gitignored)
+├── playwright-report/        # Playwright HTML report (gitignored)
 ├── allure-results/           # Allure raw results (gitignored)
 └── node_modules/             # (gitignored)
 ```
@@ -149,6 +151,7 @@ horizon_crm/tests/
 | Multi-Tenant | `10-multi-tenant` | Site isolation, tenant data boundary |
 | Leads & Branding | `11-lead-and-branding` | Lead pipeline, favicon, logo, CSS/JS assets |
 | Invoice, Customer & Master Data | `12-invoice-customer-masterdata` | Invoice lifecycle & calculations, customer CRUD, destinations, travel types, lost reasons |
+| Validation & Negative Cases | `13-validation-negative` | Controller validation, calculation edge cases, RBAC denials, portal errors, auth failures |
 
 **Playwright projects:** Tests run across `chromium` (desktop), `mobile` (iPhone 13), and `multi-tenant` (API-only with two sites).
 
@@ -194,9 +197,41 @@ test.describe("My Feature", () => {
 
 ---
 
+## npm Scripts
+
+All scripts are defined in `horizon_crm/tests/package.json`. Run them from the `horizon_crm/tests/` directory.
+
+| Script | Command | Description |
+|--------|---------|-------------|
+| `npm test` | `npx playwright test` | Run all E2E tests |
+| `npm run test:headed` | `npx playwright test --headed` | Run with visible browser |
+| `npm run test:ui` | `npx playwright test --ui` | Interactive Playwright UI |
+| `npm run test:debug` | `npx playwright test --debug` | Step-through debugger |
+| `npm run test:auth` | `…01-auth.spec.ts` | Auth tests only |
+| `npm run test:agency` | `…02-agency.spec.ts` | Agency tests only |
+| `npm run test:staff` | `…03-staff.spec.ts` | Staff tests only |
+| `npm run test:inquiry` | `…04-inquiry.spec.ts` | Inquiry tests only |
+| `npm run test:booking` | `…05-booking.spec.ts` | Booking tests only |
+| `npm run test:security` | `…06-security.spec.ts` | Security tests only |
+| `npm run test:portal` | `…07-portal.spec.ts` | Portal tests only |
+| `npm run test:ui-ux` | `…08-ui-ux.spec.ts` | UI/UX tests only |
+| `npm run test:doctypes` | `…09-other-doctypes.spec.ts` | Supplier/doctype tests |
+| `npm run test:multi-tenant` | `…10-multi-tenant.spec.ts` | Multi-tenant tests |
+| `npm run test:lead-branding` | `…11-lead-and-branding.spec.ts` | Lead & branding tests |
+| `npm run test:invoice-master` | `…12-invoice-customer-masterdata.spec.ts` | Invoice & master data |
+| `npm run test:validation` | `…13-validation-negative.spec.ts` | Validation & negative tests |
+| `npm run clean` | removes artifacts | Delete test-results, allure-results, reports |
+| `npm run test:report` | clean + test + allure generate | Full run with Allure report |
+| `npm run report:allure` | generate + open | Generate and open Allure report |
+| `npm run report:allure:generate` | `npx allure generate …` | Generate Allure HTML report |
+| `npm run report:allure:open` | `npx allure open …` | Open Allure report in browser |
+| `npm run report:html` | `npx playwright show-report …` | Open Playwright HTML report |
+
+---
+
 ## Test Reports & Video Capture
 
-Video recording is on for **all tests** via `playwright.config.ts`:
+Every test run produces videos, screenshots, and trace files automatically via `playwright.config.ts`:
 
 ```typescript
 use: {
@@ -206,26 +241,76 @@ use: {
 }
 ```
 
-Artifacts:
-- `horizon_crm/tests/test-results/<test-name>/video.webm`
-- `horizon_crm/tests/test-results/<test-name>/test-finished-1.png`
-- `horizon_crm/tests/test-results/<test-name>/trace.zip` (on retry only)
+### Artifact Locations
+
+| Artifact | Path |
+|----------|------|
+| Video | `horizon_crm/tests/test-results/<test-name>/video.webm` |
+| Screenshot | `horizon_crm/tests/test-results/<test-name>/test-finished-1.png` |
+| Trace (retry only) | `horizon_crm/tests/test-results/<test-name>/trace.zip` |
+| Playwright HTML report | `horizon_crm/tests/playwright-report/index.html` |
+| Allure raw results | `horizon_crm/tests/allure-results/` |
+| Allure HTML report | `horizon_crm/reports/allure-report/index.html` |
+
+> All artifact directories are gitignored.
 
 ### Playwright HTML Report
 
+The Playwright HTML report is generated automatically after each run. To view it:
+
 ```bash
 cd horizon_crm/tests
-npx playwright test
-npx playwright show-report
+npx playwright show-report playwright-report
 ```
+
+Or use the npm script:
+
+```bash
+npm run report:html
+```
+
+The report includes embedded videos and screenshots for every test.
 
 ### Allure Report
 
+Allure produces a richer, interactive report with test categorization, history trends, and attached videos/screenshots.
+
+#### Quick: Run tests and generate report in one step
+
 ```bash
 cd horizon_crm/tests
+npm run test:report
+```
+
+This runs `clean → test → allure generate` and writes the report to `horizon_crm/reports/allure-report/`.
+
+#### Step-by-step
+
+```bash
+cd horizon_crm/tests
+
+# 1. Run tests (generates allure-results/)
 npx playwright test
-npx allure generate allure-results --clean -o allure-report
-npx allure open allure-report
+
+# 2. Generate the HTML report
+npx allure generate allure-results -o ../reports/allure-report --clean
+
+# 3. Open in browser
+npx allure open ../reports/allure-report
+```
+
+Or equivalently:
+
+```bash
+npm run report:allure:generate   # step 2
+npm run report:allure:open       # step 3
+npm run report:allure             # steps 2 + 3 combined
+```
+
+The generated report lives at:
+
+```
+horizon_crm/reports/allure-report/index.html
 ```
 
 ---
