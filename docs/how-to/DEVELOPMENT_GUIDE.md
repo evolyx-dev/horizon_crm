@@ -40,7 +40,8 @@ horizon_crm/                     # ← Repo root = Frappe app
 │           ├── 01-auth.spec.ts
 │           ├── ...
 │           ├── 12-invoice-customer-masterdata.spec.ts
-│           └── 13-validation-negative.spec.ts
+│           ├── 13-validation-negative.spec.ts
+│           └── demo-video.spec.ts  # Annotated demo recording
 │
 ├── docs/                        # Documentation
 └── bench0/                      # Local bench runtime (gitignored)

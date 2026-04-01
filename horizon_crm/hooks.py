@@ -59,8 +59,17 @@ commands = "horizon_crm.commands.commands"
 # Only Horizon CRM and Desk modules are allowed for agency roles.
 # All system/framework modules are blocked.
 _system_modules = [
-	"Setup", "Core", "Custom", "Automation", "Workflow",
-	"Email", "Contacts", "Geo", "Integrations", "Printing", "Website",
+	"Setup",
+	"Core",
+	"Custom",
+	"Automation",
+	"Workflow",
+	"Email",
+	"Contacts",
+	"Geo",
+	"Integrations",
+	"Printing",
+	"Website",
 ]
 
 block_modules = {

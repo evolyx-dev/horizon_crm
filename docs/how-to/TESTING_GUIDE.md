@@ -128,7 +128,9 @@ horizon_crm/tests/
 │   ├── 10-multi-tenant.spec.ts   # Multi-site isolation
 │   ├── 11-lead-and-branding.spec.ts # Lead pipeline, branding
 │   ├── 12-invoice-customer-masterdata.spec.ts # Invoice, customer CRUD, master data
-│   └── 13-validation-negative.spec.ts # Validation & negative/edge-case scenarios
+│   ├── 13-validation-negative.spec.ts # Validation & negative/edge-case scenarios
+│   └── demo-video.spec.ts       # Annotated demo video recording script
+├── demo-output/              # Recorded demo videos (gitignored)
 ├── test-results/             # Playwright artifacts (gitignored)
 ├── playwright-report/        # Playwright HTML report (gitignored)
 ├── allure-results/           # Allure raw results (gitignored)
@@ -152,6 +154,7 @@ horizon_crm/tests/
 | Leads & Branding | `11-lead-and-branding` | Lead pipeline, favicon, logo, CSS/JS assets |
 | Invoice, Customer & Master Data | `12-invoice-customer-masterdata` | Invoice lifecycle & calculations, customer CRUD, destinations, travel types, lost reasons |
 | Validation & Negative Cases | `13-validation-negative` | Controller validation, calculation edge cases, RBAC denials, lead API errors, auth failures |
+| **Demo Video** | `demo-video` | 18-chapter annotated walkthrough of all features (not part of CI test suite) |
 
 **Playwright projects:** Tests run across `chromium` (desktop), `mobile` (iPhone 13), and `multi-tenant` (API-only with two sites).
 
@@ -226,6 +229,7 @@ All scripts are defined in `horizon_crm/tests/package.json`. Run them from the `
 | `npm run report:allure:generate` | `npx allure generate …` | Generate Allure HTML report |
 | `npm run report:allure:open` | `npx allure open …` | Open Allure report in browser |
 | `npm run report:html` | `npx playwright show-report …` | Open Playwright HTML report |
+| `npm run demo` | `npx playwright test e2e/demo-video.spec.ts --project chromium` | Record annotated demo video |
 
 ---
 
@@ -312,6 +316,66 @@ The generated report lives at:
 ```
 horizon_crm/reports/allure-report/index.html
 ```
+
+---
+
+## Demo Video Recording
+
+The project includes a Playwright script that records an **annotated feature demo video** suitable for client review. The script walks through every major feature with on-screen annotations (chapter titles and descriptions) overlaid on the browser.
+
+### Quick Start
+
+```bash
+cd horizon_crm/tests
+npm run demo
+```
+
+The recorded video is saved to:
+
+```
+horizon_crm/tests/demo-output/horizon-crm-demo.webm
+```
+
+> The `demo-output/` directory is gitignored — the video is a generated artifact.
+
+### What the Demo Covers (18 Chapters)
+
+| # | Chapter | Description |
+|---|---------|-------------|
+| 1 | Login | Agency Admin login flow |
+| 2 | Dashboard | Workspace overview, charts, number cards |
+| 3 | Agency Settings | Company configuration (as System Admin) |
+| 4 | Staff & Teams | Staff list, team management |
+| 5 | Public Portal | Guest-accessible lead-capture form |
+| 6 | Lead Pipeline | Lead list, status workflow, convert-to-inquiry |
+| 7 | Customers | Customer directory, profile details |
+| 8 | Inquiry Workflow | Create inquiry, status transitions |
+| 9 | Bookings & Payments | Booking lifecycle, payment tracking |
+| 10 | Destinations & Types | Master data management |
+| 11 | Airline Suppliers | Airline supplier CRUD |
+| 12 | Hotel Suppliers | Hotel supplier CRUD |
+| 13 | Tour Operators | Tour operator CRUD |
+| 14 | Itineraries | Day-by-day itinerary builder |
+| 15 | Invoicing | Invoice generation & calculation |
+| 16 | Feedback | Customer feedback collection |
+| 17 | Kanban View | Drag-and-drop Kanban board |
+| 18 | Dark Theme | Theme switching |
+
+The script also includes a cleanup phase that deletes all demo data created during recording.
+
+### How It Works
+
+- **Annotation overlay**: The `showAnnotation(page, title, subtitle)` helper injects a fixed-position styled banner at the top of the viewport.
+- **Resilient navigation**: The `waitForPage(page, "list" | "form")` helper waits for Frappe list/form pages to fully load.
+- **Role switching**: Uses API login (`page.request.post("/api/method/login")`) to switch between Agency Admin, System Admin, and Staff roles mid-recording.
+- **Single browser context**: Records one continuous video with `recordVideo: { dir: "demo-output/", size: { width: 1280, height: 720 } }`.
+- **Timeout**: 15-minute timeout to accommodate the full walkthrough.
+
+### Customizing the Demo
+
+To record only specific chapters, comment out the unwanted `test.step()` blocks in `demo-video.spec.ts`. To change the output resolution or directory, edit the `browser.newContext()` call at the top of the test.
+
+To change annotation styling, modify the CSS in the `showAnnotation()` function.
 
 ---
 

@@ -26,6 +26,7 @@ horizon_crm/tests/test-results/
 horizon_crm/tests/playwright-report/
 horizon_crm/tests/allure-results/
 horizon_crm/tests/node_modules/
+horizon_crm/tests/demo-output/
 
 # Test reports (regenerated on each run)
 reports/
