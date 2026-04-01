@@ -47,6 +47,9 @@ Thumbs.db
 mariadb-data/
 redis-data/
 
+# Secrets
+deploy/.env
+
 # Miscellaneous
 logs/
 *.log

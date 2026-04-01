@@ -35,9 +35,9 @@ frappe = ">=15.0.0-dev,<16.0.0-dev"
 packages = []
 
 [project.urls]
-Homepage = "https://github.com/ArkOne-Softwares/horizon-crm"
-Repository = "https://github.com/ArkOne-Softwares/horizon-crm.git"
-"Bug Reports" = "https://github.com/ArkOne-Softwares/horizon-crm/issues"
+Homepage = "https://github.com/evolyx-dev/horizon_crm"
+Repository = "https://github.com/evolyx-dev/horizon_crm.git"
+"Bug Reports" = "https://github.com/evolyx-dev/horizon_crm/issues"
 
 [tool.ruff]
 line-length = 110
