@@ -1,10 +1,10 @@
 """Unit tests for Horizon CRM doctypes."""
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestTravelLead(IntegrationTestCase):
+class TestTravelLead(FrappeTestCase):
 	"""Test Travel Lead doctype validation and status tracking."""
 
 	def test_requires_contact_method(self):
@@ -42,7 +42,7 @@ class TestTravelLead(IntegrationTestCase):
 		lead.delete(ignore_permissions=True)
 
 
-class TestTravelInquiry(IntegrationTestCase):
+class TestTravelInquiry(FrappeTestCase):
 	"""Test Travel Inquiry doctype."""
 
 	def test_won_inquiry_prompts_booking(self):
@@ -64,7 +64,7 @@ class TestTravelInquiry(IntegrationTestCase):
 		inquiry.delete(ignore_permissions=True)
 
 
-class TestSupplierCategories(IntegrationTestCase):
+class TestSupplierCategories(FrappeTestCase):
 	"""Test that all six supplier category doctypes can be created."""
 
 	def _create_supplier(self, doctype, title_field, title_value, **kwargs):
@@ -100,7 +100,7 @@ class TestSupplierCategories(IntegrationTestCase):
 		self._create_supplier("Insurance Provider", "provider_name", "Test Insurance")
 
 
-class TestTravelBooking(IntegrationTestCase):
+class TestTravelBooking(FrappeTestCase):
 	"""Test Travel Booking payment calculations."""
 
 	def test_payment_balance_calculation(self):
