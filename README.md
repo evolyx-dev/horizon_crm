@@ -77,7 +77,7 @@ wget https://frappe.io/easy-install.py
 python3 ./easy-install.py deploy \
     --project=horizon_crm_setup \
     --email=your@email.com \
-    --image=ghcr.io/ArkOne-Softwares/horizon-crm \
+    --image=ghcr.io/evolyx-dev/horizon_crm \
     --version=stable \
     --app=horizon_crm \
     --sitename subdomain.domain.tld
@@ -110,10 +110,10 @@ mkdir horizon-crm
 cd horizon-crm
 
 # Download the docker-compose file
-wget -O docker-compose.yml https://raw.githubusercontent.com/ArkOne-Softwares/horizon-crm/main/docker/docker-compose.yml
+wget -O docker-compose.yml https://raw.githubusercontent.com/evolyx-dev/horizon_crm/main/docker/docker-compose.yml
 
 # Download the setup script
-wget -O init.sh https://raw.githubusercontent.com/ArkOne-Softwares/horizon-crm/main/docker/init.sh
+wget -O init.sh https://raw.githubusercontent.com/evolyx-dev/horizon_crm/main/docker/init.sh
 ```
 
 **Step 2:** Run the container and daemonize it
