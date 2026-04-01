@@ -72,6 +72,12 @@ test.describe("Booking Workflow", () => {
 
   test("Booking has correct initial status", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to the booking form to show it in the video
+    await page.goto(`/app/travel-booking/${readOnlyBookingName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+    await expect(page.locator('[data-fieldname="status"]').first()).toBeVisible();
+
     const resp = await page.request.get(`/api/resource/Travel Booking/${readOnlyBookingName}`);
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
@@ -87,6 +93,10 @@ test.describe("Booking Workflow", () => {
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     expect(body.data.status).toBe("In Progress");
+
+    // Show the updated booking in the form
+    await page.goto(`/app/travel-booking/${workflowBookingName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Payment child table updates balance", async ({ page }) => {
@@ -112,10 +122,20 @@ test.describe("Booking Workflow", () => {
     const body = await resp.json();
     expect(body.data.paid_amount).toBe(3000);
     expect(body.data.balance_amount).toBe(7000);
+
+    // Show the booking form with payment details
+    await page.goto(`/app/travel-booking/${workflowBookingName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+    await expect(page.locator('[data-fieldname="paid_amount"]').first()).toBeVisible();
   });
 
   test("Booking summary API returns valid data", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Show the booking list before checking summary
+    await gotoList(page, "Travel Booking");
+    await expect(page.locator(".frappe-list")).toBeVisible();
+
     const resp = await page.request.get(
       "/api/method/horizon_crm.api.booking.get_booking_summary"
     );
@@ -145,6 +165,10 @@ test.describe("Booking Workflow", () => {
       expect(resp.ok()).toBeTruthy();
       const body = await resp.json();
       expect(body.data.status).toBe(status);
+
+      // Navigate to form after each transition to show status in video
+      await page.goto(`/app/travel-booking/${workflowBookingName}`, { waitUntil: "domcontentloaded" });
+      await page.waitForSelector(".form-layout", { timeout: 15_000 });
     }
   });
 });

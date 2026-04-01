@@ -89,6 +89,12 @@ test.describe("Inquiry Workflow", () => {
 
   test("Inquiry has correct initial status", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to the inquiry form to show it in the video
+    await page.goto(`/app/travel-inquiry/${readOnlyInquiryName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+    await expect(page.locator('[data-fieldname="status"]').first()).toBeVisible();
+
     const resp = await page.request.get(
       `/api/resource/Travel Inquiry/${readOnlyInquiryName}`
     );
@@ -106,6 +112,11 @@ test.describe("Inquiry Workflow", () => {
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     expect(body.data.status).toBe("Contacted");
+
+    // Navigate to form to show the updated status in the video
+    await page.goto(`/app/travel-inquiry/${workflowInquiryName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+    await expect(page.locator('[data-fieldname="status"]').first()).toBeVisible();
   });
 
   test("Inquiry can be moved to Quoted", async ({ page }) => {
@@ -115,6 +126,10 @@ test.describe("Inquiry Workflow", () => {
       { data: { status: "Quoted" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     expect(resp.ok()).toBeTruthy();
+
+    // Show the inquiry form with Quoted status
+    await page.goto(`/app/travel-inquiry/${workflowInquiryName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Inquiry can be moved to Won", async ({ page }) => {
@@ -124,10 +139,19 @@ test.describe("Inquiry Workflow", () => {
       { data: { status: "Won" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
     expect(resp.ok()).toBeTruthy();
+
+    // Show the Won status in the form
+    await page.goto(`/app/travel-inquiry/${workflowInquiryName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Won inquiry can be converted to booking via API", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Show the Won inquiry in the form before conversion
+    await page.goto(`/app/travel-inquiry/${workflowInquiryName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+
     const resp = await page.request.post(
       "/api/method/horizon_crm.api.inquiry.create_booking_from_inquiry",
       { data: { source_name: workflowInquiryName }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
@@ -135,6 +159,12 @@ test.describe("Inquiry Workflow", () => {
     if (resp.ok()) {
       const body = await resp.json();
       expect(body.message).toBeDefined();
+
+      // Navigate to the newly created booking to show it
+      if (body.message?.name) {
+        await page.goto(`/app/travel-booking/${body.message.name}`, { waitUntil: "domcontentloaded" });
+        await page.waitForSelector(".form-layout", { timeout: 15_000 });
+      }
     }
   });
 

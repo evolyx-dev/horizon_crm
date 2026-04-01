@@ -30,6 +30,12 @@ test.describe("Lead Pipeline", () => {
 
   test("Lead created with correct initial status", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to the lead form to show it in video
+    await page.goto(`/app/travel-lead/${leadName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+    await expect(page.locator('[data-fieldname="status"]').first()).toBeVisible();
+
     const resp = await page.request.get(`/api/resource/Travel Lead/${leadName}`);
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
@@ -45,6 +51,10 @@ test.describe("Lead Pipeline", () => {
         { data: { status }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
       );
       expect(resp.ok()).toBeTruthy();
+
+      // Show each status transition in the form
+      await page.goto(`/app/travel-lead/${leadName}`, { waitUntil: "domcontentloaded" });
+      await page.waitForSelector(".form-layout", { timeout: 15_000 });
     }
     // Verify final status
     const resp = await page.request.get(`/api/resource/Travel Lead/${leadName}`);
@@ -76,6 +86,10 @@ test.describe("Lead Pipeline", () => {
     expect(inqResp.data.name).toBeDefined();
     expect(inqResp.data.lead).toBe(leadName);
 
+    // Show the created inquiry in the form
+    await page.goto(`/app/travel-inquiry/${inqResp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+
     // Mark lead as Converted
     const convResp = await page.request.put(
       `/api/resource/Travel Lead/${leadName}`,
@@ -88,6 +102,11 @@ test.describe("Lead Pipeline", () => {
 test.describe("Branding & Favicon", () => {
   test("Custom favicon asset is accessible", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to desk to show branding in video
+    await page.goto("/app", { waitUntil: "domcontentloaded" });
+    await expect(page.locator(".navbar")).toBeVisible();
+
     const resp = await page.request.get("/assets/horizon_crm/images/favicon.svg");
     expect(resp.ok()).toBeTruthy();
     const body = await resp.text();
@@ -96,6 +115,11 @@ test.describe("Branding & Favicon", () => {
 
   test("Custom logo asset is accessible", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to desk to show branding in video
+    await page.goto("/app", { waitUntil: "domcontentloaded" });
+    await expect(page.locator(".navbar")).toBeVisible();
+
     const resp = await page.request.get("/assets/horizon_crm/images/logo.svg");
     expect(resp.ok()).toBeTruthy();
     const body = await resp.text();

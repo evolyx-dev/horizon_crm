@@ -68,11 +68,20 @@ test.describe("Travel Invoice", () => {
     });
     expect(resp.data.name).toBeDefined();
     invoiceName = resp.data.name;
+
+    // Navigate to the created invoice to show it in video
+    await page.goto(`/app/travel-invoice/${invoiceName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Invoice calculates subtotal, tax, grand_total correctly", async ({ page }) => {
     test.skip(!invoiceName, "Invoice not created in prior test");
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to the invoice form to show calculations in video
+    await page.goto(`/app/travel-invoice/${invoiceName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+
     const resp = await page.request.get(`/api/resource/Travel Invoice/${invoiceName}`);
     expect(resp.ok()).toBeTruthy();
     const inv = (await resp.json()).data;
@@ -96,6 +105,10 @@ test.describe("Travel Invoice", () => {
     });
     expect(resp.ok()).toBeTruthy();
     expect((await resp.json()).data.status).toBe("Sent");
+
+    // Show the updated status in the form
+    await page.goto(`/app/travel-invoice/${invoiceName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Invoice payment reduces outstanding", async ({ page }) => {
@@ -114,6 +127,10 @@ test.describe("Travel Invoice", () => {
     const inv = (await resp.json()).data;
     expect(inv.paid_amount).toBe(2000);
     expect(inv.outstanding_amount).toBe(2740);
+
+    // Show the updated invoice in the form
+    await page.goto(`/app/travel-invoice/${invoiceName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Invoice list view loads", async ({ page }) => {
@@ -157,10 +174,19 @@ test.describe("Travel Customer CRUD", () => {
     });
     expect(resp.data.name).toBeDefined();
     custName = resp.data.name;
+
+    // Navigate to the created customer to show it in video
+    await page.goto(`/app/travel-customer/${custName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Customer detail fields are persisted", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to the customer form to show fields in video
+    await page.goto(`/app/travel-customer/${custName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+
     const resp = await page.request.get(`/api/resource/Travel Customer/${custName}`);
     expect(resp.ok()).toBeTruthy();
     const cust = (await resp.json()).data;
@@ -178,6 +204,10 @@ test.describe("Travel Customer CRUD", () => {
     });
     expect(resp.ok()).toBeTruthy();
     expect((await resp.json()).data.loyalty_tier).toBe("Gold");
+
+    // Show the updated customer in the form
+    await page.goto(`/app/travel-customer/${custName}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Customer list view loads", async ({ page }) => {
@@ -193,6 +223,11 @@ test.describe("Travel Customer CRUD", () => {
 test.describe("Travel Destination (master data)", () => {
   test("Default destinations are seeded", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to destination list to show in video
+    await page.goto("/app/travel-destination", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".frappe-list", { timeout: 15_000 });
+
     const resp = await page.request.get(
       "/api/resource/Travel Destination?limit_page_length=0"
     );
@@ -209,6 +244,11 @@ test.describe("Travel Destination (master data)", () => {
 
   test("Destination detail can be read", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to Paris destination to show in video
+    await page.goto("/app/travel-destination/Paris", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+
     const resp = await page.request.get("/api/resource/Travel Destination/Paris");
     if (resp.ok()) {
       const dest = (await resp.json()).data;
@@ -223,6 +263,11 @@ test.describe("Travel Destination (master data)", () => {
 test.describe("Travel Type (master data)", () => {
   test("Default travel types are seeded", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to travel type list to show in video
+    await page.goto("/app/travel-type", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".frappe-list", { timeout: 15_000 });
+
     const resp = await page.request.get(
       "/api/resource/Travel Type?limit_page_length=0"
     );
@@ -243,6 +288,11 @@ test.describe("Travel Type (master data)", () => {
 test.describe("Travel Lost Reason (master data)", () => {
   test("Default lost reasons are seeded", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to lost reason list to show in video
+    await page.goto("/app/travel-lost-reason", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".frappe-list", { timeout: 15_000 });
+
     const resp = await page.request.get(
       "/api/resource/Travel Lost Reason?limit_page_length=0"
     );

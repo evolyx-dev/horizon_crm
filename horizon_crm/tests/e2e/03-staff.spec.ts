@@ -38,12 +38,15 @@ test.describe("Staff Management", () => {
     // Arrange — login as admin
     await login(page, USERS.admin.email, USERS.admin.password);
 
-    // Act — fetch team lead user data
+    // Act — navigate to the team lead's user page
+    await page.goto(`/app/user/${USERS.teamLead.email}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+
+    // Assert — user page should display, verify role via API
+    await expect(page.locator('[data-fieldname="email"]').first()).toBeVisible();
     const resp = await page.request.get(
       `/api/resource/User/${USERS.teamLead.email}`
     );
-
-    // Assert — should have Agency Team Lead role
     expect(resp.ok()).toBeTruthy();
     const body = await resp.json();
     const roles = body.data.roles.map((r: { role: string }) => r.role);
@@ -58,7 +61,12 @@ test.describe("Staff Management", () => {
       { data: { max_staff: 1 }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
 
-    // Act — try to add a new staff member beyond limit
+    // Navigate to agency settings to show the max_staff value
+    await page.goto("/app/travel-agency", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+    await page.waitForTimeout(1000);
+
+    // Act — try to add a new staff member beyond limit via API
     const resp = await page.request.post(
       "/api/resource/Travel Agency Staff",
       {

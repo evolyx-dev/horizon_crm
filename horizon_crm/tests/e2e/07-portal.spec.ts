@@ -39,6 +39,10 @@ test.describe("Customer Portal", () => {
   });
 
   test("Portal API: get_my_bookings returns data", async ({ page }) => {
+    // Navigate to portal bookings page to show in video
+    await page.goto("/portal/bookings", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1500);
+
     // Act — call portal API
     const resp = await page.request.get(
       "/api/method/horizon_crm.api.portal.get_my_bookings"
@@ -51,6 +55,10 @@ test.describe("Customer Portal", () => {
   });
 
   test("Portal API: submit_inquiry creates inquiry", async ({ page }) => {
+    // Navigate to portal inquiry page to show in video
+    await page.goto("/portal/inquiry", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1500);
+
     // Act — submit inquiry via portal API
     const resp = await page.request.post(
       "/api/method/horizon_crm.api.portal.submit_inquiry",
@@ -127,6 +135,10 @@ test.describe("Customer Portal", () => {
   });
 
   test("Customer cannot access admin-only resources", async ({ page }) => {
+    // Navigate to admin area to show it's restricted in video
+    await page.goto("/app/travel-agency-staff", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(2000);
+
     // Act — try to list Travel Agency Staff
     const resp = await page.request.get("/api/resource/Travel Agency Staff");
 

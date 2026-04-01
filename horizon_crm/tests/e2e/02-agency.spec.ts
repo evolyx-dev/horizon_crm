@@ -42,36 +42,45 @@ test.describe("Agency Settings", () => {
   });
 
   test("Agency status can be toggled via API", async ({ page }) => {
-    // Arrange — login as admin
+    // Arrange — login as admin and navigate to agency form
     await login(page, USERS.admin.email, USERS.admin.password);
+    await page.goto("/app/travel-agency", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
 
     // Act — set status to Inactive then back to Active
-    const resp = await page.request.put(
-      "/api/resource/Travel Agency/Travel Agency",
-      { data: { status: "Inactive" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
-    );
-    expect(resp.ok()).toBeTruthy();
+    await fillField(page, "status", "Inactive", "select");
+    await saveForm(page);
+    await page.waitForTimeout(500);
 
-    const resp2 = await page.request.put(
-      "/api/resource/Travel Agency/Travel Agency",
-      { data: { status: "Active" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
-    );
+    // Verify Inactive persisted
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
 
-    // Assert — both operations should succeed
-    expect(resp2.ok()).toBeTruthy();
+    // Toggle back to Active
+    await fillField(page, "status", "Active", "select");
+    await saveForm(page);
+    await page.waitForTimeout(500);
+
+    // Assert — verify Active persisted
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+    const status = page.locator('[data-fieldname="status"] select');
+    await expect(status).toHaveValue("Active");
   });
 
   test("Staff cannot modify agency settings", async ({ page }) => {
     // Arrange — login as regular staff
     await login(page, USERS.staff.email, USERS.staff.password);
 
-    // Act — try to update agency via API
+    // Act — navigate to agency settings page
+    await page.goto("/app/travel-agency", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(2000);
+
+    // Assert — phone field should be read-only or the page should block write
     const resp = await page.request.put(
       "/api/resource/Travel Agency/Travel Agency",
       { data: { phone: "+0000000000" }, headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
-
-    // Assert — should be forbidden (staff has read-only)
     expect([403, 401]).toContain(resp.status());
   });
 

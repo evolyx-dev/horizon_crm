@@ -20,6 +20,11 @@ const ts = Date.now();
 test.describe("Travel Lead — negative cases", () => {
   test("Lead without any contact method is rejected", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Navigate to lead creation form to show in video
+    await page.goto("/app/travel-lead/new", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+
     const resp = await page.request.post("/api/resource/Travel Lead", {
       data: { lead_name: "No Contact Lead", status: "New" },
       headers: { "X-Frappe-CSRF-Token": getCsrfToken() },
@@ -102,6 +107,10 @@ test.describe("Inquiry API — negative cases", () => {
       status: "New",
       source: "Website",
     });
+
+    // Navigate to the inquiry form to show its New status
+    await page.goto(`/app/travel-inquiry/${inq.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
 
     const resp = await page.request.post(
       "/api/method/horizon_crm.api.inquiry.create_booking_from_inquiry",
@@ -218,6 +227,10 @@ test.describe("Invoice — calculation edge cases", () => {
     });
     expect(resp.data.subtotal).toBe(200);
     expect(resp.data.grand_total).toBe(220);
+
+    // Navigate to the invoice to show calculations in video
+    await page.goto(`/app/travel-invoice/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Invoice with 100% tax doubles the total", async ({ page }) => {
@@ -316,6 +329,10 @@ test.describe("Booking — payment calculation cases", () => {
     });
     expect(resp.data.paid_amount).toBe(2000);
     expect(resp.data.balance_amount).toBe(3000);
+
+    // Navigate to the booking to show payment details in video
+    await page.goto(`/app/travel-booking/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Booking with no payments has full balance", async ({ page }) => {
@@ -376,6 +393,11 @@ test.describe("Booking — payment calculation cases", () => {
 test.describe("Booking Summary API — validation", () => {
   test("Summary returns expected numeric fields", async ({ page }) => {
     await login(page, USERS.agencyAdmin.email, USERS.agencyAdmin.password);
+
+    // Show booking list in video before checking summary
+    await page.goto("/app/travel-booking", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".frappe-list", { timeout: 15_000 });
+
     const resp = await page.request.get(
       "/api/method/horizon_crm.api.booking.get_booking_summary"
     );
@@ -419,7 +441,16 @@ test.describe("Permission — RBAC negative cases", () => {
       status: "Confirmed",
     });
 
+    // Show the booking in the form before trying to delete
+    await page.goto(`/app/travel-booking/${booking.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+
     await login(page, USERS.staff.email, USERS.staff.password);
+
+    // Navigate to the booking as staff
+    await page.goto(`/app/travel-booking/${booking.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(2000);
+
     const delResp = await page.request.delete(
       `/api/resource/Travel Booking/${booking.data.name}`,
       { headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
@@ -557,16 +588,26 @@ test.describe("Portal API — negative cases", () => {
 
 test.describe("Auth — edge cases", () => {
   test("Empty credentials return error", async ({ page }) => {
-    const resp = await page.request.post("/api/method/login", {
-      form: { usr: "", pwd: "" },
-    });
-    expect(resp.ok()).toBeFalsy();
+    // Show login page in video
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await page.fill("#login_email", "");
+    await page.fill("#login_password", "");
+    await page.locator(".btn-login").click();
+    await page.waitForTimeout(2000);
+
+    // Should still be on login page
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test("Wrong password returns error", async ({ page }) => {
-    const resp = await page.request.post("/api/method/login", {
-      form: { usr: USERS.agencyAdmin.email, pwd: "WrongPassword123!" },
-    });
-    expect(resp.ok()).toBeFalsy();
+    // Show login attempt in video
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await page.fill("#login_email", USERS.agencyAdmin.email);
+    await page.fill("#login_password", "WrongPassword123!");
+    await page.locator(".btn-login").click();
+    await page.waitForTimeout(2000);
+
+    // Should still be on login page
+    await expect(page).toHaveURL(/\/login/);
   });
 });

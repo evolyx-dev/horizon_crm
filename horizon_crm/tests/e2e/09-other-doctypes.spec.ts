@@ -35,6 +35,10 @@ test.describe("Itinerary Management", () => {
     // Assert — total cost should be calculated
     expect(resp.data.name).toBeDefined();
     expect(resp.data.total_cost).toBe(350);
+
+    // Navigate to the created itinerary to show it in video
+    await page.goto(`/app/travel-itinerary/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Itinerary list view loads", async ({ page }) => {
@@ -58,6 +62,10 @@ test.describe("Airline Supplier", () => {
       ],
     });
     expect(resp.data.name).toBeDefined();
+
+    // Navigate to the created supplier to show it in video
+    await page.goto(`/app/airline-supplier/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Airline Supplier list view loads", async ({ page }) => {
@@ -79,6 +87,10 @@ test.describe("Hotel Supplier", () => {
       ],
     });
     expect(resp.data.name).toBeDefined();
+
+    // Navigate to the created hotel to show it in video
+    await page.goto(`/app/hotel-supplier/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Hotel Supplier list view loads", async ({ page }) => {
@@ -97,6 +109,10 @@ test.describe("Visa Agent", () => {
       avg_processing_days: 15,
     });
     expect(resp.data.name).toBeDefined();
+
+    // Navigate to the created visa agent to show it in video
+    await page.goto(`/app/visa-agent/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Visa Agent list view loads", async ({ page }) => {
@@ -115,6 +131,10 @@ test.describe("Transport Supplier", () => {
       fleet_size: 50,
     });
     expect(resp.data.name).toBeDefined();
+
+    // Navigate to the created transport to show it in video
+    await page.goto(`/app/transport-supplier/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Transport Supplier list view loads", async ({ page }) => {
@@ -133,6 +153,10 @@ test.describe("Tour Operator", () => {
       destinations_covered: "Nepal, Peru, Tanzania",
     });
     expect(resp.data.name).toBeDefined();
+
+    // Navigate to the created tour operator to show it in video
+    await page.goto(`/app/tour-operator/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Tour Operator list view loads", async ({ page }) => {
@@ -151,6 +175,10 @@ test.describe("Insurance Provider", () => {
       max_coverage_amount: 100000,
     });
     expect(resp.data.name).toBeDefined();
+
+    // Navigate to the created insurance provider to show it in video
+    await page.goto(`/app/insurance-provider/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Insurance Provider list view loads", async ({ page }) => {
@@ -194,6 +222,10 @@ test.describe("Travel Feedback", () => {
     // Assert
     expect(fbResp.data.name).toBeDefined();
     expect(fbResp.data.rating).toBeGreaterThan(0);
+
+    // Navigate to the created feedback to show it in video
+    await page.goto(`/app/travel-feedback/${fbResp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Feedback list view loads", async ({ page }) => {
@@ -221,6 +253,10 @@ test.describe("Travel Teams", () => {
 
     // Assert
     expect(resp.data.name).toBeDefined();
+
+    // Navigate to the created team to show it in video
+    await page.goto(`/app/travel-team/${resp.data.name}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Team list view loads", async ({ page }) => {
