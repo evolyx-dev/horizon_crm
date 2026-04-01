@@ -42,22 +42,24 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
       testIgnore: /10-multi-tenant/,
       dependencies: ["setup"],
+      teardown: "teardown",
     },
     {
       name: "mobile",
       use: { ...devices["iPhone 13"] },
       testIgnore: /10-multi-tenant/,
       dependencies: ["setup"],
+      teardown: "teardown",
     },
     {
       name: "multi-tenant",
       testMatch: /10-multi-tenant\.spec\.ts/,
       dependencies: ["setup"],
+      teardown: "teardown",
     },
     {
       name: "teardown",
       testMatch: /global-teardown\.ts/,
-      dependencies: ["chromium", "mobile", "multi-tenant"],
     },
   ],
 });
