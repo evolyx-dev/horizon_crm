@@ -85,7 +85,7 @@ services:
 
   # ── Frappe Dev Server ──────────────────────────────────────
   frappe:
-    image: frappe/bench:latest
+    image: ${FRAPPE_BENCH_IMAGE:-frappe/bench@sha256:9c79fb8acd3e23a11e62aa6771f3426909303fddee39785adf645a0f2df7d208}
     container_name: horizon-frappe
     restart: unless-stopped
     depends_on:
@@ -99,7 +99,11 @@ services:
       - SHELL=/bin/bash
       - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-123}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - SITE_NAME=${SITE_NAME:-horizon.localhost}
+      - FRAPPE_BRANCH=${FRAPPE_BRANCH:-develop}
+      - FRAPPE_COMMIT=${FRAPPE_COMMIT:-0afbf2a98e00288bba20a3a6231b7dabe31df69f}
+      - PRIMARY_SITE_NAME=${PRIMARY_SITE_NAME:-horizon.localhost}
+      - SECONDARY_SITE_NAME=${SECONDARY_SITE_NAME:-tenant2.localhost}
+      - SITE_NAME=${PRIMARY_SITE_NAME:-horizon.localhost}
       - SEED_DEMO=${SEED_DEMO:-0}
     volumes:
       - .:/workspace/horizon_crm:cached

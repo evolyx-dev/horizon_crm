@@ -9,6 +9,11 @@ set -eo pipefail
 BENCH_DIR="/home/frappe/frappe-bench"
 cd "$BENCH_DIR"
 
+SITE_SETUP_LANGUAGE="${SITE_SETUP_LANGUAGE:-English}"
+SITE_SETUP_COUNTRY="${SITE_SETUP_COUNTRY:-United States}"
+SITE_SETUP_TIMEZONE="${SITE_SETUP_TIMEZONE:-America/New_York}"
+SITE_SETUP_CURRENCY="${SITE_SETUP_CURRENCY:-USD}"
+
 # ── Configure common_site_config.json ───────────────────────
 configure_bench() {
     echo "▸ Configuring bench for environment..."
@@ -35,8 +40,9 @@ configure_bench() {
     bench set-config -g logging 1
 
     # Allowed hosts (for CSRF protection behind proxy)
-    if [ -n "$FRAPPE_SITE_NAME" ]; then
-        bench use "$FRAPPE_SITE_NAME"
+    local site_name="${PRIMARY_SITE_NAME:-${FRAPPE_SITE_NAME:-horizon.localhost}}"
+    if [ -n "$site_name" ]; then
+        bench use "$site_name"
     fi
 }
 
@@ -89,9 +95,55 @@ except Exception:
     echo "✓ Redis at ${host}:${port} is ready"
 }
 
+complete_site_setup() {
+    local site_name="${1:-}"
+    local setup_complete=""
+    local setup_args=""
+
+    if [ -z "$site_name" ]; then
+        return
+    fi
+
+    setup_complete="$(
+        bench --site "$site_name" execute frappe.db.get_single_value --args '["System Settings", "setup_complete"]' 2>/dev/null \
+            | tail -n 1 \
+            | tr -d '\r'
+    )"
+
+    if [ "$setup_complete" = "1" ]; then
+        return
+    fi
+
+    echo "▸ Completing setup wizard on $site_name..."
+    setup_args="$(
+        python3 - <<'PY'
+import json
+import os
+
+print(
+    json.dumps(
+        [
+            {
+                "language": os.environ.get("SITE_SETUP_LANGUAGE", "English"),
+                "email": "Administrator",
+                "full_name": "Administrator",
+                "password": os.environ.get("ADMIN_PASSWORD", "admin"),
+                "country": os.environ.get("SITE_SETUP_COUNTRY", "United States"),
+                "timezone": os.environ.get("SITE_SETUP_TIMEZONE", "America/New_York"),
+                "currency": os.environ.get("SITE_SETUP_CURRENCY", "USD"),
+                "enable_telemetry": 0,
+            }
+        ]
+    )
+)
+PY
+    )"
+    bench --site "$site_name" execute frappe.desk.page.setup_wizard.setup_wizard.setup_complete --args "$setup_args"
+}
+
 # ── Create site if it doesn't exist ─────────────────────────
 maybe_create_site() {
-    local site_name="${FRAPPE_SITE_NAME:-horizon.localhost}"
+    local site_name="${PRIMARY_SITE_NAME:-${FRAPPE_SITE_NAME:-horizon.localhost}}"
 
     if [ ! -d "sites/$site_name" ]; then
         echo "▸ Creating site: $site_name..."
@@ -109,6 +161,7 @@ maybe_create_site() {
 
         bench --site "$site_name" install-app horizon_crm
         bench --site "$site_name" set-config mute_emails 1
+        complete_site_setup "$site_name"
         bench use "$site_name"
 
         # Resolve asset symlinks so nginx can serve them (nginx only
@@ -129,6 +182,7 @@ maybe_create_site() {
     else
         echo "▸ Site $site_name exists, running migrate..."
         bench --site "$site_name" migrate --skip-failing 2>/dev/null || true
+        complete_site_setup "$site_name"
     fi
 }
 
@@ -210,7 +264,7 @@ case "$ROLE" in
         ;;
     migrate)
         wait_for_db
-        bench --site "${FRAPPE_SITE_NAME:-horizon.localhost}" migrate
+        bench --site "${PRIMARY_SITE_NAME:-${FRAPPE_SITE_NAME:-horizon.localhost}}" migrate
         ;;
     new-site)
         wait_for_db
@@ -219,7 +273,7 @@ case "$ROLE" in
     seed)
         wait_for_db
         echo "▸ Seeding demo data..."
-        bench --site "${FRAPPE_SITE_NAME:-horizon.localhost}" execute horizon_crm.setup.demo.seed
+        bench --site "${PRIMARY_SITE_NAME:-${FRAPPE_SITE_NAME:-horizon.localhost}}" execute horizon_crm.setup.demo.seed
         echo "✓ Demo data seeded"
         ;;
     *)

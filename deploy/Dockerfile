@@ -4,20 +4,30 @@
 # Supports: linux/amd64, linux/arm64 (Oracle A1, Apple Silicon)
 # ─────────────────────────────────────────────────────────────
 
-# ── Stage 1: Build bench + install app ──────────────────────
-FROM frappe/bench:latest AS builder
+ARG FRAPPE_BENCH_IMAGE=frappe/bench@sha256:9c79fb8acd3e23a11e62aa6771f3426909303fddee39785adf645a0f2df7d208
 
-ARG FRAPPE_BRANCH=version-15
+# ── Stage 1: Build bench + install app ──────────────────────
+FROM ${FRAPPE_BENCH_IMAGE} AS builder
+
+ARG FRAPPE_BRANCH=develop
+ARG FRAPPE_COMMIT=0afbf2a98e00288bba20a3a6231b7dabe31df69f
 ARG APP_REPO=.
 
 USER frappe
 WORKDIR /home/frappe
 
+COPY --chown=frappe:frappe docker/pin-frappe.sh /home/frappe/pin-frappe.sh
+COPY --chown=frappe:frappe docker/retry.sh /home/frappe/retry.sh
+
 # Initialize bench
-RUN bench init \
+RUN bash /home/frappe/retry.sh bench init \
     --skip-redis-config-generation \
+    --skip-assets \
     --frappe-branch ${FRAPPE_BRANCH} \
-    frappe-bench
+    frappe-bench \
+    && bash /home/frappe/pin-frappe.sh /home/frappe/frappe-bench \
+    && cd /home/frappe/frappe-bench \
+    && bash /home/frappe/retry.sh bench setup requirements
 
 WORKDIR /home/frappe/frappe-bench
 
@@ -43,9 +53,10 @@ RUN rm -rf /tmp/horizon_crm \
     && rm -rf /home/frappe/.cache /home/frappe/.npm
 
 # ── Stage 2: Production runtime ────────────────────────────
-FROM frappe/bench:latest AS production
+FROM ${FRAPPE_BENCH_IMAGE} AS production
 
-ARG FRAPPE_BRANCH=version-15
+ARG FRAPPE_BRANCH=develop
+ARG FRAPPE_COMMIT=0afbf2a98e00288bba20a3a6231b7dabe31df69f
 
 USER frappe
 WORKDIR /home/frappe/frappe-bench
