@@ -2,29 +2,30 @@
  * Multi-Tenant Site Isolation E2E Tests
  *
  * Verifies that Frappe's site-per-tenant architecture provides complete
- * data isolation between tenant sites. Uses API calls against two separate
- * Frappe sites running on different ports.
- *
- * Site1 (horizon.localhost) — port 8000 (main dev server, has test data)
- * Site2 (tenant2.localhost) — port 8001 (started by this test suite)
+ * data isolation between tenant sites. Uses one Dockerized bench and
+ * addresses multiple sites via Frappe's site-selection headers.
  */
 import { test, expect, APIRequestContext, request } from "@playwright/test";
-import { execSync, ChildProcess, spawn } from "child_process";
-import path from "path";
 
-const SITE1_URL = "http://127.0.0.1:8000";
-const SITE2_URL = "http://127.0.0.1:8001";
-// From horizon_crm/tests/e2e/ → repo root is ../../../, bench0 is a sibling
-const BENCH_DIR = path.resolve(__dirname, "../../../bench0");
+const BASE_URL = process.env.FRAPPE_URL || "http://127.0.0.1:8000";
+const PRIMARY_SITE_NAME = process.env.PRIMARY_SITE_NAME || "horizon.localhost";
+const SECONDARY_SITE_NAME = process.env.SECONDARY_SITE_NAME || "tenant2.localhost";
+const SITE_HEADER_NAME = "X-Frappe-Site-Name";
 
 /** Authenticate as Administrator on a Frappe site */
-async function apiLogin(baseURL: string): Promise<APIRequestContext> {
-  const ctx = await request.newContext({ baseURL });
+async function apiLogin(siteName: string): Promise<APIRequestContext> {
+  const ctx = await request.newContext({
+    baseURL: BASE_URL,
+    extraHTTPHeaders: {
+      Host: siteName,
+      [SITE_HEADER_NAME]: siteName,
+    },
+  });
   const resp = await ctx.post("/api/method/login", {
     form: { usr: "Administrator", pwd: "admin" },
   });
   if (!resp.ok()) {
-    throw new Error(`Login failed on ${baseURL}: ${resp.status()}`);
+    throw new Error(`Login failed on ${siteName}: ${resp.status()} ${await resp.text()}`);
   }
   return ctx;
 }
@@ -35,12 +36,18 @@ async function getCsrf(ctx: APIRequestContext): Promise<string> {
   return (await resp.json()).message;
 }
 
-/** Wait for a URL to respond */
-async function waitForServer(url: string, timeoutMs = 30_000): Promise<void> {
+/** Wait for a site to respond */
+async function waitForSite(siteName: string, timeoutMs = 30_000): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      const ctx = await request.newContext({ baseURL: url });
+      const ctx = await request.newContext({
+        baseURL: BASE_URL,
+        extraHTTPHeaders: {
+          Host: siteName,
+          [SITE_HEADER_NAME]: siteName,
+        },
+      });
       const r = await ctx.get("/api/method/ping", { timeout: 2000 });
       await ctx.dispose();
       if (r.ok()) return;
@@ -49,48 +56,26 @@ async function waitForServer(url: string, timeoutMs = 30_000): Promise<void> {
     }
     await new Promise((r) => setTimeout(r, 1000));
   }
-  throw new Error(`Server at ${url} did not start within ${timeoutMs}ms`);
+  throw new Error(`Site ${siteName} did not respond within ${timeoutMs}ms`);
 }
 
 test.describe("Multi-Tenant Site Isolation", () => {
   let site1: APIRequestContext;
   let site2: APIRequestContext;
   let csrf2: string;
-  let site2Server: ChildProcess;
 
   test.beforeAll(async () => {
-    // Start a second Frappe dev server for tenant2.localhost on port 8001
-    site2Server = spawn(
-      "bench",
-      ["--site", "tenant2.localhost", "serve", "--port", "8001"],
-      {
-        cwd: BENCH_DIR,
-        stdio: "ignore",
-        detached: true,
-        env: { ...process.env },
-      }
-    );
-    site2Server.unref();
+    await waitForSite(PRIMARY_SITE_NAME, 60_000);
+    await waitForSite(SECONDARY_SITE_NAME, 60_000);
 
-    // Wait for tenant2 server to be ready
-    await waitForServer(SITE2_URL, 60_000);
-
-    site1 = await apiLogin(SITE1_URL);
-    site2 = await apiLogin(SITE2_URL);
+    site1 = await apiLogin(PRIMARY_SITE_NAME);
+    site2 = await apiLogin(SECONDARY_SITE_NAME);
     csrf2 = await getCsrf(site2);
   });
 
   test.afterAll(async () => {
     await site1?.dispose();
     await site2?.dispose();
-    // Kill the tenant2 server process group
-    if (site2Server?.pid) {
-      try {
-        process.kill(-site2Server.pid, "SIGTERM");
-      } catch {
-        // already exited
-      }
-    }
   });
 
   test("Each site has a distinct Travel Agency name", async () => {

@@ -53,7 +53,22 @@ export async function login(page: Page, email: string, password: string) {
 
 /** Log out of current session */
 export async function logout(page: Page) {
-  await page.request.get("/api/method/logout");
+  await Promise.all([
+    page.waitForURL(/\/login/, { timeout: 15_000 }),
+    page.evaluate(() => {
+      const app = (window as any).frappe?.app;
+      if (!app?.logout) {
+        throw new Error("frappe.app.logout is unavailable");
+      }
+      app.logout();
+    }),
+  ]);
+  csrfToken = "";
+  await page.evaluate(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
+  await page.context().clearCookies();
 }
 
 /** Navigate to a list view for a doctype */

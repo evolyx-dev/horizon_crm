@@ -1,5 +1,11 @@
 name: CI
 
+env:
+  FRAPPE_BENCH_IMAGE: frappe/bench@sha256:9c79fb8acd3e23a11e62aa6771f3426909303fddee39785adf645a0f2df7d208
+  FRAPPE_BRANCH: develop
+  FRAPPE_COMMIT: 0afbf2a98e00288bba20a3a6231b7dabe31df69f
+  PRIMARY_SITE_NAME: horizon.localhost
+
 on:
   push:
     branches:
@@ -13,6 +19,8 @@ concurrency:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    container:
+      image: ${{ env.FRAPPE_BENCH_IMAGE }}
     strategy:
       fail-fast: false
     name: Server
@@ -38,63 +46,27 @@ jobs:
       - name: Clone
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          check-latest: true
-
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml', '**/setup.py', '**/setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: 'echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT'
-
-      - uses: actions/cache@v4
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Install MariaDB Client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mariadb-client
-
       - name: Setup
         run: |
-          pip install frappe-bench
-          bench init --skip-redis-config-generation --skip-assets --frappe-branch version-15 --python "$(which python)" ~/frappe-bench
+          bash "$GITHUB_WORKSPACE/docker/retry.sh" bench init --skip-redis-config-generation --skip-assets --frappe-branch "$FRAPPE_BRANCH" /home/frappe/frappe-bench
+          bash "$GITHUB_WORKSPACE/docker/pin-frappe.sh" /home/frappe/frappe-bench
 
       - name: Install
-        working-directory: /home/runner/frappe-bench
+        working-directory: /home/frappe/frappe-bench
         run: |
+          bash "$GITHUB_WORKSPACE/docker/retry.sh" bench setup requirements --dev
           bench get-app horizon_crm $GITHUB_WORKSPACE
-          bench setup requirements --dev
-          bench new-site --db-root-password root --admin-password admin test_site
-          bench --site test_site install-app horizon_crm
+          bench new-site --db-root-username root --db-root-password root --admin-password admin --mariadb-user-host-login-scope='%' "$PRIMARY_SITE_NAME"
+          bench --site "$PRIMARY_SITE_NAME" install-app horizon_crm
+          bench --site "$PRIMARY_SITE_NAME" execute frappe.desk.page.setup_wizard.setup_wizard.setup_complete --args '[{"language":"English","email":"Administrator","full_name":"Administrator","password":"admin","country":"United States","timezone":"America/New_York","currency":"USD","enable_telemetry":0}]'
           bench build
         env:
           CI: 'Yes'
 
       - name: Run Tests
-        working-directory: /home/runner/frappe-bench
+        working-directory: /home/frappe/frappe-bench
         run: |
-          bench --site test_site set-config allow_tests true
-          bench --site test_site run-tests --app horizon_crm
+          bench --site "$PRIMARY_SITE_NAME" set-config allow_tests true
+          bench --site "$PRIMARY_SITE_NAME" run-tests --app horizon_crm
         env:
           TYPE: server
