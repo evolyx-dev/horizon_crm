@@ -20,6 +20,9 @@
 		}
 	},
 	"shutdownAction": "stopCompose",
+	"features": {
+		"ghcr.io/devcontainers/features/sshd:1": {}
+	},
 	"settings": {
 		"terminal.integrated.defaultProfile.linux": "bash"
 	},
