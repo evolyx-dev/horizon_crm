@@ -53,21 +53,19 @@ export async function login(page: Page, email: string, password: string) {
 
 /** Log out of current session */
 export async function logout(page: Page) {
-  await Promise.all([
-    page.waitForURL(/\/login/, { timeout: 15_000 }),
-    page.evaluate(() => {
-      const app = (window as any).frappe?.app;
-      if (!app?.logout) {
-        throw new Error("frappe.app.logout is unavailable");
-      }
-      app.logout();
-    }),
-  ]);
+  const resp = await page.request.post("/api/method/logout", {
+    headers: { "X-Frappe-CSRF-Token": csrfToken },
+  });
+  if (!resp.ok()) {
+    const body = await resp.text();
+    throw new Error(`Logout failed: ${resp.status()} ${body}`);
+  }
+
   csrfToken = "";
   await page.evaluate(() => {
     window.localStorage.clear();
     window.sessionStorage.clear();
-  });
+  }).catch(() => {});
   await page.context().clearCookies();
 }
 

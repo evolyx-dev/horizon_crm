@@ -143,16 +143,7 @@
         }
     ],
     "image_field": "logo",
-    "links": [
-        {
-            "link_doctype": "Travel Agency Staff",
-            "link_fieldname": "agency"
-        },
-        {
-            "link_doctype": "Travel Team",
-            "link_fieldname": "agency"
-        }
-    ],
+    "links": [],
     "search_fields": "agency_name,agency_code,contact_email",
     "modified": "2026-03-30 12:00:00.000000",
     "modified_by": "Administrator",

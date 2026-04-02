@@ -100,9 +100,13 @@ test.describe("Authentication", () => {
     await ctx.clearCookies();
 
     // Navigate again — should redirect to login
-    await page.goto("/app", { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(2000);
+    await page.goto("/app", { waitUntil: "domcontentloaded" }).catch((error) => {
+      if (!String(error).includes("ERR_ABORTED")) {
+        throw error;
+      }
+    });
     await expect(page).toHaveURL(/\/login/);
+    await expect(page.getByRole("heading", { name: "Login to Horizon CRM" })).toBeVisible();
 
     await ctx.close();
   });

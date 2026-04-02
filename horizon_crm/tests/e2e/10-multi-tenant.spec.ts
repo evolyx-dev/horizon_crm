@@ -2,30 +2,26 @@
  * Multi-Tenant Site Isolation E2E Tests
  *
  * Verifies that Frappe's site-per-tenant architecture provides complete
- * data isolation between tenant sites. Uses one Dockerized bench and
- * addresses multiple sites via Frappe's site-selection headers.
+ * data isolation between tenant sites. Uses one Dockerized bench with
+ * deterministic site-pinned web ports for each local tenant.
  */
 import { test, expect, APIRequestContext, request } from "@playwright/test";
 
-const BASE_URL = process.env.FRAPPE_URL || "http://127.0.0.1:8000";
+const PRIMARY_BASE_URL = process.env.FRAPPE_URL || "http://127.0.0.1:8000";
+const SECONDARY_BASE_URL = process.env.SECONDARY_FRAPPE_URL || "http://127.0.0.1:8001";
 const PRIMARY_SITE_NAME = process.env.PRIMARY_SITE_NAME || "horizon.localhost";
 const SECONDARY_SITE_NAME = process.env.SECONDARY_SITE_NAME || "tenant2.localhost";
-const SITE_HEADER_NAME = "X-Frappe-Site-Name";
 
 /** Authenticate as Administrator on a Frappe site */
-async function apiLogin(siteName: string): Promise<APIRequestContext> {
+async function apiLogin(baseURL: string, siteName: string): Promise<APIRequestContext> {
   const ctx = await request.newContext({
-    baseURL: BASE_URL,
-    extraHTTPHeaders: {
-      Host: siteName,
-      [SITE_HEADER_NAME]: siteName,
-    },
+    baseURL,
   });
   const resp = await ctx.post("/api/method/login", {
     form: { usr: "Administrator", pwd: "admin" },
   });
   if (!resp.ok()) {
-    throw new Error(`Login failed on ${siteName}: ${resp.status()} ${await resp.text()}`);
+    throw new Error(`Login failed on ${siteName} (${baseURL}): ${resp.status()} ${await resp.text()}`);
   }
   return ctx;
 }
@@ -37,17 +33,11 @@ async function getCsrf(ctx: APIRequestContext): Promise<string> {
 }
 
 /** Wait for a site to respond */
-async function waitForSite(siteName: string, timeoutMs = 30_000): Promise<void> {
+async function waitForSite(baseURL: string, siteName: string, timeoutMs = 30_000): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      const ctx = await request.newContext({
-        baseURL: BASE_URL,
-        extraHTTPHeaders: {
-          Host: siteName,
-          [SITE_HEADER_NAME]: siteName,
-        },
-      });
+      const ctx = await request.newContext({ baseURL });
       const r = await ctx.get("/api/method/ping", { timeout: 2000 });
       await ctx.dispose();
       if (r.ok()) return;
@@ -65,11 +55,11 @@ test.describe("Multi-Tenant Site Isolation", () => {
   let csrf2: string;
 
   test.beforeAll(async () => {
-    await waitForSite(PRIMARY_SITE_NAME, 60_000);
-    await waitForSite(SECONDARY_SITE_NAME, 60_000);
+    await waitForSite(PRIMARY_BASE_URL, PRIMARY_SITE_NAME, 60_000);
+    await waitForSite(SECONDARY_BASE_URL, SECONDARY_SITE_NAME, 60_000);
 
-    site1 = await apiLogin(PRIMARY_SITE_NAME);
-    site2 = await apiLogin(SECONDARY_SITE_NAME);
+    site1 = await apiLogin(PRIMARY_BASE_URL, PRIMARY_SITE_NAME);
+    site2 = await apiLogin(SECONDARY_BASE_URL, SECONDARY_SITE_NAME);
     csrf2 = await getCsrf(site2);
   });
 

@@ -610,28 +610,41 @@ test("Horizon CRM — Complete Feature Demo", async ({ page, context }) => {
   await showAnnotation(page, "New Inquiry Form", "Filling customer, destination, dates, and travel details");
 
   // Customer link
+  const inquiryCustomer = created.customers[3] || "Aisha Khan";
   const inqCust = page.locator('[data-fieldname="customer"] .control-input input');
   await inqCust.click();
   await inqCust.fill("");
-  await inqCust.type("Aisha", { delay: 50 });
+  await inqCust.type(inquiryCustomer, { delay: 50 });
   await page.waitForTimeout(1200);
-  const custSugg = page.locator(".awesomplete li").first();
-  if (await custSugg.isVisible({ timeout: 3000 }).catch(() => false)) await custSugg.click();
+  const custSugg = page.locator(".awesomplete li").filter({ hasText: inquiryCustomer }).first();
+  const fallbackCustSugg = page.locator(".awesomplete li").first();
+  if (await custSugg.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await custSugg.click();
+  } else if (await fallbackCustSugg.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await fallbackCustSugg.click();
+  }
   await pause(page, 800);
+  await page.waitForSelector('[data-fieldname="destination"] .control-input input', { timeout: 5000 });
 
   // Scroll down so destination field is not covered by the customer section header
   await slowScroll(page, 300, 800);
 
   // Destination link
+  const inquiryDestination = "Bangkok";
   const inqDest = page.locator('[data-fieldname="destination"] .control-input input');
   await inqDest.scrollIntoViewIfNeeded();
   await pause(page, 500);
   await inqDest.click({ force: true });
   await inqDest.fill("");
-  await inqDest.type("Bangkok", { delay: 50 });
+  await inqDest.type(inquiryDestination, { delay: 50 });
   await page.waitForTimeout(1000);
-  const dSugg = page.locator(".awesomplete li").first();
-  if (await dSugg.isVisible({ timeout: 3000 }).catch(() => false)) await dSugg.click();
+  const dSugg = page.locator(".awesomplete li").filter({ hasText: inquiryDestination }).first();
+  const fallbackDestSugg = page.locator(".awesomplete li").first();
+  if (await dSugg.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await dSugg.click();
+  } else if (await fallbackDestSugg.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await fallbackDestSugg.click();
+  }
   await pause(page, 600);
   // Dismiss any remaining awesomplete dropdown
   await page.keyboard.press("Escape");

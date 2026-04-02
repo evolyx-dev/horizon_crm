@@ -7,8 +7,10 @@
 #
 # Environment variables (set in docker-compose.yml):
 #   SITE_NAME          — Frappe site name (default: horizon.localhost)
+#   SECONDARY_SITE_NAME — Secondary tenant site name (default: tenant2.localhost)
 #   DB_ROOT_PASSWORD   — MariaDB root password (default: 123)
 #   ADMIN_PASSWORD     — Frappe admin password (default: admin)
+#   PORTAL_LEAD_RATE_LIMIT — Optional per-hour portal lead limit for local/CI runs
 #   SEED_DEMO          — Set to "1" to seed demo data on first run
 # ─────────────────────────────────────────────────────
 set -e
@@ -17,10 +19,12 @@ BENCH_DIR="/workspace/frappe-bench"
 PIN_STATE_FILE="${BENCH_DIR}/.frappe-pinned-commit"
 PRIMARY_SITE_NAME="${PRIMARY_SITE_NAME:-${SITE_NAME:-horizon.localhost}}"
 SECONDARY_SITE_NAME="${SECONDARY_SITE_NAME:-tenant2.localhost}"
+SECONDARY_BENCH_PORT="${SECONDARY_BENCH_PORT:-8001}"
 DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD:-123}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
 FRAPPE_BRANCH="${FRAPPE_BRANCH:-develop}"
 FRAPPE_COMMIT="${FRAPPE_COMMIT:-0afbf2a98e00288bba20a3a6231b7dabe31df69f}"
+PORTAL_LEAD_RATE_LIMIT="${PORTAL_LEAD_RATE_LIMIT:-}"
 SITE_SETUP_LANGUAGE="${SITE_SETUP_LANGUAGE:-English}"
 SITE_SETUP_COUNTRY="${SITE_SETUP_COUNTRY:-United States}"
 SITE_SETUP_TIMEZONE="${SITE_SETUP_TIMEZONE:-America/New_York}"
@@ -88,8 +92,12 @@ ensure_site() {
             --admin-password "$ADMIN_PASSWORD" \
             --mariadb-user-host-login-scope='%'
         bench --site "$site_name" install-app horizon_crm
+        bench --site "$site_name" set-config allow_tests 1
         bench --site "$site_name" set-config developer_mode 1
         bench --site "$site_name" set-config mute_emails 1
+        if [ -n "$PORTAL_LEAD_RATE_LIMIT" ]; then
+            bench --site "$site_name" set-config portal_lead_rate_limit "$PORTAL_LEAD_RATE_LIMIT"
+        fi
         complete_site_setup "$site_name"
 
         if [ "$seed_demo" = "1" ]; then
@@ -99,6 +107,10 @@ ensure_site() {
     else
         echo "       Site $site_name exists, running migrate..."
         bench --site "$site_name" migrate 2>/dev/null || true
+        bench --site "$site_name" set-config allow_tests 1
+        if [ -n "$PORTAL_LEAD_RATE_LIMIT" ]; then
+            bench --site "$site_name" set-config portal_lead_rate_limit "$PORTAL_LEAD_RATE_LIMIT"
+        fi
         complete_site_setup "$site_name"
     fi
 }
@@ -155,6 +167,38 @@ bench set-config -g serve_default_site true
 # ── Step 4: Remove redis from Procfile (Docker provides them) ─
 echo "[4/8] Cleaning Procfile..."
 sed -i '/redis/d' ./Procfile 2>/dev/null || true
+python3 - <<'PY'
+from pathlib import Path
+import os
+
+procfile = Path("Procfile")
+lines = procfile.read_text().splitlines()
+primary_site = os.environ.get("PRIMARY_SITE_NAME", os.environ.get("SITE_NAME", "horizon.localhost"))
+secondary_site = os.environ.get("SECONDARY_SITE_NAME", "tenant2.localhost")
+secondary_port = os.environ.get("SECONDARY_BENCH_PORT", "8001")
+
+filtered = [
+    line
+    for line in lines
+    if not line.startswith("web:")
+    and not line.startswith("web_secondary:")
+]
+
+for index, line in enumerate(filtered):
+    if line.startswith("worker:"):
+        filtered[index] = (
+            "worker: while true; do "
+            "bench worker 1>> logs/worker.log 2>> logs/worker.error.log || true; "
+            "echo \"[worker] restarting after exit\" 1>> logs/worker.log; "
+            "sleep 1; "
+            "done"
+        )
+
+filtered.insert(0, f"web: bench --site {primary_site} serve --port 8000 --noreload --nothreading")
+if secondary_site != primary_site:
+    filtered.insert(1, f"web_secondary: bench --site {secondary_site} serve --port {secondary_port} --noreload --nothreading")
+procfile.write_text("\n".join(filtered) + "\n")
+PY
 
 # ── Step 5: Install app via symlink (live source for dev) ──
 if [ ! -d "$BENCH_DIR/apps/horizon_crm" ]; then
@@ -190,7 +234,7 @@ if [ "${SEED_DEMO:-0}" = "1" ]; then
 fi
 echo "  Primary site:   $PRIMARY_SITE_NAME"
 if [ "$SECONDARY_SITE_NAME" != "$PRIMARY_SITE_NAME" ]; then
-    echo "  Secondary site: $SECONDARY_SITE_NAME"
+    echo "  Secondary site: $SECONDARY_SITE_NAME (:${SECONDARY_BENCH_PORT})"
 fi
 echo "============================================"
 bench start

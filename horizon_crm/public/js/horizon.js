@@ -417,7 +417,7 @@ frappe.ui.form.on("Travel Agency Staff", {
     setup(frm) {
         frm.set_query("team", function() {
             return {
-                filters: { agency: frm.doc.agency }
+                filters: { is_active: 1 }
             };
         });
     }
