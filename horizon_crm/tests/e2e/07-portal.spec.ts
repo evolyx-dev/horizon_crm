@@ -115,10 +115,6 @@ test.describe("Public Lead-Capture Portal", () => {
     expect(lead.status).toBe("New");
     expect(lead.interested_destination).toBe("Paris");
     expect(lead.num_travelers).toBe(3);
-
-    // Cleanup — navigate to the lead form to show it in video
-    await page.goto(`/app/travel-lead/${leadName}`, { waitUntil: "domcontentloaded" });
-    await page.waitForSelector(".form-layout", { timeout: 15_000 });
   });
 
   test("Required field: missing name returns error", async ({ page }) => {

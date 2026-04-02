@@ -9,8 +9,8 @@ ARG FRAPPE_BENCH_IMAGE=frappe/bench@sha256:9c79fb8acd3e23a11e62aa6771f3426909303
 # ── Stage 1: Build bench + install app ──────────────────────
 FROM ${FRAPPE_BENCH_IMAGE} AS builder
 
-ARG FRAPPE_BRANCH=develop
-ARG FRAPPE_COMMIT=0afbf2a98e00288bba20a3a6231b7dabe31df69f
+ARG FRAPPE_BRANCH=version-15
+ARG FRAPPE_COMMIT=7abafc4824ec8d71e9127df965e54913bb41a870
 ARG APP_REPO=.
 
 USER frappe
@@ -55,8 +55,8 @@ RUN rm -rf /tmp/horizon_crm \
 # ── Stage 2: Production runtime ────────────────────────────
 FROM ${FRAPPE_BENCH_IMAGE} AS production
 
-ARG FRAPPE_BRANCH=develop
-ARG FRAPPE_COMMIT=0afbf2a98e00288bba20a3a6231b7dabe31df69f
+ARG FRAPPE_BRANCH=version-15
+ARG FRAPPE_COMMIT=7abafc4824ec8d71e9127df965e54913bb41a870
 
 USER frappe
 WORKDIR /home/frappe/frappe-bench

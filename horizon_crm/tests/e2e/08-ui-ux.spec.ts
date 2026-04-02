@@ -18,6 +18,55 @@ test.describe("UI/UX — Desktop", () => {
     await expect(page.locator(".navbar")).toBeVisible();
   });
 
+  test("Agency workspace rail is reduced to Horizon CRM", async ({ page }) => {
+    await page.goto("/app", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle");
+
+    const sidebarEntries = await page.evaluate(() => {
+      return Array.from(
+        document.querySelectorAll(".desk-sidebar .sidebar-item-label, .desk-sidebar .section-title")
+      ).map((el) => (el.textContent || "").trim()).filter(Boolean);
+    });
+
+    expect(sidebarEntries).toContain("Horizon CRM");
+    expect(sidebarEntries).not.toContain("Users");
+    expect(sidebarEntries).not.toContain("Website");
+    expect(sidebarEntries).not.toContain("Tools");
+    expect(sidebarEntries).not.toContain("Integrations");
+    expect(sidebarEntries).not.toContain("Build");
+  });
+
+  test("Horizon workspace renders branded app navigation", async ({ page }) => {
+    await page.goto("/app/horizon-crm", { waitUntil: "domcontentloaded" });
+    const nav = page.locator(".horizon-app-nav");
+
+    await expect(nav).toBeVisible();
+    await expect(nav).toContainText("Dashboard");
+    await expect(nav).toContainText("Pipeline");
+    await expect(nav).toContainText("Customers");
+    await expect(nav).toContainText("Billing");
+    await expect(nav).toContainText("Trip Planning");
+    await expect(nav).toContainText("Team");
+    await expect(nav).toContainText("Settings");
+  });
+
+  test("Horizon dashboard renders in light and dark themes", async ({ page }) => {
+    await page.goto("/app/horizon-crm", { waitUntil: "domcontentloaded" });
+    const widgets = page.locator(".layout-main-section .widget.number-widget-box");
+
+    await expect(page.locator(".horizon-app-nav")).toBeVisible();
+    await expect(widgets.first()).toBeVisible({ timeout: 15_000 });
+
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("data-theme-mode", "dark");
+      (window as any).frappe?.ui?.set_theme?.("dark");
+    });
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await expect(page.locator(".horizon-app-nav")).toBeVisible();
+    await expect(widgets.first()).toBeVisible();
+  });
+
   test("Travel Inquiry list has status indicators", async ({ page }) => {
     // Act
     await gotoList(page, "Travel Inquiry");

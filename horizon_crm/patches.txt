@@ -6,3 +6,4 @@
 # Patches added in this section will be executed after doctypes are migrated
 horizon_crm.patches.migrate_suppliers_to_categories
 horizon_crm.patches.remove_travel_supplier
+horizon_crm.patches.sync_agency_access_profiles

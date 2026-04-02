@@ -29,8 +29,8 @@ x-frappe-common: &frappe-common
     dockerfile: deploy/Dockerfile
     args:
       FRAPPE_BENCH_IMAGE: ${FRAPPE_BENCH_IMAGE:-frappe/bench@sha256:9c79fb8acd3e23a11e62aa6771f3426909303fddee39785adf645a0f2df7d208}
-      FRAPPE_BRANCH: ${FRAPPE_BRANCH:-develop}
-      FRAPPE_COMMIT: ${FRAPPE_COMMIT:-0afbf2a98e00288bba20a3a6231b7dabe31df69f}
+      FRAPPE_BRANCH: ${FRAPPE_BRANCH:-version-15}
+      FRAPPE_COMMIT: ${FRAPPE_COMMIT:-7abafc4824ec8d71e9127df965e54913bb41a870}
   image: horizon-crm:latest
   env_file: .env
   restart: unless-stopped

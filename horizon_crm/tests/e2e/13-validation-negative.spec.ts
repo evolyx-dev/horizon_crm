@@ -423,15 +423,18 @@ test.describe("Booking Summary API — validation", () => {
 // ─── Permission / RBAC Negative Cases ────────────────────────────
 
 test.describe("Permission — RBAC negative cases", () => {
-  test("Staff cannot delete a booking", async ({ page }) => {
-    await login(page, USERS.admin.email, USERS.admin.password);
-    const custResp = await page.request.get(
+  test("Staff cannot delete a booking", async ({ browser }) => {
+    const adminCtx = await browser.newContext();
+    const adminPage = await adminCtx.newPage();
+    await login(adminPage, USERS.admin.email, USERS.admin.password);
+
+    const custResp = await adminPage.request.get(
       `/api/resource/Travel Customer?limit_page_length=1`
     );
     const custBody = await custResp.json();
     test.skip(custBody.data.length === 0, "No customer available");
 
-    const booking = await createDoc(page, "Travel Booking", {
+    const booking = await createDoc(adminPage, "Travel Booking", {
       customer: custBody.data[0].name,
       departure_date: "2026-03-01",
       return_date: "2026-03-10",
@@ -441,21 +444,23 @@ test.describe("Permission — RBAC negative cases", () => {
       status: "Confirmed",
     });
 
-    // Show the booking in the form before trying to delete
-    await page.goto(`/app/travel-booking/${booking.data.name}`, { waitUntil: "domcontentloaded" });
-    await page.waitForSelector(".form-layout", { timeout: 15_000 });
+    const staffCtx = await browser.newContext();
+    const staffPage = await staffCtx.newPage();
+    await login(staffPage, USERS.staff.email, USERS.staff.password);
 
-    await login(page, USERS.staff.email, USERS.staff.password);
-
-    // Navigate to the booking as staff
-    await page.goto(`/app/travel-booking/${booking.data.name}`, { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(2000);
-
-    const delResp = await page.request.delete(
+    const delResp = await staffPage.request.delete(
       `/api/resource/Travel Booking/${booking.data.name}`,
       { headers: { "X-Frappe-CSRF-Token": getCsrfToken() } }
     );
-    expect([400, 403, 404, 409]).toContain(delResp.status());
+    const deleteStatus = delResp.status();
+    const deleteBody = await delResp.text();
+    expect(
+      [400, 403, 404, 409],
+      `Unexpected delete response ${deleteStatus}: ${deleteBody}`
+    ).toContain(deleteStatus);
+
+    await staffCtx.close();
+    await adminCtx.close();
   });
 
   test("Guest cannot create booking via API", async ({ page }) => {

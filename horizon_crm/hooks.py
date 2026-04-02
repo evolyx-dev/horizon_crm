@@ -16,7 +16,7 @@ add_to_apps_screen = [
 		"name": "horizon_crm",
 		"logo": "/assets/horizon_crm/images/logo.svg",
 		"title": "Horizon CRM",
-		"route": "/app/travel-inquiry",
+		"route": "/app/horizon-crm",
 	}
 ]
 
@@ -36,15 +36,16 @@ website_context = {
 # ----------
 
 role_home_page = {
-	"Agency Staff": "travel-inquiry",
-	"Agency Team Lead": "travel-inquiry",
-	"Agency Admin": "travel-inquiry",
+	"Agency Staff": "horizon-crm",
+	"Agency Team Lead": "horizon-crm",
+	"Agency Admin": "horizon-crm",
 }
 
 # Installation
 # ------------
 
 after_install = "horizon_crm.install.after_install"
+boot_session = "horizon_crm.boot.boot_session"
 
 # Bench CLI Commands
 # ------------------
@@ -56,29 +57,6 @@ commands = "horizon_crm.commands.commands"
 # Standard role-based permissions are defined in DocType JSON files.
 # In site-per-tenant architecture, each site is a separate tenant
 # so no custom permission_query_conditions are needed.
-
-# Block specific pages for non-admin roles
-# Only Horizon CRM and Desk modules are allowed for agency roles.
-# All system/framework modules are blocked.
-_system_modules = [
-	"Setup",
-	"Core",
-	"Custom",
-	"Automation",
-	"Workflow",
-	"Email",
-	"Contacts",
-	"Geo",
-	"Integrations",
-	"Printing",
-	"Website",
-]
-
-block_modules = {
-	"Agency Staff": _system_modules,
-	"Agency Team Lead": _system_modules,
-	"Agency Admin": _system_modules,
-}
 
 # Automatically update python controller files with type annotations for this app.
 export_python_type_annotations = True
@@ -92,10 +70,6 @@ require_type_annotated_api_methods = True
 fixtures = [
 	{
 		"dt": "Workspace",
-		"filters": [["module", "=", "Horizon CRM"]],
-	},
-	{
-		"dt": "Workspace Sidebar",
 		"filters": [["module", "=", "Horizon CRM"]],
 	},
 	{

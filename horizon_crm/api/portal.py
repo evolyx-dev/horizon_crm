@@ -6,8 +6,17 @@ from frappe.rate_limiter import rate_limit
 from frappe.utils import validate_email_address
 
 
+def get_portal_lead_rate_limit() -> int:
+	"""Return the per-window rate limit for the public lead form."""
+	try:
+		limit = int(frappe.conf.get("portal_lead_rate_limit") or 10)
+	except (TypeError, ValueError):
+		limit = 10
+	return max(limit, 1)
+
+
 @frappe.whitelist(allow_guest=True)
-@rate_limit(key="portal_lead", limit=10, seconds=3600)
+@rate_limit(key="portal_lead", limit=get_portal_lead_rate_limit, seconds=3600)
 def submit_lead(
 	full_name: str,
 	email: str,

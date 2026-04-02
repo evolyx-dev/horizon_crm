@@ -5,12 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-
-ROLE_MAP = {
-	"Agency Admin": "Agency Admin",
-	"Team Lead": "Agency Team Lead",
-	"Staff": "Agency Staff",
-}
+from horizon_crm.access import AGENCY_ROLE_MAP, sync_agency_user_access
 
 
 class TravelAgencyStaff(Document):
@@ -32,11 +27,17 @@ class TravelAgencyStaff(Document):
 				)
 
 	def after_insert(self):
-		self.assign_role()
+		self.sync_user_access()
 
-	def assign_role(self):
-		role = ROLE_MAP.get(self.role_in_agency)
-		if role and not frappe.db.exists("Has Role", {"parent": self.staff_user, "role": role}):
-			user = frappe.get_doc("User", self.staff_user)
-			user.append("roles", {"role": role})
-			user.save(ignore_permissions=True)
+	def on_update(self):
+		self.sync_user_access()
+
+	def on_trash(self):
+		sync_agency_user_access(self.staff_user, is_active=False)
+
+	def sync_user_access(self):
+		sync_agency_user_access(
+			self.staff_user,
+			AGENCY_ROLE_MAP.get(self.role_in_agency),
+			bool(self.is_active),
+		)

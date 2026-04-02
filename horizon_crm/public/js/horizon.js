@@ -434,12 +434,91 @@ frappe.ui.form.on("Travel Feedback", {
     }
 });
 
-// ─── Sidebar Workspace Enhancement ─────────────────────────────────────
-// Highlight the Horizon CRM workspace in sidebar for branding
+// ─── Workspace App Navigation ─────────────────────────────────────────
+horizon_crm.workspaceNav = {
+    mountTimer: null,
+
+    getConfig() {
+        return frappe.boot?.horizon_crm || null;
+    },
+
+    isWorkspaceRoute() {
+        const config = this.getConfig();
+        return !!config?.workspace_route && window.location.pathname === config.workspace_route;
+    },
+
+    queueMount() {
+        window.clearTimeout(this.mountTimer);
+        this.mountTimer = window.setTimeout(() => this.mount(), 80);
+    },
+
+    mount() {
+        const config = this.getConfig();
+        const shouldRender = this.isWorkspaceRoute() && config?.app_nav;
+        const sideSection = document.querySelector(".page-container .layout-side-section");
+        const listSidebar = sideSection?.querySelector(".list-sidebar");
+        const existingNav = sideSection?.querySelector(".horizon-app-nav");
+
+        document.body.classList.toggle("horizon-workspace-active", !!shouldRender);
+
+        if (!shouldRender || !sideSection || !listSidebar) {
+            existingNav?.remove();
+            listSidebar?.classList.remove("horizon-app-nav-hidden");
+            return;
+        }
+
+        const navRoot = existingNav || document.createElement("aside");
+        navRoot.className = "horizon-app-nav";
+        navRoot.innerHTML = this.render(config);
+        if (!existingNav) {
+            sideSection.insertBefore(navRoot, listSidebar);
+        }
+        listSidebar.classList.add("horizon-app-nav-hidden");
+    },
+
+    render(config) {
+        const nav = config.app_nav || {};
+        const dashboard = nav.dashboard || null;
+        const sections = Array.isArray(nav.sections) ? nav.sections : [];
+        const logo = frappe.utils.escape_html("/assets/horizon_crm/images/logo.svg");
+
+        return `
+            <div class="horizon-app-nav__brand">
+                <span class="horizon-app-nav__logo">
+                    <img src="${logo}" alt="Horizon CRM" />
+                </span>
+                <div class="horizon-app-nav__brand-copy">
+                    <span class="horizon-app-nav__eyebrow">Workspace</span>
+                    <strong>Horizon CRM</strong>
+                </div>
+            </div>
+            ${dashboard ? `
+                <a class="horizon-app-nav__dashboard is-active" href="${frappe.utils.escape_html(dashboard.route)}">
+                    <span class="horizon-app-nav__dashboard-dot"></span>
+                    <span>${frappe.utils.escape_html(dashboard.label)}</span>
+                </a>
+            ` : ""}
+            ${sections.map((section) => `
+                <section class="horizon-app-nav__section">
+                    <h2 class="horizon-app-nav__section-label">${frappe.utils.escape_html(section.label)}</h2>
+                    <div class="horizon-app-nav__items">
+                        ${(section.items || []).map((item) => `
+                            <a class="horizon-app-nav__item" href="${frappe.utils.escape_html(item.route)}">
+                                <span class="horizon-app-nav__item-bullet"></span>
+                                <span>${frappe.utils.escape_html(item.label)}</span>
+                            </a>
+                        `).join("")}
+                    </div>
+                </section>
+            `).join("")}
+        `;
+    }
+};
+
 $(document).ready(function() {
-    // Add Horizon CRM branding class to body when on CRM pages
-    if (frappe.boot && frappe.boot.app_name === "Horizon CRM") {
-        $("body").addClass("horizon-crm-active");
+    horizon_crm.workspaceNav.queueMount();
+    if (frappe.router?.on) {
+        frappe.router.on("change", () => horizon_crm.workspaceNav.queueMount());
     }
 });
 
@@ -652,4 +731,8 @@ frappe.ui.form.on("Invoice Item", {
     items_remove(frm) {
         frm.trigger("calculate_totals");
     }
+});
+
+frappe.after_ajax(() => {
+    horizon_crm.workspaceNav.queueMount();
 });

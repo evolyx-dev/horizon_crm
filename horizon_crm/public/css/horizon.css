@@ -230,6 +230,141 @@
     font-weight: 600;
 }
 
+/* Horizon CRM branded nav inside the workspace page */
+.horizon-workspace-active .layout-side-section {
+    background:
+        radial-gradient(circle at top left, rgba(255, 107, 107, 0.12), transparent 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(250, 251, 252, 0.98));
+    padding-top: 10px;
+}
+
+.horizon-workspace-active .list-sidebar.horizon-app-nav-hidden {
+    display: none;
+}
+
+.horizon-app-nav {
+    background: var(--horizon-card-bg);
+    border: 1px solid var(--horizon-border-light);
+    border-radius: var(--horizon-radius-lg);
+    box-shadow: var(--horizon-shadow-md);
+    margin: 0 10px 12px;
+    padding: 14px 12px 16px;
+    position: sticky;
+    top: 12px;
+}
+
+.horizon-app-nav__brand {
+    align-items: center;
+    border-bottom: 1px solid var(--horizon-border-light);
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 2px 4px 14px;
+}
+
+.horizon-app-nav__logo {
+    align-items: center;
+    background: var(--horizon-gradient);
+    border-radius: 12px;
+    box-shadow: 0 12px 24px rgba(255, 107, 107, 0.22);
+    display: inline-flex;
+    height: 42px;
+    justify-content: center;
+    width: 42px;
+}
+
+.horizon-app-nav__logo img {
+    filter: brightness(0) invert(1);
+    height: 22px;
+    width: 22px;
+}
+
+.horizon-app-nav__brand-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.horizon-app-nav__brand-copy strong {
+    color: var(--horizon-text);
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+.horizon-app-nav__eyebrow {
+    color: var(--horizon-text-light);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+}
+
+.horizon-app-nav__dashboard,
+.horizon-app-nav__item {
+    align-items: center;
+    border-radius: var(--horizon-radius-sm);
+    color: var(--horizon-text);
+    display: flex;
+    font-size: 13px;
+    font-weight: 500;
+    gap: 10px;
+    padding: 8px 10px;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.horizon-app-nav__dashboard {
+    background: var(--horizon-primary-light);
+    color: var(--horizon-primary);
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.horizon-app-nav__dashboard:hover,
+.horizon-app-nav__item:hover {
+    background: var(--horizon-bg);
+    color: var(--horizon-text);
+    transform: translateX(1px);
+}
+
+.horizon-app-nav__dashboard-dot,
+.horizon-app-nav__item-bullet {
+    background: var(--horizon-primary);
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.horizon-app-nav__dashboard-dot {
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.16);
+    height: 8px;
+    width: 8px;
+}
+
+.horizon-app-nav__item-bullet {
+    height: 6px;
+    opacity: 0.65;
+    width: 6px;
+}
+
+.horizon-app-nav__section + .horizon-app-nav__section {
+    margin-top: 12px;
+}
+
+.horizon-app-nav__section-label {
+    color: var(--horizon-text-light);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    margin: 0 0 6px;
+    padding: 0 10px;
+    text-transform: uppercase;
+}
+
+.horizon-app-nav__items {
+    display: grid;
+    gap: 2px;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    FORM STYLES — Clean, modern form design
    ═══════════════════════════════════════════════════════════════════════ */
@@ -1137,6 +1272,31 @@
 [data-theme="dark"] .workspace-container .chart-widget-box .widget {
     border-color: var(--horizon-border);
     background: var(--horizon-card-bg);
+}
+
+[data-theme="dark"] .horizon-workspace-active .layout-side-section {
+    background:
+        radial-gradient(circle at top left, rgba(255, 107, 107, 0.18), transparent 40%),
+        linear-gradient(180deg, rgba(26, 28, 43, 0.98), rgba(30, 32, 48, 0.98));
+}
+
+[data-theme="dark"] .horizon-app-nav {
+    background: linear-gradient(180deg, rgba(35, 37, 54, 0.98), rgba(30, 32, 48, 0.98));
+    border-color: var(--horizon-border);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="dark"] .horizon-app-nav__brand {
+    border-color: var(--horizon-border);
+}
+
+[data-theme="dark"] .horizon-app-nav__dashboard {
+    background: rgba(255, 107, 107, 0.14);
+    color: #ffb0b0;
+}
+
+[data-theme="dark"] .horizon-app-nav__item:hover {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 /* Dark mode kanban cards */

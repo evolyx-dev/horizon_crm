@@ -5,10 +5,13 @@ Creates custom roles and default data.
 
 import frappe
 
+from horizon_crm.access import ensure_module_profiles
+
 
 def after_install():
 	"""Setup roles, default travel types, destinations, and agency settings after app install."""
 	create_roles()
+	ensure_module_profiles()
 	create_default_travel_types()
 	create_default_destinations()
 	create_default_lost_reasons()

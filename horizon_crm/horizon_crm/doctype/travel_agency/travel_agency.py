@@ -4,6 +4,8 @@
 import frappe
 from frappe.model.document import Document
 
+from horizon_crm.access import ensure_admin_staff_record
+
 
 class TravelAgency(Document):
     def validate(self):
@@ -19,21 +21,9 @@ class TravelAgency(Document):
             frappe.throw(f"Admin user {self.admin_user} must be a System User.")
 
     def on_update(self):
-        if self.has_value_changed("admin_user") and self.admin_user:
+        if self.admin_user:
             self._ensure_admin_staff()
 
     def _ensure_admin_staff(self):
         """Create a Travel Agency Staff record for the admin user."""
-        if frappe.db.exists("Travel Agency Staff", {"staff_user": self.admin_user}):
-            frappe.db.set_value(
-                "Travel Agency Staff",
-                {"staff_user": self.admin_user},
-                "role_in_agency",
-                "Agency Admin",
-            )
-        else:
-            staff = frappe.new_doc("Travel Agency Staff")
-            staff.staff_user = self.admin_user
-            staff.role_in_agency = "Agency Admin"
-            staff.is_active = 1
-            staff.insert(ignore_permissions=True)
+        ensure_admin_staff_record(self.admin_user)

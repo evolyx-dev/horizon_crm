@@ -91,14 +91,34 @@ setup("bootstrap test data", async ({ page }) => {
   ];
 
   for (const s of staffRecords) {
-    const filters = JSON.stringify({ staff_user: s.staff_user });
     const check = await page.request.get(
-      `/api/resource/Travel Agency Staff?filters=${filters}`
+      `/api/resource/Travel Agency Staff/${encodeURIComponent(s.staff_user)}`
     );
-    const body = await check.json();
-    if (body.data.length === 0) {
-      await createDoc(page, "Travel Agency Staff", s);
+    if (!check.ok()) {
+      try {
+        await createDoc(page, "Travel Agency Staff", s);
+      } catch (error) {
+        const message = String(error);
+        if (!message.includes("DuplicateEntryError")) {
+          throw error;
+        }
+      }
     }
+  }
+
+  // Multi-tenant isolation tests expect a primary-site customer that
+  // does not exist on the secondary site.
+  const customerFilters = JSON.stringify({ email: "customer@agency1.test" });
+  const customerCheck = await page.request.get(
+    `/api/resource/Travel Customer?filters=${customerFilters}`
+  );
+  const customerBody = await customerCheck.json();
+  if (customerBody.data.length === 0) {
+    await createDoc(page, "Travel Customer", {
+      customer_name: "Primary Tenant Customer",
+      email: "customer@agency1.test",
+      phone: "+9999999999",
+    });
   }
 
   // Verify roles were assigned correctly by the hooks

@@ -99,17 +99,20 @@ services:
       - SHELL=/bin/bash
       - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-123}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - FRAPPE_BRANCH=${FRAPPE_BRANCH:-develop}
-      - FRAPPE_COMMIT=${FRAPPE_COMMIT:-0afbf2a98e00288bba20a3a6231b7dabe31df69f}
+      - FRAPPE_BRANCH=${FRAPPE_BRANCH:-version-15}
+      - FRAPPE_COMMIT=${FRAPPE_COMMIT:-7abafc4824ec8d71e9127df965e54913bb41a870}
       - PRIMARY_SITE_NAME=${PRIMARY_SITE_NAME:-horizon.localhost}
       - SECONDARY_SITE_NAME=${SECONDARY_SITE_NAME:-tenant2.localhost}
+      - SECONDARY_BENCH_PORT=${SECONDARY_BENCH_PORT:-8001}
       - SITE_NAME=${PRIMARY_SITE_NAME:-horizon.localhost}
+      - PORTAL_LEAD_RATE_LIMIT=${PORTAL_LEAD_RATE_LIMIT:-250}
       - SEED_DEMO=${SEED_DEMO:-0}
     volumes:
       - .:/workspace/horizon_crm:cached
       - bench-data:/workspace/frappe-bench
     ports:
       - "${BENCH_PORT:-8000}:8000"
+      - "${SECONDARY_BENCH_PORT:-8001}:8001"
       - "${SOCKETIO_PORT:-9000}:9000"
     working_dir: /workspace
     stdin_open: true
