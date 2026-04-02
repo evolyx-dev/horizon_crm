@@ -54,7 +54,7 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - sites-data:/srv/sites:ro
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "--header=Host: ${FRAPPE_SITE_NAME:-horizon.localhost}", "http://localhost/api/method/ping"]
+      test: ["CMD", "wget", "-qO-", "--header=Host: ${FRAPPE_SITE_NAME:-horizon.localhost}", "http://127.0.0.1/api/method/ping"]
       interval: 30s
       timeout: 5s
       retries: 3

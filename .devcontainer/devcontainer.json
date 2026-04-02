@@ -1,22 +1,38 @@
 {
-	"name": "Horizon CRM",
-	"forwardPorts": [8000, 9000],
-	"remoteUser": "frappe",
-	"settings": {
-		"terminal.integrated.defaultProfile.linux": "bash",
-		"debug.node.autoAttach": "disabled"
-	},
+	"name": "Horizon CRM Demo",
 	"dockerComposeFile": "./docker-compose.yml",
 	"service": "frappe",
-	"workspaceFolder": "/workspace/frappe-bench",
-	"postCreateCommand": "bash /workspace/app/scripts/init.sh",
+	"workspaceFolder": "/workspace/horizon_crm",
+	"remoteUser": "frappe",
+	"onCreateCommand": "bash /workspace/horizon_crm/.devcontainer/init.sh",
+	"postStartCommand": "bash /workspace/horizon_crm/.devcontainer/start.sh",
+	"forwardPorts": [8080, 8000],
+	"portsAttributes": {
+		"8080": {
+			"label": "Horizon CRM (nginx)",
+			"onAutoForward": "openBrowser",
+			"visibility": "public"
+		},
+		"8000": {
+			"label": "Bench Dev Server",
+			"onAutoForward": "silent",
+			"visibility": "public"
+		}
+	},
 	"shutdownAction": "stopCompose",
-	"extensions": [
-		"ms-python.python",
-		"ms-python.vscode-pylance",
-		"charliermarsh.ruff",
-		"ms-vscode.live-server",
-		"mtxr.sqltools",
-		"ms-playwright.playwright"
-	]
+	"settings": {
+		"terminal.integrated.defaultProfile.linux": "bash"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"charliermarsh.ruff"
+			]
+		},
+		"codespaces": {
+			"openFiles": ["docs/DEMO.md"]
+		}
+	}
 }

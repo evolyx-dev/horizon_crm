@@ -110,6 +110,21 @@ maybe_create_site() {
         bench --site "$site_name" install-app horizon_crm
         bench --site "$site_name" set-config mute_emails 1
         bench use "$site_name"
+
+        # Resolve asset symlinks so nginx can serve them (nginx only
+        # has the sites volume, not the apps directory).
+        echo "▸ Resolving asset symlinks for nginx..."
+        cd "$BENCH_DIR/sites/assets"
+        for link in */; do
+            link="${link%/}"
+            if [ -L "$link" ]; then
+                target=$(readlink -f "$link")
+                rm -f "$link"
+                cp -r "$target" "$link"
+            fi
+        done
+        cd "$BENCH_DIR"
+
         echo "✓ Site created: $site_name"
     else
         echo "▸ Site $site_name exists, running migrate..."
@@ -201,9 +216,15 @@ case "$ROLE" in
         wait_for_db
         maybe_create_site
         ;;
+    seed)
+        wait_for_db
+        echo "▸ Seeding demo data..."
+        bench --site "${FRAPPE_SITE_NAME:-horizon.localhost}" execute horizon_crm.setup.demo.seed
+        echo "✓ Demo data seeded"
+        ;;
     *)
         echo "Unknown role: $ROLE"
-        echo "Valid roles: web, socketio, worker, scheduler, migrate, new-site"
+        echo "Valid roles: web, socketio, worker, scheduler, migrate, new-site, seed"
         exit 1
         ;;
 esac

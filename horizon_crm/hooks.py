@@ -6,6 +6,8 @@ app_email = "dev@horizon.io"
 app_license = "agpl-3.0"
 app_logo_url = "/assets/horizon_crm/images/logo.svg"
 
+required_apps = ["frappe"]
+
 # Apps
 # ------------------
 

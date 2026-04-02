@@ -326,7 +326,7 @@ services:
     # Custom image: Python 3.11-slim-bookworm, Node 18
     # Runs bench start on port 8000
     # Developer mode enabled (FRAPPE_DEVELOPER_MODE=1)
-    # Volumes: repo root mounted at /workspace/app, bench volume at /workspace/frappe-bench
+    # Volumes: repo root mounted at /workspace/horizon_crm, bench volume at /workspace/frappe-bench
     
   mariadb:
     # MariaDB 10.6 on port 3307 (mapped from 3306)

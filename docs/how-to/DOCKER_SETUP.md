@@ -1,8 +1,12 @@
 # Docker Setup Guide
 
-This guide covers both the **development** Docker stack (for local coding) and the **production** Docker deployment (for hosting / demos).
+Horizon CRM runs in three Docker environments, all sharing the same architecture pattern: **Nginx → Frappe → MariaDB + Redis**.
 
----
+| Environment | Compose File | Nginx Port | Purpose |
+|-------------|-------------|------------|---------|
+| **Local Dev** | `docker-compose.yml` | `:8080` | Development with hot-reload |
+| **Codespace** | `.devcontainer/docker-compose.yml` | `:8080` | One-click client demos |
+| **Production** | `deploy/docker-compose.prod.yml` | `:80` | Hosting with Gunicorn + Workers |
 
 ## Prerequisites
 
@@ -12,163 +16,276 @@ This guide covers both the **development** Docker stack (for local coding) and t
 | Docker Compose | v2+ |
 | Git | 2.x |
 
+## Shared Components
+
+All environments use the same backing services:
+
+| Component | Image | Purpose |
+|-----------|-------|---------|
+| MariaDB | `mariadb:10.6` | Database (utf8mb4, `--skip-innodb-read-only-compressed`) |
+| Redis Cache | `redis:7-alpine` | In-memory caching |
+| Redis Queue | `redis:7-alpine` | Background jobs + socketio pubsub |
+| Nginx | `nginx:1.27-alpine` | Reverse proxy, security headers, gzip |
+
+Nginx config for dev/codespace: `docker/nginx.dev.conf` — lightweight proxy without rate limiting.
+Nginx config for production: `deploy/nginx.conf` — rate limiting, static asset caching, WebSocket upgrade.
+
+## Demo Data
+
+The demo seeder (`horizon_crm/setup/demo.py`) creates realistic sample data across all environments:
+
+| Data | Count | Details |
+|------|-------|---------|
+| Demo User | 1 | `demo@horizon.com` / `demo1234` (Agency Admin) |
+| Customers | 6 | Bronze → Platinum tiers, diverse nationalities |
+| Leads | 7 | All pipeline stages (New → Converted) |
+| Hotels | 3 | 3-5 star, with service pricing |
+| Airlines | 2 | International carriers with class pricing |
+| Tour Operators | 2 | Cultural + Safari specialists |
+| Inquiries | 7 | New, Contacted, Quoted, Won, Lost |
+| Bookings | 5 | Confirmed, In Progress, Completed |
+| Invoices | 4 | Sent, Partially Paid, Paid |
+
+The seed is **idempotent** — safe to run multiple times.
+
+```bash
+# Any environment — inside the bench directory:
+bench --site horizon.localhost execute horizon_crm.setup.demo.seed
+```
+
 ---
 
-## Part 1 — Development Setup
+## Part 1 — Local Development
 
 ### Quick Start
 
 ```bash
-# 1. Clone the repository
-git clone <repo-url> horizon_crm
-cd horizon_crm
+git clone <repo-url> horizon_crm && cd horizon_crm
 
-# 2. Start all services (MariaDB + Redis + Frappe bench)
+# Start all services (MariaDB + Redis + Nginx + Frappe)
 docker compose up
 
-# 3. Wait for first-time bootstrap (watch the logs)
-#    init.sh creates bench, installs the app, seeds data, and starts the server.
-
-# 4. Access the application
-#    Desk:   http://localhost:8000
-#    Portal: http://localhost:8000/portal
-#    Login:  Administrator / admin
+# First run takes ~5 min (downloads frappe, installs app, creates site)
+# Access:  http://localhost:8080 (nginx)
+#          http://localhost:8000 (bench direct — for debugging)
+# Login:   Administrator / admin
 ```
 
-## Architecture
-
-```
-┌──────────────────────────────────────────────────────┐
-│  docker-compose.yml                                  │
-│                                                      │
-│  ┌──────────┐  ┌──────────────┐  ┌──────────────┐   │
-│  │ MariaDB  │  │ Redis Cache  │  │ Redis Queue  │   │
-│  │ :3306    │  │ :6379        │  │ :6379        │   │
-│  └──────────┘  └──────────────┘  └──────────────┘   │
-│                                                      │
-│  ┌──────────────────────────────────────────────┐    │
-│  │ Frappe Dev Server (frappe/bench:latest)       │    │
-│  │  /workspace/app ← repo bind-mount            │    │
-│  │  /workspace/frappe-bench ← bench volume       │    │
-│  │  :8000 web  :9000 socketio                   │    │
-│  └──────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────┘
+With demo data:
+```bash
+SEED_DEMO=1 docker compose up
 ```
 
-## Service Details
+### Architecture
 
-| Service | Image | Port (host) | Notes |
-|---------|-------|-------------|-------|
-| mariadb | `mariadb:10.6` | 3307 | utf8mb4, persistent volume |
-| redis-cache | `redis:7-alpine` | 13000 | In-memory cache |
-| redis-queue | `redis:7-alpine` | 11000 | Background job queue |
-| frappe | `frappe/bench:latest` | 8000, 9000 | Dev server + socketio |
+```
+┌────────────────────────────────────────────────────────────┐
+│  docker-compose.yml (Local Development)                    │
+│                                                            │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Nginx (:8080 → :80)                    │   │
+│  │    Reverse proxy — same headers as production       │   │
+│  └────────────────────┬────────────────────────────────┘   │
+│                       │                                    │
+│  ┌────────────────────▼────────────────────────────────┐   │
+│  │  Frappe Dev Server (frappe/bench:latest)             │   │
+│  │  /workspace/horizon_crm ← bind-mount (hot-reload)   │   │
+│  │  :8000 web  :9000 socketio                          │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                            │
+│  ┌──────────┐  ┌──────────────┐  ┌──────────────┐         │
+│  │ MariaDB  │  │ Redis Cache  │  │ Redis Queue  │         │
+│  │ :3307    │  │ :13000       │  │ :11000       │         │
+│  └──────────┘  └──────────────┘  └──────────────┘         │
+└────────────────────────────────────────────────────────────┘
+```
 
-## Environment Variables
+### File Layout
 
-Set these in `.env` or pass via the command line:
+```
+docker-compose.yml        # 5 services: nginx, frappe, mariadb, redis-cache, redis-queue
+docker/
+├── init.sh               # Bootstrap script (bench init → install → site → start)
+└── nginx.dev.conf        # Nginx reverse proxy for dev/codespace
+```
+
+### Services
+
+| Service | Container | Host Port | Notes |
+|---------|-----------|-----------|-------|
+| nginx | horizon-nginx | 8080 | Reverse proxy to bench |
+| frappe | horizon-frappe | 8000, 9000 | Dev server + socketio |
+| mariadb | horizon-mariadb | 3307 | Persistent volume, healthcheck |
+| redis-cache | horizon-redis-cache | 13000 | Cache |
+| redis-queue | horizon-redis-queue | 11000 | Jobs + socketio pubsub |
+
+### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `DB_ROOT_PASSWORD` | `123` | MariaDB root password |
 | `ADMIN_PASSWORD` | `admin` | Frappe Administrator password |
-| `DB_PORT` | `3307` | Host port for MariaDB |
-| `REDIS_CACHE_PORT` | `13000` | Host port for Redis cache |
-| `REDIS_QUEUE_PORT` | `11000` | Host port for Redis queue |
-| `BENCH_PORT` | `8000` | Host port for bench web |
-| `SOCKETIO_PORT` | `9000` | Host port for socketio |
 | `SITE_NAME` | `horizon.localhost` | Frappe site name |
+| `SEED_DEMO` | `0` | Set to `1` to seed demo data on first run |
+| `HTTP_PORT` | `8080` | Nginx host port |
+| `BENCH_PORT` | `8000` | Bench direct access (debugging) |
+| `DB_PORT` | `3307` | MariaDB host port |
 
-## Common Commands
+### Init Script (`docker/init.sh`)
 
-### Start / Stop
+On first launch:
+1. Fix Docker volume permissions (`sudo chown`)
+2. `bench init --frappe-branch version-15`
+3. Configure db_host, redis-cache, redis-queue, developer_mode=1
+4. Remove Redis from Procfile (Docker provides them)
+5. Install app via symlink + pip (live source for dev)
+6. `bench build --app horizon_crm`
+7. Create site + install app + optionally seed demo data (`SEED_DEMO=1`)
+8. `bench start`
 
-```bash
-# Start all services (foreground — see logs)
-docker compose up
+On subsequent launches: detects existing bench/site, runs `migrate`, starts bench.
 
-# Start in background
-docker compose up -d
-
-# Stop all services
-docker compose down
-
-# Stop and remove volumes (DESTRUCTIVE — resets DB & bench)
-docker compose down -v
-
-# Restart a single service
-docker compose restart frappe
-```
-
-### Logs
+### Common Commands
 
 ```bash
-docker compose logs -f              # All services
-docker compose logs -f frappe       # Frappe only
-docker compose logs --tail=100 frappe
-```
+# Start / stop
+docker compose up                   # foreground
+docker compose up -d                # background
+docker compose down                 # stop
+docker compose down -v              # reset everything (DESTRUCTIVE)
 
-### Shell Access
+# With demo data
+SEED_DEMO=1 docker compose up
 
-```bash
-# Enter Frappe container
+# Logs
+docker compose logs -f              # all services
+docker compose logs -f frappe       # frappe only
+
+# Shell access
 docker compose exec frappe bash
-
-# Run bench commands inside the container
 cd /workspace/frappe-bench
+
+# Bench commands
 bench --site horizon.localhost migrate
 bench --site horizon.localhost console
 bench build --app horizon_crm
 bench watch
-```
 
-### Database
+# Seed demo data manually
+bench --site horizon.localhost execute horizon_crm.setup.demo.seed
 
-```bash
-# Access MariaDB console
+# Database access
 docker compose exec mariadb mysql -u root -p123
-
-# Backup
-docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench --site horizon.localhost backup"
-
-# Restore
-docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench --site horizon.localhost restore <backup-file>"
 ```
 
-## Init Script (`docker/init.sh`)
+### Hot-Reload
 
-On first launch, the frappe container runs `docker/init.sh` which:
-
-1. **Initializes bench** (`bench init` with `version-15`)
-2. **Configures services** (db_host=mariadb, redis-cache, redis-queue)
-3. **Removes Redis from Procfile** (already provided by Docker)
-4. **Installs the app** (`bench get-app file:///workspace/app`)
-5. **Creates the site** (horizon.localhost, installs horizon_crm)
-6. **Starts bench** (`bench start`)
-
-On subsequent launches, it detects the existing bench/site and runs `migrate` instead.
-
-## Hot-Reload Workflow
-
-The app source (repo root) is bind-mounted at `/workspace/app` inside the container.
-
-- **Python changes**: Picked up automatically by the bench dev server
-- **JS/CSS changes**:
-  ```bash
-  docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench build --app horizon_crm"
-  ```
-
-## Self-Hosting Compose
-
-A minimal compose for production/self-hosting is available at `docker/docker-compose.yml` (3 services: MariaDB, Redis, Frappe).
+The app source is bind-mounted at `/workspace/horizon_crm`:
+- **Python changes**: Auto-detected by bench dev server
+- **JS/CSS changes**: `bench build --app horizon_crm` or `bench watch`
 
 ---
 
-## Part 2 — Production Deployment
+## Part 2 — GitHub Codespaces (Client Demo)
 
-The `deploy/` directory contains a full production-grade Docker deployment with Nginx, Gunicorn, background workers, and scheduler.
+One-click demo environment using GitHub Codespaces (60 free hours/month on 2-core).
 
-### Production Architecture
+### How It Works
+
+```
+Client clicks Codespace link
+  → GitHub provisions a container
+  → .devcontainer/docker-compose.yml starts Nginx + MariaDB + Redis + Frappe
+  → .devcontainer/init.sh bootstraps bench, installs app, seeds demo data
+  → .devcontainer/start.sh starts bench on each resume
+  → Nginx on port 8080 auto-opens in browser (public)
+```
+
+### Sharing With Clients
+
+```
+https://codespaces.new/evolyx-dev/horizon_crm?quickstart=1
+```
+
+Or use the "Open in GitHub Codespaces" badge in the README.
+
+### File Layout
+
+```
+.devcontainer/
+├── devcontainer.json     # Codespace config (ports, extensions, lifecycle)
+├── docker-compose.yml    # 5 services: nginx, frappe, mariadb, redis-cache, redis-queue
+├── init.sh               # One-time setup (onCreateCommand, ~5 min)
+└── start.sh              # Start bench on resume (postStartCommand)
+
+docker/
+└── nginx.dev.conf        # Shared nginx config (used by both dev & codespace)
+
+horizon_crm/setup/
+└── demo.py               # Demo data seeder
+
+docs/
+└── DEMO.md               # Welcome page (auto-opened in Codespace)
+```
+
+### Architecture
+
+Same as local dev but optimized for demos:
+- **Nginx reverse proxy** on port 8080 (production-like routing)
+- `developer_mode` OFF (production-like UI)
+- Demo data always seeded
+- Port 8080 is public and auto-opens
+- App installed via symlink (live workspace files, no git clone)
+
+### Demo Credentials
+
+| User | Email | Password | Role |
+|------|-------|----------|------|
+| Administrator | Administrator | `admin` | Full Access |
+| Demo User | demo@horizon.com | `demo1234` | Agency Admin |
+
+### Init Script (`.devcontainer/init.sh`)
+
+1. Wait for MariaDB (30 attempts × 2s)
+2. Fix volume permissions (`sudo chown`)
+3. `bench init --frappe-branch version-15`
+4. Configure services (developer_mode=0)
+5. **Symlink** app into bench + `pip install -e` (no git clone)
+6. `bench build --app horizon_crm`
+7. Create site, install app, seed demo data
+
+### Lifecycle
+
+| Phase | Script | When |
+|-------|--------|------|
+| Create | `.devcontainer/init.sh` | First launch (~5 min) |
+| Start | `.devcontainer/start.sh` | Every start / resume |
+| Stop | Automatic | After 30 min idle |
+
+### Cost Control
+
+- **Free tier**: 60 hours/month on 2-core
+- **Auto-stop**: Default 30 min idle timeout
+- **Tip**: Set to 240 min in GitHub Settings → Codespaces for longer demos
+- **Cleanup**: Delete unused Codespaces at github.com/codespaces
+
+### Codespace Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Setup stuck on "Waiting for MariaDB" | Wait 60s, check: `docker compose -f .devcontainer/docker-compose.yml logs mariadb` |
+| App doesn't open | Ports tab → globe icon next to port 8080 |
+| Bench crashed | Terminal: `cd /workspace/frappe-bench && bench start` |
+| Demo data missing | `bench --site horizon.localhost execute horizon_crm.setup.demo.seed` |
+| Too slow | Upgrade to 4-core in Codespace settings |
+
+---
+
+## Part 3 — Production Deployment
+
+Full production stack with Nginx, Gunicorn, background workers, and scheduler.
+
+### Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -176,259 +293,207 @@ The `deploy/` directory contains a full production-grade Docker deployment with 
 │                                                                  │
 │  ┌─────────────────────────────────────────────────────────┐     │
 │  │                    Nginx (:80)                           │     │
-│  │          Reverse proxy + static assets                   │     │
-│  └──────┬──────────────────────────────┬───────────────────┘     │
-│         │ HTTP                         │ WebSocket                │
-│  ┌──────▼──────────┐          ┌───────▼────────────┐             │
-│  │ frappe-web      │          │ frappe-socketio    │             │
-│  │ (Gunicorn :8000)│          │ (Node.js :9000)    │             │
-│  └─────────────────┘          └────────────────────┘             │
+│  │   Rate limiting · static assets · security headers      │     │
+│  └──────┬──────────────────────────────────┬───────────────┘     │
+│         │ HTTP                             │ WebSocket            │
+│  ┌──────▼──────────┐              ┌───────▼────────────┐         │
+│  │ frappe-web      │              │ frappe-socketio    │         │
+│  │ (Gunicorn :8000)│              │ (Node.js :9000)    │         │
+│  └─────────────────┘              └────────────────────┘         │
 │                                                                  │
-│  ┌─────────────────┐          ┌────────────────────┐             │
-│  │ frappe-worker   │          │ frappe-scheduler   │             │
-│  │ (background)    │          │ (cron-like)        │             │
-│  └─────────────────┘          └────────────────────┘             │
+│  ┌─────────────────┐              ┌────────────────────┐         │
+│  │ frappe-worker   │              │ frappe-scheduler   │         │
+│  │ (background)    │              │ (cron-like)        │         │
+│  └─────────────────┘              └────────────────────┘         │
 │                                                                  │
-│  ┌─────────────────┐          ┌────────────────────┐             │
-│  │ Redis Cache     │          │ Redis Queue        │             │
-│  │ (LRU, 128MB)   │          │ (AOF persist)      │             │
-│  └─────────────────┘          └────────────────────┘             │
+│  ┌─────────────────┐              ┌────────────────────┐         │
+│  │ Redis Cache     │              │ Redis Queue        │         │
+│  │ (LRU, 128MB)   │              │ (AOF persist)      │         │
+│  └─────────────────┘              └────────────────────┘         │
 │                                                                  │
-│  ┌─────────────────┐  (optional — use --profile with-db)         │
+│  ┌─────────────────┐  (optional: --profile with-db)              │
 │  │ MariaDB 10.6    │                                             │
 │  └─────────────────┘                                             │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### Production Service Details
+### File Layout
 
-| Service | Image | Role | Container Name |
-|---------|-------|------|----------------|
-| nginx | `nginx:1.27-alpine` | Reverse proxy, static assets | horizon-nginx |
-| frappe-web | `horizon-crm:latest` | Gunicorn web server (:8000) | horizon-web |
-| frappe-socketio | `horizon-crm:latest` | Real-time WebSocket (:9000) | horizon-socketio |
-| frappe-worker | `horizon-crm:latest` | Background job processing | horizon-worker |
-| frappe-scheduler | `horizon-crm:latest` | Periodic task scheduling | horizon-scheduler |
-| redis-cache | `redis:7-alpine` | In-memory cache (LRU) | horizon-redis-cache |
-| redis-queue | `redis:7-alpine` | Job queue + socketio pubsub | horizon-redis-queue |
-| mariadb | `mariadb:10.6` | Database (optional, profile) | horizon-mariadb |
-
-### Quick Start — Production
-
-```bash
-# 1. Clone the repository
-git clone <repo-url> horizon_crm
-cd horizon_crm
-
-# 2. Create your .env from the template
-cp deploy/.env.template deploy/.env
-# Edit deploy/.env — set DB_HOST, passwords, site name
-
-# 3. Build the production image (~2-3 min)
-docker compose -f deploy/docker-compose.prod.yml build
-
-# 4a. Start WITH local MariaDB (for testing / demos):
-docker compose -f deploy/docker-compose.prod.yml --profile with-db up -d
-
-# 4b. Start WITHOUT local MariaDB (external DB, e.g. Oracle MySQL HeatWave):
-docker compose -f deploy/docker-compose.prod.yml up -d
-
-# 5. Access the application
-#    http://localhost (port 80 via nginx)
-#    Login: Administrator / <ADMIN_PASSWORD from .env>
+```
+deploy/
+├── docker-compose.prod.yml   # 7 services + optional MariaDB
+├── Dockerfile                # Multi-stage build (bench → app → runtime)
+├── entrypoint.sh             # Multi-role entrypoint
+├── nginx.conf                # Production nginx (rate limiting, caching)
+├── .env.template             # Environment variable template
+└── .env                      # Your values (gitignored)
 ```
 
-### Production Environment Variables
+### Quick Start
 
-Set in `deploy/.env`:
+```bash
+git clone <repo-url> horizon_crm && cd horizon_crm
+
+# 1. Configure environment
+cp deploy/.env.template deploy/.env
+# Edit deploy/.env
+
+# 2. Build the production image (~3 min)
+docker compose -f deploy/docker-compose.prod.yml build
+
+# 3a. Start WITH local MariaDB
+docker compose -f deploy/docker-compose.prod.yml --profile with-db up -d
+
+# 3b. Start WITHOUT local MariaDB (external DB)
+docker compose -f deploy/docker-compose.prod.yml up -d
+
+# 4. Seed demo data (optional)
+docker compose -f deploy/docker-compose.prod.yml run --rm frappe-web seed
+
+# 5. Access: http://localhost — Login: Administrator / <ADMIN_PASSWORD>
+```
+
+### Services
+
+| Service | Image | Role | Container |
+|---------|-------|------|-----------|
+| nginx | `nginx:1.27-alpine` | Reverse proxy, static assets, rate limiting | horizon-nginx |
+| frappe-web | `horizon-crm:latest` | Gunicorn web server (:8000) | horizon-web |
+| frappe-socketio | `horizon-crm:latest` | WebSocket server (:9000) | horizon-socketio |
+| frappe-worker | `horizon-crm:latest` | Background job processing | horizon-worker |
+| frappe-scheduler | `horizon-crm:latest` | Periodic task scheduling | horizon-scheduler |
+| redis-cache | `redis:7-alpine` | Cache (LRU, 128MB) | horizon-redis-cache |
+| redis-queue | `redis:7-alpine` | Jobs + socketio pubsub (AOF) | horizon-redis-queue |
+| mariadb | `mariadb:10.6` | Database (optional profile) | horizon-mariadb |
+
+### Environment Variables (`deploy/.env`)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DB_HOST` | `mariadb` | Database hostname (use container name or external IP) |
+| `DB_HOST` | `mariadb` | Database hostname |
 | `DB_PORT` | `3306` | Database port |
-| `DB_ROOT_PASSWORD` | — | MariaDB/MySQL root password |
-| `FRAPPE_SITE_NAME` | `horizon.localhost` | Frappe site name (matches your domain) |
-| `ADMIN_PASSWORD` | `admin` | Frappe Administrator password |
-| `REDIS_CACHE_HOST` | `redis-cache` | Redis cache container hostname |
-| `REDIS_QUEUE_HOST` | `redis-queue` | Redis queue container hostname |
-| `HTTP_PORT` | `80` | Host port for nginx |
-| `GUNICORN_WORKERS` | auto | Web workers (auto = `nproc * 2 + 1`, max 4) |
-| `WORKER_QUEUE` | `default,short,long` | Background job queues |
+| `DB_ROOT_PASSWORD` | — | MariaDB root password |
+| `FRAPPE_SITE_NAME` | `horizon.localhost` | Site name (your domain) |
+| `ADMIN_PASSWORD` | `admin` | Administrator password |
+| `REDIS_CACHE_HOST` | `redis-cache` | Cache hostname |
+| `REDIS_QUEUE_HOST` | `redis-queue` | Queue hostname |
+| `HTTP_PORT` | `80` | Nginx port |
+| `GUNICORN_WORKERS` | auto | Workers (auto = nproc*2+1, max 4) |
+| `WORKER_QUEUE` | `default,short,long` | Background queues |
+
+### Entrypoint Roles (`deploy/entrypoint.sh`)
+
+| Role | Usage | Description |
+|------|-------|-------------|
+| `web` | Default | Gunicorn (auto-creates site on first run) |
+| `socketio` | `["socketio"]` | Node.js WebSocket |
+| `worker` | `["worker"]` | Background jobs |
+| `scheduler` | `["scheduler"]` | Periodic tasks |
+| `migrate` | One-off | Database migrations |
+| `new-site` | One-off | Create a new site |
+| `seed` | One-off | Seed demo data |
+
+### Dockerfile
+
+Multi-stage build:
+1. **Builder** — `frappe/bench:latest` → `bench init --version-15` → `bench get-app` → `bench build`
+2. **Production** — Copies built bench, runs `entrypoint.sh`
+
+### Production Nginx (`deploy/nginx.conf`)
+
+- Reverse proxy to Gunicorn (`:8000`) and Socketio (`:9000`)
+- Static assets with 1-year cache (`/assets`)
+- WebSocket upgrade for `/socket.io`
+- Rate limiting: 10 req/s API, 5 req/s portal
+- Gzip, security headers, 50MB upload limit
 
 ### Production Commands
 
 ```bash
-# View all container status
+# Status & logs
 docker compose -f deploy/docker-compose.prod.yml ps
+docker compose -f deploy/docker-compose.prod.yml logs -f frappe-web
 
-# View logs
-docker compose -f deploy/docker-compose.prod.yml logs -f              # All
-docker compose -f deploy/docker-compose.prod.yml logs -f frappe-web   # Web only
-
-# Run bench commands inside the web container
+# Shell
 docker compose -f deploy/docker-compose.prod.yml exec frappe-web bash
 cd /home/frappe/frappe-bench
+
+# Migrate
 bench --site horizon.localhost migrate
-bench --site horizon.localhost console
 
 # Backup
-docker compose -f deploy/docker-compose.prod.yml exec frappe-web \
-  bash -c "cd /home/frappe/frappe-bench && bench --site horizon.localhost backup --with-files"
+bench --site horizon.localhost backup --with-files
 
-# Stop
+# Seed demo data
+docker compose -f deploy/docker-compose.prod.yml run --rm frappe-web seed
+
+# New tenant
+bench new-site agency2.example.com \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" \
+  --db-root-password "$DB_ROOT_PASSWORD" \
+  --admin-password "SecurePass123" \
+  --mariadb-user-host-login-scope='%'
+bench --site agency2.example.com install-app horizon_crm
+
+# Stop / reset
 docker compose -f deploy/docker-compose.prod.yml down
-
-# Stop and remove volumes (DESTRUCTIVE)
 docker compose -f deploy/docker-compose.prod.yml --profile with-db down -v
 ```
 
-### Create a New Tenant (Production)
+### Using Pre-Built GHCR Image
 
 ```bash
-# Enter the web container
-docker compose -f deploy/docker-compose.prod.yml exec frappe-web bash
-
-# Create a new site for the agency
-bench new-site agency2.example.com \
-  --db-host "$DB_HOST" \
-  --db-port "$DB_PORT" \
-  --db-root-password "$DB_ROOT_PASSWORD" \
-  --admin-password SecurePass123 \
-  --mariadb-user-host-login-scope='%'
-
-bench --site agency2.example.com install-app horizon_crm
-bench --site agency2.example.com migrate
-```
-
-### Production Dockerfile
-
-The `deploy/Dockerfile` uses a multi-stage build:
-
-1. **Builder stage**: `frappe/bench:latest` → `bench init --frappe-branch version-15` → `bench get-app file:///tmp/horizon_crm` → `bench build --app horizon_crm`
-2. **Production stage**: Copies the built bench, adds `entrypoint.sh`, runs Gunicorn
-
-The key step is installing the app from local source:
-```dockerfile
-COPY --chown=frappe:frappe . /tmp/horizon_crm
-RUN cd /tmp/horizon_crm && git init && git add -A && git commit -m "build"
-RUN bench get-app file:///tmp/horizon_crm && bench build --app horizon_crm
-```
-
-The `deploy/entrypoint.sh` is a single entrypoint that handles all service roles:
-- `web` — Gunicorn (gthread, capped at 4 workers)
-- `socketio` — Node.js socketio server
-- `worker` — Background job processor
-- `scheduler` — Periodic task runner
-- `migrate` — One-off migration
-- `new-site` — One-off site creation
-
-### Using the Pre-Built GHCR Image
-
-Instead of building locally, you can pull the image from GitHub Container Registry:
-
-```bash
-# Pull the latest image
 docker pull ghcr.io/evolyx-dev/horizon_crm:latest
-
-# Or a specific version
-docker pull ghcr.io/evolyx-dev/horizon_crm:v1.0.0
 ```
 
-To use the GHCR image in `docker-compose.prod.yml`, replace the `build:` directive with `image:`:
-
+Replace `build:` in `deploy/docker-compose.prod.yml`:
 ```yaml
 x-frappe-common: &frappe-common
   image: ghcr.io/evolyx-dev/horizon_crm:latest
-  # Remove or comment out the build: section
 ```
 
-### Production Nginx
+### Deploy to Oracle Cloud (Always Free)
 
-The `deploy/nginx.conf` provides:
-- Reverse proxy to Gunicorn (`:8000`) and Socketio (`:9000`)
-- Static asset serving with 1-year cache (`/assets`)
-- WebSocket upgrade for `/socket.io`
-- Rate limiting: 10 req/s for API, 5 req/s for portal
-- Gzip compression
-- Security headers (X-Frame-Options, X-Content-Type-Options, etc.)
-- 50MB upload limit
+1. Provision an A1.Flex instance (4 OCPU, 24GB, ARM64)
+2. Install Docker + Compose
+3. Configure `deploy/.env` with Oracle MySQL HeatWave as `DB_HOST`
+4. `docker compose -f deploy/docker-compose.prod.yml up -d`
+5. Point DNS to the instance IP
 
-### Deploying to Oracle Cloud (Always Free)
+---
 
-The production stack is designed for **Oracle Cloud A1.Flex** (4 OCPU, 24GB RAM, ARM64):
+## Part 4 — CI/CD Pipeline
 
-1. Provision an A1.Flex instance with Oracle Linux / Ubuntu
-2. Install Docker and Docker Compose
-3. Clone the repo, configure `deploy/.env` with Oracle MySQL HeatWave as `DB_HOST`
-4. Run `docker compose -f deploy/docker-compose.prod.yml up -d` (no `--profile with-db`)
-5. Point your domain's DNS A record to the instance IP
+| Workflow | File | Trigger | Purpose |
+|----------|------|---------|---------|
+| CI | `.github/workflows/ci.yml` | Push to `main`, PRs | Server-side tests |
+| Build | `.github/workflows/builds.yml` | Push to `main`, tags | Docker → GHCR (amd64 + arm64) |
+| Linters | `.github/workflows/linter.yml` | PRs | Pre-commit + Semgrep |
+| Release | `.github/workflows/on_release.yml` | Push to `main` | Semantic versioning |
 
-### Deploying to GitHub Codespaces (Demos)
+### Runtime Versions
 
-The stack also works in GitHub Codespaces (120 free hours/month on 2-core/8GB):
+| Component | Version |
+|-----------|---------|
+| Python | 3.12 |
+| Node.js | 18 |
+| MariaDB | 10.6 |
+| Redis | 7 |
+| Frappe | v15 (`version-15` branch) |
 
-1. Open the repo in Codespaces
-2. Use `--profile with-db` to include the local MariaDB
-3. Forward port 80 and set visibility to "Public"
-4. Share the Codespace URL with clients for live demos
-
-> **Tip:** Set idle timeout to 240 minutes in Codespaces settings to avoid sleep during demos.
+---
 
 ## Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
-| Port in use | Change port via env vars: `BENCH_PORT=8001 docker compose up` |
-| MariaDB won't start | Check logs: `docker compose logs mariadb`. Often disk space. |
-| Redis connection refused | `docker compose ps` — ensure redis containers are running |
-| bench init hangs | Network issue pulling frappe. Check `docker compose logs frappe` |
-| Permission denied | `sudo chown -R $USER:$USER .` |
-| Site not found | Enter container and run `bench use horizon.localhost` |
-| Assets 404 | `docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench build"` |
-| First start is slow | bench init downloads frappe + node deps. Subsequent starts are fast. |
-
----
-
-## Part 3 — CI/CD Pipeline
-
-The project uses GitHub Actions for continuous integration and image publishing.
-
-### Workflows
-
-| Workflow | File | Trigger | Purpose |
-|----------|------|---------|---------|
-| CI | `.github/workflows/ci.yml` | Push to `main`, PRs | Server-side tests (Python 3.12, Node 18, MariaDB 10.6) |
-| Build | `.github/workflows/builds.yml` | Push to `main`, tags | Build & push Docker image to GHCR (amd64 + arm64) |
-| Linters | `.github/workflows/linter.yml` | PRs | Pre-commit hooks + Semgrep security rules |
-| Release | `.github/workflows/on_release.yml` | Push to `main` | Semantic versioning via conventional commits |
-
-### CI Pipeline Details
-
-The CI workflow:
-1. Spins up MariaDB 10.6 and Redis as service containers
-2. Installs Python 3.12 and Node 18 (matching Frappe v15 requirements)
-3. Initializes a bench with `--frappe-branch version-15`
-4. Installs `horizon_crm` from the checked-out workspace
-5. Creates a test site and runs `bench --site test_site run-tests --app horizon_crm`
-
-### Docker Image Build
-
-The build workflow:
-1. Checks out the repo
-2. Builds the production image using `deploy/Dockerfile`
-3. Pushes to `ghcr.io/evolyx-dev/horizon_crm` with these tags:
-   - `latest` — always points to the latest `main` build
-   - `main` — same as latest (branch name tag)
-   - `v1.2.3` — when a git tag is pushed
-   - `stable` — when a version tag (e.g. `v1.0.0`) is pushed
-4. Builds for both `linux/amd64` and `linux/arm64` platforms
-5. Uses GitHub Actions build cache for faster rebuilds
-
-### Runtime Compatibility
-
-| Component | Version | Notes |
-|-----------|---------|-------|
-| Python | 3.12 | Frappe v15 requirement (pyproject.toml: `>=3.11`) |
-| Node.js | 18 | Frappe v15 standard |
-| MariaDB | 10.6 | Matches production docker-compose |
-| Redis | 7 | Alpine variant |
+| Port in use | Change via env: `HTTP_PORT=9090 docker compose up` |
+| MariaDB won't start | `docker compose logs mariadb` — disk space or stale volume |
+| Redis connection refused | `docker compose ps` — ensure redis containers are healthy |
+| bench init hangs | Network issue. Check logs |
+| Permission denied | `sudo chown -R $USER:$USER .` (host) or `sudo chown -R frappe:frappe /workspace` (container) |
+| Site not found | `bench use horizon.localhost` |
+| Assets 404 | `bench build --app horizon_crm` |
+| First start slow | Normal — bench downloads frappe + node deps (~5 min) |
+| Stale MariaDB volume | `docker compose down -v` (DESTRUCTIVE) |
+| Nginx 502 | Bench not started yet — wait or check `docker compose logs frappe` |

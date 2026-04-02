@@ -2,6 +2,10 @@
 
 Multi-tenant Travel Agency CRM built on the Frappe Framework.
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/evolyx-dev/horizon_crm?quickstart=1)
+
+> **Try it now** — Click the badge above to launch a free live demo in your browser. Login: `demo@horizon.com` / `demo1234`
+
 ![Horizon CRM Dashboard](.github/screenshots/01_dashboard.png)
 
 > **Demo Video:** [Watch the full feature walkthrough](https://github.com/evolyx-dev/horizon_crm/releases/download/v1.0.1/horizon-crm-demo.webm) (~20 min, all features covered)
@@ -29,15 +33,18 @@ Horizon CRM is a purpose-built CRM for travel agencies, running on the Frappe Fr
 
 ---
 
-## Getting Started (Production)
+## Getting Started
 
-### Docker Compose (Recommended)
+### One-Click Demo (GitHub Codespaces)
+
+Click the Codespaces badge at the top to launch a free live demo. Setup takes ~5 minutes, then the app opens automatically with demo data pre-loaded. Login: `demo@horizon.com` / `demo1234`.
+
+### Production Deployment
 
 The `deploy/` directory contains a production-grade Docker stack with Nginx, Gunicorn, background workers, and scheduler.
 
 ```bash
-git clone <repo-url> horizon_crm
-cd horizon_crm
+git clone <repo-url> horizon_crm && cd horizon_crm
 
 # 1. Configure environment
 cp deploy/.env.template deploy/.env
@@ -46,33 +53,27 @@ cp deploy/.env.template deploy/.env
 # 2. Build the production image
 docker compose -f deploy/docker-compose.prod.yml build
 
-# 3. Start with local database (testing / demos)
+# 3. Start (with local MariaDB for testing)
 docker compose -f deploy/docker-compose.prod.yml --profile with-db up -d
 
-# 4. Access: http://localhost — Login: Administrator / <your ADMIN_PASSWORD>
+# 4. Optionally seed demo data
+docker compose -f deploy/docker-compose.prod.yml run --rm frappe-web seed
+
+# 5. Access: http://localhost — Login: Administrator / <ADMIN_PASSWORD>
 ```
 
 For external database (Oracle MySQL HeatWave, managed MariaDB, etc.):
-
 ```bash
-# Set DB_HOST=<your-db-host> in deploy/.env, then:
 docker compose -f deploy/docker-compose.prod.yml up -d
 ```
 
-**Production services:** Nginx (port 80), Gunicorn, Socketio, Worker, Scheduler, Redis Cache, Redis Queue.
-
-See [Docker Setup Guide](docs/how-to/DOCKER_SETUP.md) for deployment to Oracle Cloud, GitHub Codespaces, and full configuration reference.
-
 ### Using Pre-Built Image (GHCR)
-
-A pre-built multi-arch Docker image (amd64 + arm64) is published to GitHub Container Registry on every push to `main`:
 
 ```bash
 docker pull ghcr.io/evolyx-dev/horizon_crm:latest
 ```
 
-To use the pre-built image instead of building locally, edit `deploy/docker-compose.prod.yml` and replace the `build:` directive in `x-frappe-common` with:
-
+Replace the `build:` directive in `deploy/docker-compose.prod.yml` with:
 ```yaml
 x-frappe-common: &frappe-common
   image: ghcr.io/evolyx-dev/horizon_crm:latest
@@ -80,17 +81,8 @@ x-frappe-common: &frappe-common
 
 ### Self Hosting (Frappe Easy Install)
 
-Follow these steps to set up Horizon CRM in production:
-
-**Step 1:** Download the easy install script
-
 ```bash
 wget https://frappe.io/easy-install.py
-```
-
-**Step 2:** Run the deployment command
-
-```bash
 python3 ./easy-install.py deploy \
     --project=horizon_crm_setup \
     --email=your@email.com \
@@ -102,47 +94,36 @@ python3 ./easy-install.py deploy \
 
 ---
 
-## Getting Started (Development)
+## Development
 
-### Local Setup
+### Local Setup (without Docker)
 
-1. [Setup Bench](https://docs.frappe.io/framework/user/en/installation).
-2. In the frappe-bench directory, run `bench start` and keep it running.
-3. Open a new terminal session and cd into `frappe-bench` directory and run:
-
+1. [Setup Bench](https://docs.frappe.io/framework/user/en/installation) and run `bench start`.
+2. In a new terminal:
 ```bash
 bench get-app horizon_crm
 bench new-site horizon.localhost --install-app horizon_crm
 bench browse horizon.localhost --user Administrator
 ```
 
-### Docker
+### Local Setup (with Docker)
 
-You need Docker, docker-compose, and git setup on your machine. Refer [Docker documentation](https://docs.docker.com/).
-
-**Step 1:** Setup folder and download the required files
+All environments use Nginx as a reverse proxy, matching the production architecture.
 
 ```bash
-mkdir horizon-crm
-cd horizon-crm
+git clone <repo-url> horizon_crm && cd horizon_crm
 
-# Download the docker-compose file
-wget -O docker-compose.yml https://raw.githubusercontent.com/evolyx-dev/horizon_crm/main/docker/docker-compose.yml
+# Start all services — first run takes ~5 min to bootstrap
+docker compose up
 
-# Download the setup script
-wget -O init.sh https://raw.githubusercontent.com/evolyx-dev/horizon_crm/main/docker/init.sh
+# With demo data pre-loaded:
+SEED_DEMO=1 docker compose up
+
+# Access via nginx:  http://localhost:8080 — Login: Administrator / admin
+# Direct bench:      http://localhost:8000 (for debugging)
 ```
 
-**Step 2:** Run the container and daemonize it
-
-```bash
-docker compose up -d
-```
-
-**Step 3:** The site http://horizon.localhost:8000 should now be available. The default credentials are:
-
-- Username: `Administrator`
-- Password: `admin`
+The app source is bind-mounted for hot-reload. Python changes are picked up automatically. For JS/CSS: `docker compose exec frappe bash -c "cd /workspace/frappe-bench && bench build --app horizon_crm"`.
 
 ### Tenant Setup
 
@@ -161,12 +142,14 @@ bench --site agency.localhost horizon-crm create-tenant \
 
 Full documentation is available in the [docs/](docs/) directory:
 
+- [Docker Setup Guide](docs/how-to/DOCKER_SETUP.md) — Local, Codespace, and Production Docker stacks
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Data Model](docs/architecture/DATA_MODEL.md)
 - [User Guide](docs/how-to/USER_GUIDE.md)
 - [Admin Manual](docs/how-to/ADMIN_MANUAL.md)
 - [Development Guide](docs/how-to/DEVELOPMENT_GUIDE.md)
 - [Testing Guide](docs/how-to/TESTING_GUIDE.md)
+- [Demo Guide](docs/DEMO.md) — Codespace demo walkthrough
 
 ---
 

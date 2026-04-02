@@ -1,4 +1,26 @@
+# ─────────────────────────────────────────────────────────────
+# Horizon CRM — Codespace / Dev Container Docker Compose
+#
+# Architecture (mirrors production):
+#   nginx (:80) → frappe bench server (:8000 web, :9000 socketio)
+#   MariaDB, Redis Cache, Redis Queue provided by Docker
+#
+# Used by .devcontainer/devcontainer.json
+# ─────────────────────────────────────────────────────────────
 services:
+  # ── Reverse Proxy (matches production) ─────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      frappe:
+        condition: service_started
+    ports:
+      - 8080:80
+    volumes:
+      - ../docker/nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+  # ── Database ───────────────────────────────────────────────
   mariadb:
     image: mariadb:10.6
     command:
@@ -10,27 +32,51 @@ services:
       MYSQL_ROOT_PASSWORD: 123
     volumes:
       - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ── Redis Cache ────────────────────────────────────────────
   redis-cache:
-    image: redis:alpine
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
+  # ── Redis Queue ────────────────────────────────────────────
   redis-queue:
-    image: redis:alpine
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
-  redis-socketio:
-    image: redis:alpine
-
+  # ── Frappe Dev Server ──────────────────────────────────────
   frappe:
     image: frappe/bench:latest
     command: sleep infinity
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      redis-queue:
+        condition: service_healthy
     environment:
       - SHELL=/bin/bash
     volumes:
-      - ..:/workspace:cached
-    working_dir: /workspace/frappe-bench
+      - ..:/workspace/horizon_crm:cached
+      - bench-data:/workspace/frappe-bench
+    working_dir: /workspace
     ports:
-      - 8000-8005:8000-8005
-      - 9000-9005:9000-9005
+      - 8000:8000
+      - 9000:9000
 
 volumes:
   mariadb-data:
+  bench-data:

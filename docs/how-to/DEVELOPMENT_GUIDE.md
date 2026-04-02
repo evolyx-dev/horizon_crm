@@ -7,26 +7,30 @@ The repository root **is** the Frappe app (same pattern as [frappe/crm](https://
 ```
 horizon_crm/                     # ← Repo root = Frappe app
 ├── pyproject.toml               # Python package metadata
-├── docker-compose.yml           # Docker-first dev stack (MariaDB, Redis, Bench)
+├── docker-compose.yml           # Local dev: nginx + frappe + mariadb + redis
 ├── deploy/                      # Production Docker deployment
 │   ├── Dockerfile               # Multi-stage build (bench init → app install → runtime)
 │   ├── docker-compose.prod.yml  # 7 services: nginx, web, socketio, worker, scheduler, redis×2
-│   ├── entrypoint.sh            # Universal entrypoint (web/socketio/worker/scheduler)
-│   ├── nginx.conf               # Reverse proxy with rate limiting & security headers
+│   ├── entrypoint.sh            # Multi-role entrypoint (web/socketio/worker/scheduler/seed)
+│   ├── nginx.conf               # Production nginx (rate limiting, static caching)
 │   └── .env.template            # Environment variable template
 ├── docker/
-│   ├── init.sh                  # First-run bootstrap inside the container
-│   └── docker-compose.yml       # Lightweight self-hosting compose
-├── scripts/
-│   └── init.sh                  # GitHub Codespaces / Dev Container init
-├── .devcontainer/               # VS Code Dev Container support
+│   ├── init.sh                  # First-run bootstrap inside the dev container
+│   └── nginx.dev.conf           # Shared nginx config for dev & codespace
+├── .devcontainer/               # GitHub Codespace / Dev Container
+│   ├── devcontainer.json        # Codespace config (ports, extensions, lifecycle)
+│   ├── docker-compose.yml       # Demo: nginx + frappe + mariadb + redis
+│   ├── init.sh                  # One-time setup (symlink app, seed demo data)
+│   └── start.sh                 # Resume script (start bench)
 ├── .dockerignore                # Build context exclusions for production image
 │
 ├── horizon_crm/                 # Python module
 │   ├── hooks.py                 # App hooks & configuration
 │   ├── utils.py                 # Utility helpers
-│   ├── install.py               # Post-install seed data
-│   ├── commands.py              # Bench CLI commands
+│   ├── install.py               # Post-install seed data (roles, types, branding)
+│   ├── commands.py              # Bench CLI commands (create-tenant)
+│   ├── setup/                   # Setup & demo data
+│   │   └── demo.py              # Demo data seeder (idempotent)
 │   ├── api/                     # Whitelisted API endpoints
 │   │   ├── inquiry.py
 │   │   ├── booking.py
@@ -41,16 +45,10 @@ horizon_crm/                     # ← Repo root = Frappe app
 │       ├── playwright.config.ts # E2E configuration
 │       ├── package.json         # E2E Node dependencies
 │       └── e2e/                 # Playwright E2E specs
-│           ├── fixtures.ts
-│           ├── global-setup.ts
-│           ├── global-teardown.ts
-│           ├── 01-auth.spec.ts
-│           ├── ...
-│           ├── 12-invoice-customer-masterdata.spec.ts
-│           ├── 13-validation-negative.spec.ts
-│           └── demo-video.spec.ts  # Annotated demo recording
 │
 ├── docs/                        # Documentation
+│   ├── DEMO.md                  # Codespace demo walkthrough
+│   └── how-to/                  # Guides (DOCKER_SETUP, DEVELOPMENT_GUIDE, etc.)
 └── bench0/                      # Local bench runtime (gitignored)
 ```
 
@@ -78,16 +76,20 @@ need to install MariaDB, Redis, or Python on your host.
 git clone <repo-url> horizon_crm
 cd horizon_crm
 
-# 2. Start everything (MariaDB + Redis + Bench)
+# 2. Start everything (Nginx + MariaDB + Redis + Bench)
 docker compose up
 
-# 3. Wait for first-time bootstrap (watch the logs)
+# 3. Wait for first-time bootstrap (watch the logs ~5 min)
 #    The init script creates the bench, installs the app, and starts the server.
 
 # 4. Access the application
-#    Desk:   http://localhost:8000
-#    Portal: http://localhost:8000/portal
-#    Login:  Administrator / admin
+#    Via nginx:  http://localhost:8080
+#    Direct:    http://localhost:8000
+#    Portal:    http://localhost:8080/portal
+#    Login:     Administrator / admin
+
+# With demo data pre-loaded:
+SEED_DEMO=1 docker compose up
 ```
 
 ### Day-to-Day Commands
@@ -121,7 +123,7 @@ bench build --app horizon_crm
 
 ### Hot-Reload
 
-The app source is bind-mounted into the container at `/workspace/app`. Changes
+The app source is bind-mounted into the container at `/workspace/horizon_crm`. Changes
 to Python files are picked up automatically by the bench dev server. For
 JavaScript/CSS:
 
